@@ -1,0 +1,413 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { CSSProperties, useId, useMemo, useState } from "react";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Cell,
+  type Column,
+  type ColumnDef,
+  type ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFacetedMinMaxValues,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  type RowData,
+  type SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import { Search } from "lucide-react";
+import { TableHeaderComponent } from "./table-header.component";
+import { TablePagination } from "./pagination.component";
+import { Button } from "@/components/ui/button";
+import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  arrayMove,
+  horizontalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+declare module "@tanstack/react-table" {
+  // allows us to define custom properties for our columns
+  interface ColumnMeta<TData extends RowData, TValue> {
+    filterVariant?: "text" | "range" | "select";
+  }
+}
+
+export interface TableProps<TData, TValue> {
+  items: TData[];
+  columns: ColumnDef<TData, TValue>[];
+  filterKey?: string;
+  filterKeys?: string[]; // pour activer plusieurs filtres
+  renderRowActions?: (row: TData) => React.ReactNode;
+  emptyState?: React.ReactNode;
+  btnActionIcon?: React.ReactNode;
+  onSubmit?: () => void;
+  onBulkAction?: (selectedRows: TData[]) => void;
+  isEnabled?: boolean;
+}
+
+export function TableComponent<TData, TValue>({
+  items,
+  columns,
+  onSubmit,
+  filterKey,
+  filterKeys,
+  isEnabled,
+  emptyState,
+  onBulkAction,
+  btnActionIcon,
+  renderRowActions,
+}: TableProps<TData, TValue>) {
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    columns.map((column) => column.id as string)
+  );
+  const [sorting, setSorting] = useState<SortingState>([
+    // {
+    //   id: filterKey || "email",
+    //   desc: false,
+    // },
+  ]);
+
+  const effectiveFilterKeys = useMemo(() => {
+    if (filterKeys && filterKeys.length > 0) return filterKeys;
+    return filterKey ? [filterKey] : []; // compat
+  }, [filterKeys, filterKey]);
+
+  const table = useReactTable({
+    data: items,
+    columns,
+    columnResizeMode: "onChange",
+    onColumnOrderChange: setColumnOrder,
+    state: {
+      sorting,
+      columnOrder,
+      columnFilters,
+    },
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(), //client-side filtering
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedRowModel: getFacetedRowModel(), // client-side faceting
+    getFacetedUniqueValues: getFacetedUniqueValues(), // generate unique values for select filter/autocomplete
+    getFacetedMinMaxValues: getFacetedMinMaxValues(), // generate min/max values for range filter
+    getPaginationRowModel: getPaginationRowModel(), // client-side pagination
+    onSortingChange: setSorting,
+    enableSortingRemoval: false,
+
+    initialState: {
+      pagination: {
+        pageSize: 8,
+        pageIndex: 0,
+      },
+    },
+  });
+
+  // Reorder Column after drag & drop
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((columnOrder) => {
+        const oldIndex = columnOrder.indexOf(active.id as string);
+        const newIndex = columnOrder.indexOf(over.id as string);
+        return arrayMove(columnOrder, oldIndex, newIndex); //this is just a splice util
+      });
+    }
+  }
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {}),
+    useSensor(TouchSensor, {}),
+    useSensor(KeyboardSensor, {})
+  );
+
+  return (
+    <div className="space-y-4 bg-white p-4 rounded-md mt-4 shadow-2xl">
+      {/* Filters */}
+      <div className="flex flex-wrap justify-between gap-3">
+        {/* Bloc filtres multiples */}
+        <div className="flex flex-1 gap-3">
+          {effectiveFilterKeys.map((key) => {
+            const col = table.getColumn(key);
+            if (!col) return null;
+
+            return (
+              <div key={key} className="w-full">
+                <h3 className="capitalize">
+                  {/* Filter by <span className="font-bold">{key}</span> */}
+                </h3>
+                <Filter column={col} />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Buttons */}
+        <div className="flex items-center justify-end gap-2">
+          {table.getSelectedRowModel().rows.length > 0 && (
+            <div className="flex items-center justify-end">
+              {onBulkAction && (
+                <Button
+                  variant="destructive"
+                  size="default"
+                  onClick={() => {
+                    const selected = table
+                      .getSelectedRowModel()
+                      .rows.map((r) => r.original);
+
+                    // Extract the ids from the selected rows
+                    const ids = selected.map((item: any) => item._id);
+
+                    onBulkAction(ids);
+                  }}
+                >
+                  Bulk Deactivate
+                  <p className="text-[1rem]  text-white">
+                    ({table.getSelectedRowModel().rows.length})
+                  </p>
+                </Button>
+              )}
+            </div>
+          )}
+
+          {isEnabled && (
+            <Button onClick={onSubmit} size="icon">
+              {btnActionIcon}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Table */}
+      <DndContext
+        id={useId()}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToHorizontalAxis]}
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
+      >
+        <Table>
+          <TableHeaderComponent columnOrder={columnOrder} table={table} />
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <SortableContext
+                      key={cell.id}
+                      items={columnOrder}
+                      strategy={horizontalListSortingStrategy}
+                    >
+                      <DragAlongCell key={cell.id} cell={cell} />
+                    </SortableContext>
+                  ))}
+                  {renderRowActions && (
+                    <TableCell>{renderRowActions(row.original)}</TableCell>
+                  )}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  {emptyState || "No results."}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </DndContext>
+
+      <TablePagination table={table} />
+    </div>
+  );
+}
+
+function Filter({ column }: { column: Column<any, unknown> }) {
+  const id = useId();
+  const columnFilterValue = column?.getFilterValue();
+  const { filterVariant } = column?.columnDef.meta ?? {};
+  const columnHeader =
+    typeof column?.columnDef.header === "string" ? column.columnDef.header : "";
+  const sortedUniqueValues = useMemo(() => {
+    if (filterVariant === "range") return [];
+
+    // Get all unique values from the column
+    const values = Array.from(column.getFacetedUniqueValues().keys());
+
+    // If the values are arrays, flatten them and get unique items
+    const flattenedValues = values.reduce((acc: string[], curr) => {
+      if (Array.isArray(curr)) {
+        return [...acc, ...curr];
+      }
+      return [...acc, curr];
+    }, []);
+
+    // Get unique values and sort them
+    return Array.from(new Set(flattenedValues)).sort();
+  }, [column.getFacetedUniqueValues(), filterVariant]);
+
+  if (filterVariant === "range") {
+    return (
+      <div className="space-y-2">
+        <Label>{columnHeader}</Label>
+        <div className="flex">
+          <Input
+            id={`${id}-range-1`}
+            className="flex-1 rounded-e-none [-moz-appearance:_textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+            value={(columnFilterValue as [number, number])?.[0] ?? ""}
+            onChange={(e) =>
+              column.setFilterValue((old: [number, number]) => [
+                e.target.value ? Number(e.target.value) : undefined,
+                old?.[1],
+              ])
+            }
+            placeholder="Min"
+            type="number"
+            aria-label={`${columnHeader} min`}
+          />
+          <Input
+            id={`${id}-range-2`}
+            className="-ms-px flex-1 rounded-s-none [-moz-appearance:_textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+            value={(columnFilterValue as [number, number])?.[1] ?? ""}
+            onChange={(e) =>
+              column.setFilterValue((old: [number, number]) => [
+                old?.[0],
+                e.target.value ? Number(e.target.value) : undefined,
+              ])
+            }
+            placeholder="Max"
+            type="number"
+            aria-label={`${columnHeader} max`}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (filterVariant === "select") {
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={`${id}-select`}>{columnHeader}</Label>
+        <Select
+          value={columnFilterValue?.toString() ?? "all"}
+          onValueChange={(value) => {
+            column.setFilterValue(value === "all" ? undefined : value);
+          }}
+        >
+          <SelectTrigger id={`${id}-select`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            {sortedUniqueValues.map((value) => (
+              <SelectItem key={String(value)} value={String(value)}>
+                {String(value)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
+  if (filterVariant === "text" || !filterVariant) {
+    // 🔥 Construire un placeholder avec quelques valeurs disponibles
+    const exampleValues = sortedUniqueValues.slice(0, 3); // on limite à 3 exemples
+    const examplesLabel = exampleValues.length
+      ? ` (ex: ${exampleValues.join(", ")})`
+      : "";
+
+    const placeholderText = `Rechercher ${columnHeader.toLowerCase()}${examplesLabel}`;
+
+    return (
+      <div className="space-y-2 -translate-y-1">
+        <Label htmlFor={`${id}-input`}>{columnHeader}</Label>
+        <div className="relative">
+          <Input
+            id={`${id}-input`}
+            className="peer ps-9 placeholder:text-muted-for"
+            value={(columnFilterValue ?? "") as string}
+            onChange={(e) => column.setFilterValue(e.target.value)}
+            placeholder={placeholderText}
+            type="text"
+          />
+          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
+            <Search size={16} strokeWidth={2} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={`${id}-input`}>{columnHeader}</Label>
+      <div className="relative">
+        <Input
+          id={`${id}-input`}
+          className="peer ps-9"
+          value={(columnFilterValue ?? "") as string}
+          onChange={(e) => column.setFilterValue(e.target.value)}
+          placeholder={`Search ${columnHeader.toLowerCase()}`}
+          type="text"
+        />
+        <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
+          <Search size={16} strokeWidth={2} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const DragAlongCell = <Item, _>({ cell }: { cell: Cell<Item, _> }) => {
+  const { isDragging, setNodeRef, transform, transition } = useSortable({
+    id: cell.column.id,
+  });
+
+  const style: CSSProperties = {
+    opacity: isDragging ? 0.8 : 1,
+    position: "relative",
+    transform: CSS.Translate.toString(transform),
+    transition,
+    width: cell.column.getSize(),
+    zIndex: isDragging ? 1 : 0,
+  };
+
+  return (
+    <TableCell ref={setNodeRef} className="truncate" style={style}>
+      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+    </TableCell>
+  );
+};

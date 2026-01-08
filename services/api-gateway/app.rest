@@ -1,0 +1,88 @@
+POST http://localhost:4000/v1/auth/register
+Content-Type: application/json
+# Cookie: accessToken=user:123:MG_COS
+
+{
+  "email":"admin@anac-gabon.com",
+  "password":"password",
+  "matriculation":"208",
+  "confirmPassword":"password",
+  "role":"ADMIN"
+}
+
+# GET http://localhost:4000/v1/inventory/categories
+# Content-Type: application/json
+
+# PATCH http://localhost:4000/v1/inventory/68f8dfc7ad0fab8f6b0cf9a5
+# Content-Type: application/json
+# POST http://localhost:4000/v1/inventory/locations
+# POST http://localhost:4000/v1/inventory/assets
+# Content-Type: application/json
+
+# Location ID (Estuaire): 68f8eb6faeba18423c35d4b3
+# Cat ID (Informatique): 68f8ddad507648fc188cf1fd
+# Cat ID (Bureau): 68f9d8f1622ec5925120681a
+
+# {
+#     "code": "IAC",
+#     "label": "Ordinateur complet",
+#     "family": "INFORMATIQUE",
+#     "parentId": "68f8ddad507648fc188cf1fd",
+#     "canonicalPrefix": "IAC"
+# }
+
+# "_id": "68f8dfc7ad0fab8f6b0cf9a5",
+# "code": "IAC",
+# "label": "Desktops Fixes",
+# "family": "INFORMATIQUE",
+# "parentId": "68f8ddad507648fc188cf1fd",
+# "canonicalPrefix": "IAC",
+
+# Create Asset
+# {
+#   "code":"IAL-001",
+#   "label":"Laptop HP",
+#   "categoryId":"68f8ddad507648fc188cf1fd",
+#   "locationId":"68f8eb6faeba18423c35d4b3"
+# }
+
+# {
+#     "code": "BR",
+#     "label": "Bureau",
+#     "family": "MOBILIER",
+#     "parentId": null,
+#     "canonicalPrefix": "BRA"
+# }
+
+# "code": "INFORMATIQUE",
+#   "_id": "68f8ddad507648fc188cf1fd",
+
+# {
+#   "localisation":"ESTUAIRE",
+#   "batiment":"A",
+#   "direction":"DAF",
+#   "bureau":"Pool Chargé d'étude"
+# }
+
+#  "localisation": "ESTUAIRE",
+#   "batiment": "A",
+#   "direction": "DAF",
+#   "bureau": "Pool Chargé d'étude",
+#   "code": "ESTUAIRE-A-DAF-POOL-CHARGÉ-D'ÉTUDE",
+#   "path": "ESTUAIRE/A/DAF/Pool Chargé d'étude",
+#   "level": "BUREAU",
+#   "_id": "68f8eb6faeba18423c35d4b3",
+
+# {
+#   "code":"IAC-001",
+#   "label":"Ordinateur HP ProDesk","categoryId":"68f8dfc7ad0fab8f6b0cf9a5","locationId":"68f8eb6faeba18423c35d4b3","situation":"EN_SERVICE"
+# }
+
+  # "code": "IAC-001",
+  # "label": "Ordinateur HP ProDesk",
+  # "categoryId": "68f8dfc7ad0fab8f6b0cf9a5",
+  # "locationId": "68f8eb6faeba18423c35d4b3",
+  # "quantity": 1,
+  # "unit": "pcs",
+  # "situation": "EN_SERVICE",
+  # "_id": "68f8ecd0aeba18423c35d4b9",

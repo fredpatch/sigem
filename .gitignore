@@ -1,0 +1,25 @@
+# build
+dist/
+node_modules/
+
+# env
+.env
+.env.*
+
+frontend/sigem-ui/.env
+frontend/sigem-ui/.env.*
+frontend/sigem-ui/node_modules/
+
+services/api-gateway/.env
+services/inventory-services/.env.*
+services/log-services/.env
+services/notification-services/.env
+services/reference-services/.env
+services/vehicle-services/.env.*
+
+services/api-gateway/dist
+services/inventory-services/dist
+services/log-services/dist
+services/notification-services/dist
+services/reference-services/dist
+services/vehicle-services/dist

@@ -1,0 +1,59 @@
+{
+  "name": "sigem",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "frontend/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "build:clean": "tsc -b --clean && rimraf **/dist",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "watch": "tsc -b --watch",
+    "dev:notif": "npm run dev -w @sigem/notification-service",
+    "dev:ref": "npm run dev -w @sigem/reference-service",
+    "dev:gateway": "npm run dev -w @sigem/api-gateway",
+    "dev:auth": "npm run dev -w @sigem/auth-service",
+    "dev:inventory": "npm run dev -w @sigem/inventory-service",
+    "dev:log": "npm run dev -w @sigem/log-service",
+    "dev:vehicle": "npm run dev -w @sigem/vehicle-service",
+    "dev:client": "npm run dev -w @sigem/client",
+    "dev": "concurrently -k -n GATEWAY,INVENTORY,VEHICLE,NOTIFY,LOG,CLIENT \"npm run dev -w @sigem/api-gateway\" \"npm run dev -w @sigem/inventory-service\" \"npm run dev -w @sigem/vehicle-service\" \"npm run dev -w @sigem/notification-service\" \"npm run dev -w @sigem/client\"",
+    "dev:api": "concurrently -k   \"npm run dev -w @sigem/api-gateway\"    \"npm run dev -w @sigem/inventory-service\" \"npm run dev -w @sigem/reference-service\"       \"npm run dev -w @sigem/vehicle-service\"       \"npm run dev -w @sigem/notification-service\"       \"npm run dev -w @sigem/log-service\"",
+    "dev:frontend": "npm run dev -w @sigem/client",
+    "dev:all": "npm run dev"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/nodemailer": "^7.0.4",
+    "@types/otp-generator": "^4.0.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@radix-ui/react-tabs": "^1.1.13",
+    "axios": "^1.13.2",
+    "bcrypt": "^6.0.0",
+    "cmdk": "^1.1.1",
+    "cron": "^4.3.4",
+    "dotenv": "^17.2.3",
+    "mysql2": "^3.16.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.11",
+    "otp-generator": "^4.0.1",
+    "pino-http": "^11.0.0",
+    "react": "^19.1.0",
+    "recharts": "^3.5.1",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.28"
+  }
+}

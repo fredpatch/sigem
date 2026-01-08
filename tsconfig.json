@@ -1,0 +1,29 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./services/api-gateway"
+    },
+    {
+      "path": "./services/notification-service"
+    },
+    {
+      "path": "./services/reference-service"
+    },
+    {
+      "path": "./services/inventory-service"
+    },
+    {
+      "path": "./services/log-service"
+    },
+    {
+      "path": "./services/vehicle-service"
+    },
+    {
+      "path": "./frontend/sigem-ui"
+    }
+  ]
+}

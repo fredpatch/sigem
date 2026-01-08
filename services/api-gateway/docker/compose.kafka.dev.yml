@@ -1,0 +1,37 @@
+# docker/compose.kafka.dev.yml
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: sigem-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: sigem-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092" # listeners externes
+      - "9093:9093" # listeners internes (optionnel)
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # 2 listeners: EXTERNAL pour la machine hôte, INTERNAL pour les containers
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9093,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true" # pratique en dev
+
+    volumes:
+      # NOTE: pour Confluent, le chemin de data recommandé est /var/lib/kafka/data
+      - kafka_data:/var/lib/kafka/data
+volumes:
+  kafka_data:

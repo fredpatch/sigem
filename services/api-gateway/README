@@ -1,0 +1,12 @@
+## Activer Kafka
+
+1. Démarrer Kafka/Zookeeper (Docker Compose).
+2. Exporter les variables :
+   - EVENTS_DRIVER=kafka
+   - KAFKA_BROKERS=localhost:9092
+   - KAFKA_CLIENT_ID=sigem-api
+3. Vérifier les topics :
+   - notify.event
+   - log.action
+4. Redémarrer l’API Gateway et vérifier:
+   - [EVENT][kafka] asset.created ...
