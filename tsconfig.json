@@ -14,6 +14,9 @@
       "path": "./services/reference-service"
     },
     {
+      "path": "./services/provider-service"
+    },
+    {
       "path": "./services/inventory-service"
     },
     {

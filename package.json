@@ -15,6 +15,7 @@
     "watch": "tsc -b --watch",
     "dev:notif": "npm run dev -w @sigem/notification-service",
     "dev:ref": "npm run dev -w @sigem/reference-service",
+    "dev:provider": "npm run dev -w @sigem/provider-service",
     "dev:gateway": "npm run dev -w @sigem/api-gateway",
     "dev:auth": "npm run dev -w @sigem/auth-service",
     "dev:inventory": "npm run dev -w @sigem/inventory-service",
@@ -22,7 +23,7 @@
     "dev:vehicle": "npm run dev -w @sigem/vehicle-service",
     "dev:client": "npm run dev -w @sigem/client",
     "dev": "concurrently -k -n GATEWAY,INVENTORY,VEHICLE,NOTIFY,LOG,CLIENT \"npm run dev -w @sigem/api-gateway\" \"npm run dev -w @sigem/inventory-service\" \"npm run dev -w @sigem/vehicle-service\" \"npm run dev -w @sigem/notification-service\" \"npm run dev -w @sigem/client\"",
-    "dev:api": "concurrently -k   \"npm run dev -w @sigem/api-gateway\"    \"npm run dev -w @sigem/inventory-service\" \"npm run dev -w @sigem/reference-service\"       \"npm run dev -w @sigem/vehicle-service\"       \"npm run dev -w @sigem/notification-service\"       \"npm run dev -w @sigem/log-service\"",
+    "dev:api": "concurrently -k   \"npm run dev -w @sigem/api-gateway\"    \"npm run dev -w @sigem/inventory-service\" \"npm run dev -w @sigem/reference-service\" \"npm run dev -w @sigem/provider-service\"       \"npm run dev -w @sigem/vehicle-service\"       \"npm run dev -w @sigem/notification-service\"       \"npm run dev -w @sigem/log-service\"",
     "dev:frontend": "npm run dev -w @sigem/client",
     "dev:all": "npm run dev"
   },

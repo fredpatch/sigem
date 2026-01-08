@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import {
   Archive,
+  BookA,
   Car,
   ChevronsUpDown,
   Cog,
@@ -287,6 +288,21 @@ export const SideNavBar = () => {
                       </>
                     )}
                     <Separator className="mb-6" />
+
+                    {/* User management */}
+                    {["SUPER_ADMIN", "ADMIN", "MG_COB", "MG_COS"].includes(
+                      role!
+                    ) && (
+                      <>
+                        <NavBarLink
+                          to={"/providers"}
+                          pathName={"providers"}
+                          isCollapsed={isCollapsed}
+                          icon={<BookA className="h-4 w-4" />}
+                          title={"Annuaire fournisseurs"}
+                        />
+                      </>
+                    )}
 
                     {/* <Separator className="mt-6" /> */}
                   </div>

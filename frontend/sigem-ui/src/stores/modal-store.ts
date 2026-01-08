@@ -17,6 +17,7 @@ type ModalName =
   | "VEHICLE_DOCUMENT_DETAILS"
   | "template-tasksForm"
   | "deleteConfirm"
+  | "providersForm"
   | null;
 
 interface ModalState {

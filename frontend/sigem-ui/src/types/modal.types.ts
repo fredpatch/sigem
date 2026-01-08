@@ -20,6 +20,9 @@ export const ModalTypes = {
   VEHICLE_DETAILS: "VEHICLE_DETAILS",
   VEHICLE_DOCUMENT_DETAILS: "VEHICLE_DOCUMENT_DETAILS",
 
+  PROVIDERS_FORM: "providersForm",
+  PROVIDER_DETAILS: "providerDetails",
+
   DELETE_CONFIRM: "deleteConfirm",
 } as const;
 

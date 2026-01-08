@@ -20,4 +20,8 @@ export const service = {
     taskTemplates: "vehicle-task-templates",
     tasks: "vehicle-tasks",
   },
+
+  PROVIDER_SERVICE: {
+    providers: "providers",
+  },
 };

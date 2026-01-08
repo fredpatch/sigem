@@ -5,6 +5,7 @@ import { router } from "./routes";
 import { vehicleProxyRouter } from "./routes/vehicles.proxy.router";
 import { notificationProxyRouter } from "./routes/notifications.proxy.router";
 import { referenceProxyRouter } from "./routes/references.proxy.router";
+import { providerProxyRouter } from "./routes/providers.proxy.router";
 
 export const API_VERSION = "v1";
 
@@ -16,6 +17,7 @@ const getApp = async () => {
 
   // routes
   // Proxy routes
+  app.use("/", providerProxyRouter);
   app.use("/", notificationProxyRouter);
   app.use("/", referenceProxyRouter);
   app.use("/", inventoryProxyRouter);

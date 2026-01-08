@@ -28,6 +28,8 @@ import { UserManagementLayout } from "@/pages/user-management.layout";
 import { UserWorkspacePage } from "@/pages/user-workspace.page";
 import { UserRightEmptyState } from "@/pages/user-right-empty-state";
 import MyVehiclePage from "@/pages/my-vehicle";
+import { ProvidersLayout } from "@/pages/providers-layout";
+import { ProvidersPage } from "@/modules/providers/pages/provider-page";
 
 const router = createBrowserRouter([
   { path: "/", element: <RootRedirect /> },
@@ -170,6 +172,27 @@ const router = createBrowserRouter([
                 ]}
               >
                 <VehicleDocumentsPage />
+              </RouteGuard>
+            ),
+          },
+        ],
+      },
+      {
+        element: <ProvidersLayout />,
+        children: [
+          {
+            path: "/providers",
+            element: (
+              <RouteGuard
+                allowedRoles={[
+                  "SUPER_ADMIN",
+                  "ADMIN",
+                  "MG_COS",
+                  "MG_AGT",
+                  "MG_COB",
+                ]}
+              >
+                <ProvidersPage />
               </RouteGuard>
             ),
           },
