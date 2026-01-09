@@ -24,4 +24,8 @@ export const service = {
   PROVIDER_SERVICE: {
     providers: "providers",
   },
+
+  PRODUCT_SERVICE: {
+    products: "products",
+  },
 };

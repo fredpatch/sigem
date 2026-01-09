@@ -1,21 +1,41 @@
-import express from "express";
-import cors from "cors";
+import express, { Application } from "express";
 import { providerRouter } from "./routes/provider.routes";
 import { errorMiddleware } from "./middlewares/error.middleware";
-import morgan from "morgan";
+import initMiddlewares from "./middlewares";
+import { productRouter } from "./routes/products.route";
+import { purchaseRouter } from "./routes/purchases.route";
 
-export const app = express();
+export const API_VERSION = "v1";
 
-app.use(cors());
-app.use(express.json({ limit: "1mb" }));
-app.use(morgan("dev"));
+const application = async () => {
+  const app: Application = express();
 
-app.use("/v1", providerRouter);
+  // middlewares init
+  initMiddlewares(app);
 
-// 404
-app.use((_req, res) =>
-  res.status(404).json({ ok: false, message: "Not found" })
-);
+  // routes
+  app.use(`/${API_VERSION}`, purchaseRouter);
+  app.use(`/${API_VERSION}`, productRouter);
+  app.use(`/${API_VERSION}`, providerRouter);
 
-// errors
-app.use(errorMiddleware);
+  // 404
+  app.use((_req, res) =>
+    res.status(404).json({
+      status: "error",
+      message: `Cannot ${_req.method} ${_req.originalUrl}`,
+      suggestions: [
+        "Check the API documentation at /docs",
+        "Check the API routes information at api/docs",
+        "Verify the API version in the URL",
+        "Ensure the endpoint exists and the HTTP(S) method is correct",
+      ],
+    })
+  );
+
+  // errors
+  app.use(errorMiddleware);
+
+  return app;
+};
+
+export default application;
