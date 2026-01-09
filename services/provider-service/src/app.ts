@@ -4,6 +4,7 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 import initMiddlewares from "./middlewares";
 import { productRouter } from "./routes/products.route";
 import { purchaseRouter } from "./routes/purchases.route";
+import { purchaseRequestRouter } from "./routes/purchase-request.route";
 
 export const API_VERSION = "v1";
 
@@ -14,6 +15,7 @@ const application = async () => {
   initMiddlewares(app);
 
   // routes
+  app.use(`/${API_VERSION}`, purchaseRequestRouter);
   app.use(`/${API_VERSION}`, purchaseRouter);
   app.use(`/${API_VERSION}`, productRouter);
   app.use(`/${API_VERSION}`, providerRouter);

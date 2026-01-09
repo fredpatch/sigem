@@ -24,6 +24,13 @@ const canRead = authorizedRoles(
 /**
  * Lecture
  */
+productRouter.get(
+  "/products/:productId/price-compare",
+  authenticate,
+  canRead,
+  productController.compare
+);
+
 productRouter.get("/products", authenticate, canRead, productController.list);
 
 productRouter.get(

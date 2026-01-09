@@ -1,4 +1,4 @@
-import mongoose, { FilterQuery } from "mongoose";
+import mongoose, { FilterQuery, Types } from "mongoose";
 import { ProviderModel, ProviderDoc } from "../models/provider.model";
 import {
   CreateProviderInput,
@@ -6,6 +6,8 @@ import {
   ListProvidersQuery,
 } from "../validators/provider.schema";
 import { response } from "@sigem/shared";
+import { PurchaseLineModel } from "../models/purchase-line.model";
+import { PurchaseModel } from "../models/purchase.model";
 
 export type ProviderStats = {
   total: number;
@@ -18,6 +20,14 @@ export type ProviderStats = {
   inactive: number;
   contactRate: number; // %
   lastUpdatedAt: string | null;
+};
+
+type CatalogQuery = {
+  providerId: string;
+  q?: string;
+  type?: "CONSUMABLE" | "MOBILIER" | "EQUIPEMENT" | "AUTRE";
+  page: number;
+  limit: number;
 };
 
 export class ProviderService {
@@ -238,6 +248,139 @@ export class ProviderService {
       },
       null,
       "Provider stats fetched successfully"
+    );
+  }
+
+  async catalog(query: CatalogQuery) {
+    const providerObjectId = new Types.ObjectId(query.providerId);
+    const { q, type, page, limit } = query;
+
+    // on ne veut que les achats CONFIRMED
+    // pipeline:
+    // purchase_lines -> lookup purchase -> filter provider/status -> group by product
+    // compute last + stats
+
+    const matchSearch = q?.trim()
+      ? {
+          $or: [
+            { labelSnapshot: { $regex: q.trim(), $options: "i" } },
+            { codeSnapshot: { $regex: q.trim(), $options: "i" } },
+          ],
+        }
+      : {};
+
+    const matchType = type ? { typeSnapshot: type } : {};
+
+    const pipeline: any[] = [
+      { $match: { ...matchSearch, ...matchType } },
+
+      // join purchase to filter by provider + status
+      {
+        $lookup: {
+          from: PurchaseModel.collection.name, // "purchases"
+          localField: "purchaseId",
+          foreignField: "_id",
+          as: "purchase",
+        },
+      },
+      { $unwind: "$purchase" },
+
+      {
+        $match: {
+          "purchase.providerId": providerObjectId,
+          "purchase.status": "CONFIRMED",
+        },
+      },
+
+      // sort by purchase date desc then createdAt desc to pick "last"
+      { $sort: { "purchase.date": -1, createdAt: -1 } },
+
+      // group per product
+      {
+        $group: {
+          _id: "$productId",
+
+          // snapshot fields (the latest one thanks to $sort + $first)
+          label: { $first: "$labelSnapshot" },
+          code: { $first: "$codeSnapshot" },
+          type: { $first: "$typeSnapshot" },
+          unit: { $first: "$unitSnapshot" },
+
+          // last
+          lastUnitPrice: { $first: "$unitPrice" },
+          lastQuantity: { $first: "$quantity" },
+          lastPurchaseDate: { $first: "$purchase.date" },
+          lastPurchaseId: { $first: "$purchase._id" },
+
+          // stats
+          minUnitPrice: { $min: "$unitPrice" },
+          maxUnitPrice: { $max: "$unitPrice" },
+          avgUnitPrice: { $avg: "$unitPrice" },
+          count: { $sum: 1 },
+        },
+      },
+
+      // shape output
+      {
+        $project: {
+          _id: 0,
+          productId: "$_id",
+
+          label: 1,
+          code: 1,
+          type: 1,
+          unit: 1,
+
+          last: {
+            unitPrice: "$lastUnitPrice",
+            quantity: "$lastQuantity",
+            date: "$lastPurchaseDate",
+            purchaseId: "$lastPurchaseId",
+          },
+
+          stats: {
+            min: "$minUnitPrice",
+            max: "$maxUnitPrice",
+            avg: { $round: ["$avgUnitPrice", 0] },
+            count: "$count",
+          },
+        },
+      },
+
+      // sort by last date desc (recent first)
+      { $sort: { "last.date": -1, label: 1 } },
+    ];
+
+    // pagination
+    const skip = (page - 1) * limit;
+    const paginated = [
+      ...pipeline,
+      {
+        $facet: {
+          items: [{ $skip: skip }, { $limit: limit }],
+          meta: [{ $count: "total" }],
+        },
+      },
+      {
+        $project: {
+          items: 1,
+          total: { $ifNull: [{ $arrayElemAt: ["$meta.total", 0] }, 0] },
+        },
+      },
+    ];
+
+    const res = await PurchaseLineModel.aggregate(paginated);
+    const first = res?.[0] ?? { items: [], total: 0 };
+
+    return response(
+      {
+        items: first.items,
+        total: first.total,
+        page,
+        limit,
+      },
+      null,
+      "Provider catalog fetched successfully"
     );
   }
 }

@@ -34,6 +34,14 @@ providerRouter.get(
 /**
  * Lecture
  */
+
+providerRouter.get(
+  "/providers/:providerId/catalog",
+  authenticate,
+  canRead,
+  providerController.catalog
+);
+
 providerRouter.get(
   "/providers",
   authenticate,

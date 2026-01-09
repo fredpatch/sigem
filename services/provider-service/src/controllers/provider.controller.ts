@@ -4,6 +4,7 @@ import { catchError } from "../utils/catch-error";
 import {
   CreateProviderSchema,
   ListProvidersQuerySchema,
+  providerCatalogQuerySchema,
   ProviderIdParamSchema,
   UpdateProviderSchema,
 } from "../validators/provider.schema";
@@ -68,6 +69,15 @@ class ProviderController {
   stats = catchError(async (req, res) => {
     const stats = await this.providerService.stats();
     res.json(stats);
+  });
+
+  catalog = catchError(async (req, res) => {
+    const q = validate(providerCatalogQuerySchema, req.query);
+    const data = await this.providerService.catalog({
+      providerId: req.params.providerId,
+      ...q,
+    });
+    res.status(data.status).json(data);
   });
 }
 

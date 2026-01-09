@@ -4,6 +4,7 @@ import { catchError } from "../utils/catch-error";
 import {
   createProductSchema,
   listProductsQuerySchema,
+  querySchema,
   updateProductSchema,
 } from "../validators/products.schema";
 
@@ -39,6 +40,17 @@ class ProductController {
   list = catchError(async (req, res) => {
     const q = validate(listProductsQuerySchema, req.query);
     const data = await this.productService.listProducts(q);
+    res.json(data);
+  });
+
+  compare = catchError(async (req, res) => {
+    const q = validate(querySchema, req.query);
+    const data = await this.productService.compareProductPrices({
+      productId: req.params.productId,
+      dateFrom: q.dateFrom,
+      dateTo: q.dateTo,
+      limit: q.limit,
+    });
     res.json(data);
   });
 }

@@ -7,6 +7,12 @@ export const ProductTypeEnum = z.enum([
   "AUTRE",
 ]);
 
+export const querySchema = z.object({
+  dateFrom: z.coerce.date().optional(),
+  dateTo: z.coerce.date().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
 export const createProductSchema = z.object({
   label: z.string().min(2),
   // code optionnel: si absent => auto-généré

@@ -99,6 +99,13 @@ export const ListProvidersQuerySchema = z.object({
     .transform((v) => (v === undefined ? undefined : v === "true")),
 });
 
+export const providerCatalogQuerySchema = z.object({
+  q: z.string().optional(),
+  type: z.enum(["CONSUMABLE", "MOBILIER", "EQUIPEMENT", "AUTRE"]).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
 export type CreateProviderInput = z.infer<typeof CreateProviderSchema>;
 export type UpdateProviderInput = z.infer<typeof UpdateProviderSchema>;
 export type ListProvidersQuery = z.infer<typeof ListProvidersQuerySchema>;
