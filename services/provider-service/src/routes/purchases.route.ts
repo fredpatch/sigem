@@ -48,6 +48,13 @@ purchaseRouter.post(
   purchasesController.create
 );
 
+purchaseRouter.post(
+  "/purchases/:id/confirm",
+  authenticate,
+  canWrite,
+  purchasesController.confirm
+);
+
 purchaseRouter.patch(
   "/purchases/:id",
   authenticate,

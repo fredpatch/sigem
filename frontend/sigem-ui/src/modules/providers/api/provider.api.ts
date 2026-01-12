@@ -7,6 +7,7 @@ import {
   toQueryParams,
   UpdateProviderInput,
 } from "../types/types";
+import { Paginated, ProviderCatalogItem } from "../types/purchasing.types";
 
 /**
  * API calls
@@ -18,14 +19,14 @@ class ProviderAPI {
       params: queryParams,
     });
 
-    console.log(
-      "ProviderAPI.list params:",
-      params,
-      "queryParams:",
-      queryParams,
-      "res:",
-      res
-    );
+    // console.log(
+    //   "ProviderAPI.list params:",
+    //   params,
+    //   "queryParams:",
+    //   queryParams,
+    //   "res:",
+    //   res
+    // );
 
     return res.data;
   }
@@ -53,6 +54,14 @@ class ProviderAPI {
 
   async stats() {
     const res = await api.get("/providers/stats");
+    return res.data;
+  }
+
+  async catalog(providerId: string, params: any) {
+    const res = await api.get<Paginated<ProviderCatalogItem>>(
+      `/providers/${providerId}/catalog`,
+      { params }
+    );
     return res.data;
   }
 }

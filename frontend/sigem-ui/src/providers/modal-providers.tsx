@@ -1,7 +1,9 @@
 import { AssetModal } from "@/modules/assets/_components/form/asset-modal";
 import { CategoryModal } from "@/modules/categories/_components/form/category-modal";
 import { LocationModal } from "@/modules/locations/_components/form/location-modal";
+import { ProductModal } from "@/modules/providers/_components/products/product-modal";
 import { ProviderModal } from "@/modules/providers/_components/provider-modal";
+import { PurchaseModal } from "@/modules/providers/_components/purchases/purchase-modal";
 import { ResetFormModal } from "@/modules/users/_components/forms/reset-password.modal";
 import { UserFormModal } from "@/modules/users/_components/forms/user-form";
 import { VehicleDocumentModal } from "@/modules/vehicules/_components/form/vehicle-document-modal";
@@ -27,6 +29,8 @@ export function ModalGlobalProvider() {
       <TemplateTasksModal />
 
       <ProviderModal />
+      <ProductModal />
+      <PurchaseModal />
     </>
   );
 }

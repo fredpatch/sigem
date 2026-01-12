@@ -23,6 +23,10 @@ export const ModalTypes = {
   PROVIDERS_FORM: "providersForm",
   PROVIDER_DETAILS: "providerDetails",
 
+  PRODUCT_FORM: "productForm",
+  PURCHASE_FORM: "purchaseForm",
+  PURCHASE_DETAILS: "purchaseDetails",
+
   DELETE_CONFIRM: "deleteConfirm",
 } as const;
 

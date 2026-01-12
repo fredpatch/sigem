@@ -30,6 +30,16 @@ import { UserRightEmptyState } from "@/pages/user-right-empty-state";
 import MyVehiclePage from "@/pages/my-vehicle";
 import { ProvidersLayout } from "@/pages/providers-layout";
 import { ProvidersPage } from "@/modules/providers/pages/provider-page";
+import { PurchaseRequestsPage } from "@/modules/providers/pages/purchase-requests.page";
+import { PurchasesPage } from "@/modules/providers/pages/purchases.page";
+import {
+  ProductDetailPage,
+  ProductsPage,
+} from "@/modules/providers/pages/products.page";
+import { ProductsLayout } from "@/pages/products-layout";
+import { PurchasesLayout } from "@/pages/purchases-layout";
+import { PurchaseRequestsLayout } from "@/pages/purchase-requests-layout";
+import { PurchaseDetailPage } from "@/modules/providers/_components/purchases/Purchase-details";
 
 const router = createBrowserRouter([
   { path: "/", element: <RootRedirect /> },
@@ -193,6 +203,104 @@ const router = createBrowserRouter([
                 ]}
               >
                 <ProvidersPage />
+              </RouteGuard>
+            ),
+          },
+        ],
+      },
+      {
+        path: "/products",
+        element: <ProductsLayout />,
+        children: [
+          {
+            index: true,
+            element: (
+              <RouteGuard
+                allowedRoles={[
+                  "SUPER_ADMIN",
+                  "ADMIN",
+                  "MG_COS",
+                  "MG_AGT",
+                  "MG_COB",
+                ]}
+              >
+                <ProductsPage />
+              </RouteGuard>
+            ),
+          },
+          {
+            path: ":id",
+            element: (
+              <RouteGuard
+                allowedRoles={[
+                  "SUPER_ADMIN",
+                  "ADMIN",
+                  "MG_COS",
+                  "MG_AGT",
+                  "MG_COB",
+                ]}
+              >
+                <ProductDetailPage />
+              </RouteGuard>
+            ),
+          },
+        ],
+      },
+      {
+        path: "/purchases",
+        element: <PurchasesLayout />,
+        children: [
+          {
+            index: true,
+            element: (
+              <RouteGuard
+                allowedRoles={[
+                  "SUPER_ADMIN",
+                  "ADMIN",
+                  "MG_COS",
+                  "MG_AGT",
+                  "MG_COB",
+                ]}
+              >
+                <PurchasesPage />
+              </RouteGuard>
+            ),
+          },
+
+          {
+            path: ":id",
+            element: (
+              <RouteGuard
+                allowedRoles={[
+                  "SUPER_ADMIN",
+                  "ADMIN",
+                  "MG_COS",
+                  "MG_AGT",
+                  "MG_COB",
+                ]}
+              >
+                <PurchaseDetailPage />
+              </RouteGuard>
+            ),
+          },
+        ],
+      },
+      {
+        element: <PurchaseRequestsLayout />,
+        children: [
+          {
+            path: "/purchase-requests",
+            element: (
+              <RouteGuard
+                allowedRoles={[
+                  "SUPER_ADMIN",
+                  "ADMIN",
+                  "MG_COS",
+                  "MG_AGT",
+                  "MG_COB",
+                ]}
+              >
+                <PurchaseRequestsPage />
               </RouteGuard>
             ),
           },
