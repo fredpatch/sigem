@@ -30,6 +30,7 @@ export const updatePurchaseSchema = z.object({
   date: z.coerce.date().optional(),
   reference: z.string().optional(),
   dept: z.string().optional(),
+  status: PurchaseStatusEnum.optional(),
   notes: z.string().optional(),
   tags: z.array(z.string()).optional(),
   tax: z.number().nonnegative().optional(),

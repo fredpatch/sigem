@@ -67,12 +67,28 @@ export function usePurchase(id?: string) {
 
 export function useCreatePurchase() {
   const qc = useQueryClient();
+  const { closeModal } = useModalStore();
   return useMutation({
     mutationFn: (body: any) =>
       purchasingApi.create(body).then((r) => (r as any).data ?? r),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.purchases() });
       // provider catalog depends on purchases; UI will refresh when opening provider tab
+      qc.invalidateQueries({ queryKey: ["providers"] });
+      closeModal();
+    },
+  });
+}
+
+export function useConfirmPurchase() {
+  const qc = useQueryClient();
+  const { closeModal } = useModalStore();
+  return useMutation({
+    mutationFn: (id: string) =>
+      purchasingApi.confirm(id).then((r) => (r as any).data ?? r),
+    onSuccess: () => {
+      closeModal();
+      qc.invalidateQueries({ queryKey: qk.purchases() });
       qc.invalidateQueries({ queryKey: ["providers"] });
     },
   });

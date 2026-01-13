@@ -24,6 +24,12 @@ class PurchasesController {
     res.status(data.status).json(data);
   });
 
+  confirm = catchError(async (req, res) => {
+    const { id } = req.params;
+    const data = await this.purchasesService.confirmPurchase(id);
+    res.status(data.status).json(data);
+  });
+
   getOne = catchError(async (req, res) => {
     const data = await this.purchasesService.getPurchaseDetail(req.params.id);
     if (!data) return res.status(404).json({ error: "Not found" });

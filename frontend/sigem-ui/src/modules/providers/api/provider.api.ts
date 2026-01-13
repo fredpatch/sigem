@@ -19,14 +19,14 @@ class ProviderAPI {
       params: queryParams,
     });
 
-    console.log(
-      "ProviderAPI.list params:",
-      params,
-      "queryParams:",
-      queryParams,
-      "res:",
-      res
-    );
+    // console.log(
+    //   "ProviderAPI.list params:",
+    //   params,
+    //   "queryParams:",
+    //   queryParams,
+    //   "res:",
+    //   res
+    // );
 
     return res.data;
   }

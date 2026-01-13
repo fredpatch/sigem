@@ -101,10 +101,8 @@ export const ProductModal = () => {
       <ConfirmDialog />
       <GenericFormModal
         className="md:min-w-[800px] xs:min-w-[400px] p-4"
-        title={
-          isEdit ? "Modifier le fournisseur" : "Enregistrer un fournisseur"
-        }
-        description="Veuillez remplir le formulaire ci-dessous pour enregistrer le fournisseur."
+        title={isEdit ? "Modifier le produit" : "Enregistrer un produit"}
+        description="Veuillez remplir le formulaire ci-dessous pour enregistrer le produit."
         classNameDescription="text-[0.75rem] -mt-1 text-muted-foreground"
       >
         <Guidelines

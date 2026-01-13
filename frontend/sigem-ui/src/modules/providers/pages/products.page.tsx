@@ -4,6 +4,20 @@ import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/stores/modal-store";
 import { ModalTypes } from "@/types/modal.types";
 import { useProduct } from "../hooks/use-purchasing";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FieldRow } from "../_components/products/field-row";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { ProductSupplierCompareTab } from "../_components/products/product-supplier-compare-tab";
+
+function typeLabel(t?: string) {
+  if (t === "CONSUMABLE") return "Consommable";
+  if (t === "MOBILIER") return "Mobilier";
+  if (t === "EQUIPEMENT") return "Équipement";
+  return t ?? "-";
+}
 
 export const ProductsPage = () => {
   return (
@@ -24,10 +38,15 @@ export const ProductDetailPage = () => {
 
   return (
     <div className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-lg font-semibold">Détails produit</div>
-          <div className="text-sm text-muted-foreground">{id}</div>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-lg font-semibold truncate">
+            {isLoading ? "Chargement..." : (product?.label ?? "Produit")}
+          </div>
+          <div className="text-sm text-muted-foreground font-mono truncate">
+            {product?.code ?? id}
+          </div>
         </div>
 
         <Button
@@ -37,15 +56,94 @@ export const ProductDetailPage = () => {
           Modifier
         </Button>
       </div>
-      {!isLoading && product && (
-        <Card>
-          <CardContent className="p-4 text-sm text-muted-foreground">
-            Ici on affichera label, code, type, tags, etc.
-            <br />
-            Ensuite on ajoutera l’onglet “Comparaison fournisseurs” (Step 3.5).
-          </CardContent>
-        </Card>
-      )}
+
+      {/* Body */}
+      <Card>
+        <CardContent className="p-4">
+          {isLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          ) : !product ? (
+            <div className="text-sm text-muted-foreground">
+              Produit introuvable.
+            </div>
+          ) : (
+            <Tabs defaultValue="info" className="w-full">
+              <TabsList>
+                <TabsTrigger value="info">Infos</TabsTrigger>
+                <TabsTrigger value="compare">
+                  Comparaison fournisseurs
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="info" className="pt-3">
+                <div className="divide-y">
+                  <FieldRow label="Libellé" value={product.label} />
+                  <FieldRow
+                    label="Code"
+                    value={<span className="font-mono">{product.code}</span>}
+                  />
+                  <FieldRow label="Type" value={typeLabel(product.type)} />
+                  <FieldRow label="Unité" value={product.unit || "-"} />
+                  <FieldRow
+                    label="Statut"
+                    value={
+                      product.isActive ? (
+                        <Badge>Actif</Badge>
+                      ) : (
+                        <Badge variant="secondary">Inactif</Badge>
+                      )
+                    }
+                  />
+                  <FieldRow
+                    label="Tags"
+                    value={
+                      (product.tags?.length ?? 0) > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {product.tags.map((t: string) => (
+                            <Badge key={t} variant="secondary">
+                              {t}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        "-"
+                      )
+                    }
+                  />
+                  <FieldRow
+                    label="Créé le"
+                    value={
+                      product.createdAt
+                        ? format(new Date(product.createdAt), "PPp", {
+                            locale: fr,
+                          })
+                        : "-"
+                    }
+                  />
+                  <FieldRow
+                    label="Mis à jour"
+                    value={
+                      product.updatedAt
+                        ? format(new Date(product.updatedAt), "PPp", {
+                            locale: fr,
+                          })
+                        : "-"
+                    }
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="compare" className="pt-3">
+                <ProductSupplierCompareTab productId={product.id} />
+              </TabsContent>
+            </Tabs>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

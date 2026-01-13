@@ -169,6 +169,81 @@ export class PurchasesService {
     );
   }
 
+  async confirmPurchase(id: string) {
+    const purchase = await PurchaseModel.findById(id);
+    if (!purchase)
+      return response(null, null, "Purchase not found", false, 404);
+
+    if (purchase.status === "CANCELLED") {
+      const err = new Error("Un achat annulé ne peut pas être confirmé.");
+      (err as any).status = 400;
+      throw err;
+    }
+
+    // idempotent
+    if (purchase.status === "CONFIRMED") {
+      return response(
+        purchase.toJSON(),
+        null,
+        "Purchase already confirmed",
+        true,
+        200
+      );
+    }
+
+    // 1) load lines
+    const lines = await PurchaseLineModel.find({
+      purchaseId: purchase._id,
+    }).lean();
+
+    if (!lines.length) {
+      const err = new Error("Impossible de confirmer un achat sans lignes.");
+      (err as any).status = 400;
+      throw err;
+    }
+
+    // 2) recompute lineTotal (important if created via insertMany/updateMany)
+    const bulk = lines.map((l: any) => {
+      const unitPrice = Number(l.unitPrice ?? 0);
+      const quantity = Number(l.quantity ?? 0);
+      const lineTotal = Math.round(unitPrice * quantity);
+
+      return {
+        updateOne: {
+          filter: { _id: l._id },
+          update: { $set: { lineTotal } },
+        },
+      };
+    });
+
+    if (bulk.length) await PurchaseLineModel.bulkWrite(bulk);
+
+    // 3) compute totals
+    const subtotal = lines.reduce((sum: number, l: any) => {
+      const unitPrice = Number(l.unitPrice ?? 0);
+      const quantity = Number(l.quantity ?? 0);
+      return sum + Math.round(unitPrice * quantity);
+    }, 0);
+
+    const discount = Number(purchase.discount ?? 0);
+    const tax = Number(purchase.tax ?? 0);
+
+    purchase.subtotal = Math.round(subtotal);
+    purchase.total = Math.max(0, Math.round(subtotal - discount + tax));
+
+    // 4) lock
+    purchase.status = "CONFIRMED";
+    await purchase.save();
+
+    return response(
+      purchase.toJSON(),
+      null,
+      "Purchase confirmed successfully",
+      true,
+      200
+    );
+  }
+
   async listPurchases(query: any) {
     const { q, providerId, dept, status, dateFrom, dateTo, page, limit } =
       query;
@@ -190,18 +265,109 @@ export class PurchasesService {
 
     const skip = (page - 1) * limit;
 
-    const [items, total] = await Promise.all([
-      PurchaseModel.find(filter)
-        .sort({ date: -1, createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate("providerId", "name designation type")
-        .lean(),
-      PurchaseModel.countDocuments(filter),
-    ]);
+    const pipeline: any[] = [
+      { $match: filter },
+      { $sort: { date: -1, createdAt: -1 } },
+
+      // join provider (same as populate but in agg)
+      {
+        $lookup: {
+          from: "providers",
+          localField: "providerId",
+          foreignField: "_id",
+          as: "provider",
+        },
+      },
+      { $unwind: { path: "$provider", preserveNullAndEmptyArrays: true } },
+
+      // summary lines
+      {
+        $lookup: {
+          from: "purchaselines",
+          let: { pid: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$purchaseId", "$$pid"] } } },
+            {
+              $project: {
+                labelSnapshot: 1,
+                quantity: 1,
+              },
+            },
+            { $sort: { createdAt: 1 } }, // pour “top” stable
+          ],
+          as: "lines",
+        },
+      },
+      {
+        $addFields: {
+          linesCount: { $size: "$lines" },
+          totalQuantity: { $sum: "$lines.quantity" },
+          topItems: {
+            $slice: [
+              {
+                $map: {
+                  input: "$lines",
+                  as: "l",
+                  in: "$$l.labelSnapshot",
+                },
+              },
+              2,
+            ],
+          },
+        },
+      },
+
+      // cleanup payload
+      {
+        $project: {
+          lines: 0, // on ne renvoie pas toutes les lignes
+          "provider._id": 0,
+          "provider.__v": 0,
+          "provider.createdAt": 0,
+          "provider.updatedAt": 0,
+        },
+      },
+
+      // pagination + total in one go
+      {
+        $facet: {
+          items: [{ $skip: skip }, { $limit: limit }],
+          total: [{ $count: "count" }],
+        },
+      },
+      {
+        $addFields: {
+          total: { $ifNull: [{ $arrayElemAt: ["$total.count", 0] }, 0] },
+        },
+      },
+      {
+        $project: {
+          items: 1,
+          total: 1,
+        },
+      },
+    ];
+
+    const agg = await PurchaseModel.aggregate(pipeline);
+    const result = agg?.[0] ?? { items: [], total: 0 };
+
+    // ⚠️ retours id comme string
+    const items = (result.items ?? []).map((it: any) => ({
+      ...it,
+      id: String(it._id),
+      providerId: it.providerId ? String(it.providerId) : undefined,
+      provider: it.provider
+        ? {
+            id: String(it.provider._id),
+            name: it.provider.name,
+            designation: it.provider.designation,
+            type: it.provider.type,
+          }
+        : null,
+    }));
 
     return response(
-      { items, page, limit, total },
+      { items, page, limit, total: result.total },
       null,
       "Purchases retrieved successfully",
       true,

@@ -19,6 +19,10 @@ type ModalName =
   | "deleteConfirm"
   | "providersForm"
   | "productForm"
+<<<<<<< HEAD
+=======
+  | "purchaseForm"
+>>>>>>> a6056fc97e8e878a7d42a358acd11c2322d17f8a
   | null;
 
 interface ModalState {
