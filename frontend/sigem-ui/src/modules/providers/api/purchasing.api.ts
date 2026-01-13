@@ -29,14 +29,11 @@ class PurchasingAPI {
     const res = await api.delete(`/purchases/${id}/cancel`);
     return res.data;
   }
-<<<<<<< HEAD
-=======
 
   async confirm(id: string) {
     const res = await api.post(`/purchases/${id}/confirm`);
     return res.data;
   }
->>>>>>> a6056fc97e8e878a7d42a358acd11c2322d17f8a
 }
 
 export const purchasingApi = new PurchasingAPI();
