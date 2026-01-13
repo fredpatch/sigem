@@ -18,6 +18,7 @@ type ModalName =
   | "template-tasksForm"
   | "deleteConfirm"
   | "providersForm"
+  | "productForm"
   | null;
 
 interface ModalState {

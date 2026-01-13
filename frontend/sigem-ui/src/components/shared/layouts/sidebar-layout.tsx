@@ -9,13 +9,16 @@ import {
   Car,
   ChevronsUpDown,
   Cog,
+  HandHelping,
   HelpCircle,
   LayoutDashboard,
   Loader2,
   LogOut,
   MessageSquareText,
+  PackageSearch,
   Pin,
   Settings,
+  ShoppingBag,
   User,
   Users,
 } from "lucide-react";
@@ -199,6 +202,61 @@ export const SideNavBar = () => {
                       />
                     )}
 
+                    {/* Providers management catalog */}
+                    {[
+                      "SUPER_ADMIN",
+                      "ADMIN",
+                      "MG_COB",
+                      "MG_COS",
+                      "MG_AGT",
+                    ].includes(role!) && (
+                      <>
+                        <NavBarLink
+                          to={"/providers"}
+                          pathName={"providers"}
+                          isCollapsed={isCollapsed}
+                          icon={<BookA className="h-4 w-4" />}
+                          title={"Annuaire fournisseurs"}
+                        />
+                      </>
+                    )}
+
+                    {/* Providers management catalog */}
+                    {[
+                      "SUPER_ADMIN",
+                      "ADMIN",
+                      "MG_COB",
+                      "MG_COS",
+                      "MG_AGT",
+                    ].includes(role!) && (
+                      <>
+                        <NavBarLink
+                          to={"/products"}
+                          pathName={"products"}
+                          isCollapsed={isCollapsed}
+                          icon={<PackageSearch className="h-4 w-4" />}
+                          title={"Catalogue Produits"}
+                        />
+
+                        <Separator className="mb-6" />
+
+                        <NavBarLink
+                          to={"/purchases"}
+                          pathName={"purchases"}
+                          isCollapsed={isCollapsed}
+                          icon={<ShoppingBag className="h-4 w-4" />}
+                          title={"Gestion des achats"}
+                        />
+                        <NavBarLink
+                          to={"/purchase-requests"}
+                          pathName={"purchase-requests"}
+                          isCollapsed={isCollapsed}
+                          icon={<HandHelping className="h-4 w-4" />}
+                          title={"Demandes d'achats"}
+                        />
+                      </>
+                    )}
+
                     {[
                       "SUPER_ADMIN",
                       "ADMIN",
@@ -288,21 +346,6 @@ export const SideNavBar = () => {
                       </>
                     )}
                     <Separator className="mb-6" />
-
-                    {/* User management */}
-                    {["SUPER_ADMIN", "ADMIN", "MG_COB", "MG_COS"].includes(
-                      role!
-                    ) && (
-                      <>
-                        <NavBarLink
-                          to={"/providers"}
-                          pathName={"providers"}
-                          isCollapsed={isCollapsed}
-                          icon={<BookA className="h-4 w-4" />}
-                          title={"Annuaire fournisseurs"}
-                        />
-                      </>
-                    )}
 
                     {/* <Separator className="mt-6" /> */}
                   </div>
