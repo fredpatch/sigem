@@ -1,0 +1,30 @@
+export type MGMaintenanceRow = {
+  id: string;
+  plateNumber: string;
+  type?: string | null;
+  brand: string;
+  model: string;
+  energy?: string | null;
+  assignedToName?: string | null;
+  fiscalPower?: number | null;
+
+  firstRegistrationDate?: Date | null;
+  ownership?: string | null;
+  acquisitionDate?: Date | null;
+
+  insuranceProvider?: string | null;
+  insuranceExpiresAt?: Date | null;
+
+  extinguisherExpiresAt?: Date | null;
+
+  lastTechVisitAt?: Date | null;
+  nextTechVisitAt?: Date | null;
+
+  oilChangeEveryKm?: number | null;
+  lastOilChangeKm?: number | null;
+  nextOilChangeKm?: number | null;
+
+  lastCheckingKm?: number | null;
+
+  maintenanceNotes?: string | null;
+};

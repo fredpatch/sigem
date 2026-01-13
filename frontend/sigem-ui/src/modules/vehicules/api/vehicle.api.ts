@@ -7,6 +7,7 @@ import {
   UpdateVehicleMileageDTO,
   Vehicle,
 } from "../types/vehicle.types";
+import { MgUpdateVehicleOilChangeDTO } from "../types/mg.types";
 
 export const VehicleAPI = {
   async list(params?: ListVehiclesQuery): Promise<PaginatedVehicles> {
@@ -52,5 +53,23 @@ export const VehicleAPI = {
 
   async softDelete(id: string): Promise<void> {
     await vehicles.delete(`/vehicles/${id}`);
+  },
+
+  // MG-specific API calls
+  async getMgTable() {
+    const res = await vehicles.get("/vehicles/mg-table");
+    return res.data;
+  },
+
+  async updateMgMileage(
+    vehicleId: string,
+    payload: MgUpdateVehicleOilChangeDTO
+  ) {
+    const res = await vehicles.post(
+      `/vehicles/${vehicleId}/mg/oil-change/complete`,
+      payload
+    );
+
+    return res.data;
   },
 };

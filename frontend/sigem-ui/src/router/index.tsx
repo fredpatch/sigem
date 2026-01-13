@@ -39,10 +39,7 @@ import {
 import { ProductsLayout } from "@/pages/products-layout";
 import { PurchasesLayout } from "@/pages/purchases-layout";
 import { PurchaseRequestsLayout } from "@/pages/purchase-requests-layout";
-<<<<<<< HEAD
-=======
 import { PurchaseDetailPage } from "@/modules/providers/_components/purchases/Purchase-details";
->>>>>>> a6056fc97e8e878a7d42a358acd11c2322d17f8a
 
 const router = createBrowserRouter([
   { path: "/", element: <RootRedirect /> },
@@ -250,18 +247,11 @@ const router = createBrowserRouter([
         ],
       },
       {
-<<<<<<< HEAD
-        element: <PurchasesLayout />,
-        children: [
-          {
-            path: "/purchases",
-=======
         path: "/purchases",
         element: <PurchasesLayout />,
         children: [
           {
             index: true,
->>>>>>> a6056fc97e8e878a7d42a358acd11c2322d17f8a
             element: (
               <RouteGuard
                 allowedRoles={[
@@ -276,9 +266,6 @@ const router = createBrowserRouter([
               </RouteGuard>
             ),
           },
-<<<<<<< HEAD
-=======
-
           {
             path: ":id",
             element: (
@@ -295,7 +282,6 @@ const router = createBrowserRouter([
               </RouteGuard>
             ),
           },
->>>>>>> a6056fc97e8e878a7d42a358acd11c2322d17f8a
         ],
       },
       {

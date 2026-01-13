@@ -93,4 +93,12 @@ vehicleTaskRouter.post(
   taskController.complete
 );
 
+// POST /v1/vehicle-tasks/:id/complete/mileage
+vehicleTaskRouter.post(
+  "/:id/complete/mileage",
+  authenticate,
+  canWrite,
+  taskController.completeMileage
+);
+
 export { vehicleTaskRouter, vehicleTaskTemplateRouter };

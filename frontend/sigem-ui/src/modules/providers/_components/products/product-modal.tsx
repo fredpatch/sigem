@@ -39,7 +39,7 @@ export const ProductModal = () => {
 
   const pending = isPending || isUpdating;
 
-  console.log("ProductModal data:", data);
+  // console.log("ProductModal data:", data);
 
   const normalizedDefaults = useMemo(() => {
     if (!isEdit || !data) {

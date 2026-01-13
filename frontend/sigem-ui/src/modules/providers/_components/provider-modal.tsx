@@ -26,7 +26,7 @@ export const ProviderModal = () => {
 
   const pending = isPending || isUpdating;
 
-  console.log(data);
+  // console.log(data);
   const normalizedDefaults = useMemo(() => {
     if (!isEdit || !data) return providerDefaultValues;
 

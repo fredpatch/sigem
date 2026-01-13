@@ -20,6 +20,8 @@ export const VehicleTaskCompleteModal = () => {
   const [ConfirmDialog, confirm] = useConfirm();
   const { mutateAsync: completeTask, isPending } = useCompleteVehicleTask(); // à adapter selon ton hook
 
+  // console.log("Vehicle Task Complete Modal data:", data);
+
   const task = data as VehicleTask & {
     vehiclePlate?: string;
     vehicleLabel?: string;

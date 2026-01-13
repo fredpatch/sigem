@@ -10,6 +10,7 @@ import { VehicleDocumentModal } from "@/modules/vehicules/_components/form/vehic
 import { VehicleModal } from "@/modules/vehicules/_components/form/vehicle-modal";
 import { VehicleTasksModal } from "@/modules/vehicules/_components/form/vehicle-tasks-modal";
 import { VehicleTaskCompleteModal } from "@/modules/vehicules/_components/form/vehicleTask-complete-modal";
+import { VehicleCompleteOilChangeModal } from "@/modules/vehicules/_components/modals/vehicle-complete-oil-change-modal";
 import { VehicleDetailsModal } from "@/modules/vehicules/_components/modals/vehicle-details.modal";
 import { TemplateTasksModal } from "@/modules/vehicules/_components/tasks/template-tasks-modal";
 
@@ -32,6 +33,7 @@ export function ModalGlobalProvider() {
       <ProductModal />
 
       <PurchaseModal />
+      <VehicleCompleteOilChangeModal />
     </>
   );
 }

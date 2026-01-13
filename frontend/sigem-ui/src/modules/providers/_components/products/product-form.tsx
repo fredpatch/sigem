@@ -1,9 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-<<<<<<< HEAD
 import { Label } from "@/components/ui/label";
-=======
->>>>>>> a6056fc97e8e878a7d42a358acd11c2322d17f8a
 import { Badge } from "@/components/ui/badge";
 import { FormFieldWrapper } from "@/components/shared/form/form-field-wrapper";
 import {
@@ -39,7 +36,6 @@ export const ProductForm = ({
         <Input placeholder="Ex: Chaise visiteur" {...form.register("label")} />
       </FormFieldWrapper>
 
-<<<<<<< HEAD
       <FormFieldWrapper label="Type">
         <Select
           value={String(form.watch("type") ?? "CONSUMABLE")}
@@ -62,7 +58,6 @@ export const ProductForm = ({
           {...form.register("unit")}
         />
       </FormFieldWrapper>
-=======
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormFieldWrapper label="Type">
           <Select
@@ -86,7 +81,6 @@ export const ProductForm = ({
           />
         </FormFieldWrapper>
       </div>
->>>>>>> a6056fc97e8e878a7d42a358acd11c2322d17f8a
 
       <FormFieldWrapper
         label="Tags (optionnel)"

@@ -1,5 +1,6 @@
 // vehicles/vehicle.route.ts
 import { Router } from "express";
+import { MgController } from "src/controller/vehicle-mg.controller";
 import { VehicleTaskController } from "src/controller/vehicle-task.controller";
 import { VehicleController } from "src/controller/vehicle.controller";
 import {
@@ -22,9 +23,19 @@ const canRead = authorizedRoles(
   "GUEST"
 );
 
+const mgController = new MgController();
+
+// MG Routes
+vehicleRouter.post(
+  "/:vehicleId/mg/oil-change/complete",
+  authenticate,
+  mgController.completeOilChangeTask
+);
+
 // --- Vehicles ---
 // Prefix final (via api-gateway) : /v1/vehicles
 
+vehicleRouter.get("/mg-table", authenticate, vehicleController.getMgTable);
 vehicleRouter.get("/my", authenticate, vehicleController.listMyVehicles);
 
 vehicleRouter.post("/", authenticate, canWrite, vehicleController.create);

@@ -5,11 +5,12 @@ import { useVehicles } from "../hooks/use-vehicle";
 import { Loader2 } from "lucide-react";
 import { vehicleColumns } from "../_components/table/columns_vehicles";
 import { Guidelines } from "@/common/guidelines";
+import { mgVehicleColumns } from "../_components/table/mg.columns";
 
 export const VehicleManagementPage = () => {
   const { openModal } = useModalStore();
-  const { list } = useVehicles();
-  const { data: vehicles, isLoading, error } = list;
+  const { mgTable } = useVehicles();
+  const { data: vehicles, isLoading, error } = mgTable;
 
   return (
     <>
@@ -26,11 +27,18 @@ export const VehicleManagementPage = () => {
           </div>
         ) : (
           <TableComponent
-            emptyState="No vehicle found"
+            emptyState="Aucun véhicule"
             onSubmit={() => openModal(ModalTypes.VEHICLE_MANAGEMENT_FORM)}
-            filterKeys={["plateNumber", "status", "assignedToName"]}
-            items={vehicles?.items || []}
-            columns={vehicleColumns}
+            filterKeys={[
+              "plateNumber",
+              "brand",
+              "model",
+              "assignedToName",
+              "ownership",
+              "energy",
+            ]}
+            items={vehicles || []}
+            columns={mgVehicleColumns}
             onBulkAction={(selected: any[]) => console.log(selected)}
           />
         )}

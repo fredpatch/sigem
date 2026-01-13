@@ -46,7 +46,7 @@ export class VehicleTaskTemplateService {
     await upsertVehicleDocAndTasksRefs({
       dept: payload.dept,
       templateLabel: doc.label,
-    })
+    });
 
     return doc;
   }
@@ -136,7 +136,7 @@ export class VehicleTaskTemplateService {
       await upsertVehicleDocAndTasksRefs({
         dept,
         templateLabel: updated?.label,
-      })
+      });
     }
 
     return updated;
@@ -180,47 +180,47 @@ export class VehicleTaskService {
     }
 
     // 2) Logique spécifique selon le type de tâche
-    switch (template.type) {
-      case "OIL_CHANGE":
-        // dernière vidange = km de complétion
-        if (completedMileage !== null) {
-          update.lastOilChangeKm = completedMileage;
-        }
-        // prochaine vidange (en km) = ce que t'a donné computeNextFromTemplate
-        if (nextDueMileage !== null) {
-          update.nextOilChangeKm = nextDueMileage;
-        }
-        break;
+    // switch (template.type) {
+    //   case "OIL_CHANGE":
+    //     // dernière vidange = km de complétion
+    //     if (completedMileage !== null) {
+    //       update.lastOilChangeKm = completedMileage;
+    //     }
+    //     // prochaine vidange (en km) = ce que t'a donné computeNextFromTemplate
+    //     if (nextDueMileage !== null) {
+    //       update.nextOilChangeKm = nextDueMileage;
+    //     }
+    //     break;
 
-      case "TECH_INSPECTION":
-        // dernière visite technique = date de complétion
-        update.lastTechnicalVisitDate = completedAt;
-        // prochaine visite = date calculée
-        if (nextDueAt) {
-          update.nextTechnicalVisitDate = nextDueAt;
-        } else {
-          // si pas de nextDueAt, on peut aussi la nuller
-          // update.nextTechnicalVisitDate = null;
-        }
-        break;
+    //   case "TECH_INSPECTION":
+    //     // dernière visite technique = date de complétion
+    //     update.lastTechnicalVisitDate = completedAt;
+    //     // prochaine visite = date calculée
+    //     if (nextDueAt) {
+    //       update.nextTechnicalVisitDate = nextDueAt;
+    //     } else {
+    //       // si pas de nextDueAt, on peut aussi la nuller
+    //       // update.nextTechnicalVisitDate = null;
+    //     }
+    //     break;
 
-      case "DOCUMENT_RENEWAL":
-        // valide jusqu'à la prochaine échéance
-        if (nextDueAt) {
-          update.insuranceValidity = nextDueAt;
-        }
-        break;
+    //   case "DOCUMENT_RENEWAL":
+    //     // valide jusqu'à la prochaine échéance
+    //     if (nextDueAt) {
+    //       update.insuranceValidity = nextDueAt;
+    //     }
+    //     break;
 
-      case "EXTINGUISHER_CARD":
-        if (nextDueAt) {
-          update.extinguisherCardValidity = nextDueAt;
-        }
-        break;
+    //   case "EXTINGUISHER_CARD":
+    //     if (nextDueAt) {
+    //       update.extinguisherCardValidity = nextDueAt;
+    //     }
+    //     break;
 
-      default:
-        // autres types → pas d'effet spécifique sur le véhicule pour l'instant
-        break;
-    }
+    //   default:
+    //     // autres types → pas d'effet spécifique sur le véhicule pour l'instant
+    //     break;
+    // }
 
     return update;
   }
@@ -316,7 +316,7 @@ export class VehicleTaskService {
     await upsertVehicleDocAndTasksRefs({
       dept: payload.dept,
       templateLabel: doc.label,
-    })
+    });
 
     return doc;
   }
@@ -608,22 +608,234 @@ export class VehicleTaskService {
           }
         );
       } else {
-        await VehicleDocumentEntity.findByIdAndUpdate(existing.vehicleDocumentId, {
-          $set: {
-            // ✅ clé du fix : le document n’est plus “expired”
-            expiresAt: nextDueAt,
+        await VehicleDocumentEntity.findByIdAndUpdate(
+          existing.vehicleDocumentId,
+          {
+            $set: {
+              // ✅ clé du fix : le document n’est plus “expired”
+              expiresAt: nextDueAt,
 
-            // optionnel : mettre issuedAt = date de complétion (= date de renouvellement)
-            issuedAt: completedAt,
+              // optionnel : mettre issuedAt = date de complétion (= date de renouvellement)
+              issuedAt: completedAt,
 
-            // reset anti-spam doc (si tu as un cron doc aussi)
-            lastNotificationAt: null,
-            notificationsCount: 0,
-          },
-        });
+              // reset anti-spam doc (si tu as un cron doc aussi)
+              lastNotificationAt: null,
+              notificationsCount: 0,
+            },
+          }
+        );
       }
     }
 
+    // 6) Créer la nouvelle tâche (cycle suivant) si next existe
+    if (!next) {
+      return completedTask;
+    }
+
+    // 5) Créer la nouvelle tâche (cycle suivant)
+    // const nextTask =
+    await VehicleTaskEntity.create({
+      vehicleId: existing.vehicleId,
+
+      vehicleDocumentId: existing.vehicleDocumentId ?? undefined,
+
+      templateId: existing.templateId,
+      type: template.type,
+      triggerType: template.triggerType,
+      label: existing.label || template.label,
+      description: existing.description || template.description,
+      dueAt: nextDueAt,
+      dueMileage: nextDueMileage,
+      severity: template.defaultSeverity,
+      status: VehicleTaskStatus.PLANNED,
+
+      notificationsCount: 0,
+      lastNotificationAt: null,
+      lastNotifiedState: null,
+    });
+
+    // console.log("[vehicle-task.complete] Next occurrence created", {
+    //   prevTaskId: existing._id.toString(),
+    //   nextTaskId: nextTask?._id.toString(),
+    //   vehicleId: existing.vehicleId?.toString(),
+    //   templateId: existing.templateId?.toString(),
+    //   nextDueAt,
+    //   nextDueMileage,
+    // });
+
+    // On retourne la tâche complétée (la nouvelle est juste un side-effect)
+    return completedTask;
+  }
+
+  async completeMileage(
+    id: string,
+    payload: CompleteVehicleTaskDTO
+  ): Promise<VehicleTask | null> {
+    if (!Types.ObjectId.isValid(id)) return null;
+
+    // 1) Récupérer la tâche actuelle
+    const existing = await VehicleTaskEntity.findOne({ _id: id });
+    if (!existing) return null;
+
+    const completedAt = payload.completedAt ?? new Date();
+
+    const update: Record<string, any> = {
+      status: VehicleTaskStatus.COMPLETED,
+      completedAt,
+    };
+
+    if (payload.completedMileage !== undefined) {
+      update.completedMileage = payload.completedMileage;
+    }
+    if (payload.completionComment !== undefined) {
+      update.completionComment = payload.completionComment?.trim();
+    }
+
+    // 2) Marquer la tâche comme complétée
+    const completedTask = await VehicleTaskEntity.findOneAndUpdate(
+      { _id: id },
+      { $set: update },
+      { new: true }
+    );
+
+    if (!completedTask) return null;
+
+    // 3) Auto-générer la prochaine occurrence SI:
+    //    - la tâche est liée à un template
+    //    - le template a une récurrence (everyKm / everyMonths)
+    if (!existing.templateId) {
+      // We still update the km of the vehicle
+      if (payload.completedMileage !== undefined) {
+        await Vehicle.findByIdAndUpdate(existing.vehicleId, {
+          $set: {
+            currentMileage: payload.completedMileage,
+            mileageUpdatedAt: completedAt,
+          },
+        });
+      }
+      return completedTask;
+    }
+
+    const template = await VehicleTaskTemplateEntity.findOne({
+      _id: existing.templateId,
+      active: true,
+    });
+
+    if (!template) {
+      return completedTask;
+    }
+
+    // Pas de récurrence définie → on ne crée pas de nouvelle tâche
+    if (!template.everyKm && !template.everyMonths) {
+      // --- Mise à jour du véhicule si nécessaire ---
+      const vehicle = await Vehicle.findById(existing.vehicleId)
+        .select("currentMileage")
+        .lean();
+
+      const vehicleUpdate = this.buildVehicleUpdateFromTask({
+        template,
+        existing,
+        payload,
+        completedAt,
+        nextDueAt: null,
+        nextDueMileage: null,
+        vehicleCurrentMileage: vehicle?.currentMileage ?? null,
+      });
+
+      if (Object.keys(vehicleUpdate).length > 0) {
+        await Vehicle.findByIdAndUpdate(existing.vehicleId, {
+          $set: vehicleUpdate,
+        });
+      }
+
+      // ✅ Si tâche liée à un document mais pas de récurrence => on ne peut pas repousser expiresAt
+      // (Optionnel: log)
+      if (existing.vehicleDocumentId) {
+        console.warn(
+          "[vehicle-task.complete] Task linked to a document but template has no recurrence (no nextDueAt).",
+          {
+            taskId: existing._id.toString(),
+            templateId: existing.templateId?.toString(),
+          }
+        );
+      }
+
+      return completedTask;
+    }
+
+    // 4) Récupérer le véhicule pour avoir le km actuel (si utile)
+    const vehicle = await Vehicle.findById(existing.vehicleId)
+      .select("currentMileage")
+      .lean();
+
+    const next = computeNextFromTemplate({
+      triggerType: template.triggerType,
+      everyKm: template.everyKm,
+      everyMonths: template.everyMonths,
+      completedAt,
+      completedMileage:
+        payload.completedMileage ?? existing.completedMileage ?? null,
+      vehicleCurrentMileage: vehicle?.currentMileage ?? null,
+      previousDueAt: existing.dueAt ?? null,
+      previousDueMileage: existing.dueMileage ?? null,
+    });
+
+    let nextDueAt: Date | null = null;
+    let nextDueMileage: number | null = null;
+
+    if (next) {
+      nextDueAt = next.nextDueAt ?? null;
+      nextDueMileage = next.nextDueMileage ?? null;
+    }
+
+    // 5) Appliquer les effets sur le véhicule (km + champs métier)
+    const vehicleUpdate = this.buildVehicleUpdateFromTask({
+      template,
+      existing,
+      payload,
+      completedAt,
+      nextDueAt,
+      nextDueMileage,
+      vehicleCurrentMileage: vehicle?.currentMileage ?? null,
+    });
+
+    if (Object.keys(vehicleUpdate).length > 0) {
+      await Vehicle.findByIdAndUpdate(existing.vehicleId, {
+        $set: vehicleUpdate,
+      });
+    }
+
+    // ✅ 8) MAJ DU DOCUMENT si la tâche est liée à un VehicleDocument
+    // Si la tâche est un renouvellement basé date, nextDueAt doit exister
+    if (existing.vehicleDocumentId) {
+      if (!nextDueAt) {
+        console.warn(
+          "[vehicle-task.complete] Task linked to a document but nextDueAt is null (cannot update expiresAt).",
+          {
+            taskId: existing._id.toString(),
+            templateId: existing.templateId?.toString(),
+            triggerType: template.triggerType,
+          }
+        );
+      } else {
+        await VehicleDocumentEntity.findByIdAndUpdate(
+          existing.vehicleDocumentId,
+          {
+            $set: {
+              // ✅ clé du fix : le document n’est plus “expired”
+              expiresAt: nextDueAt,
+
+              // optionnel : mettre issuedAt = date de complétion (= date de renouvellement)
+              issuedAt: completedAt,
+
+              // reset anti-spam doc (si tu as un cron doc aussi)
+              lastNotificationAt: null,
+              notificationsCount: 0,
+            },
+          }
+        );
+      }
+    }
 
     // 6) Créer la nouvelle tâche (cycle suivant) si next existe
     if (!next) {

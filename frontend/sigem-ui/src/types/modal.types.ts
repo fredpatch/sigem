@@ -28,6 +28,11 @@ export const ModalTypes = {
   PURCHASE_DETAILS: "purchaseDetails",
 
   DELETE_CONFIRM: "deleteConfirm",
+
+  // New
+  VEHICLE_UPDATE_MILEAGE: "vehicleUpdateMileage",
+  VEHICLE_COMPLETE_OIL_CHANGE: "vehicleCompleteOilChange",
+  VEHICLE_COMPLETE_TECH_VISIT: "vehicleCompleteTechVisit",
 } as const;
 
 export type ModalType = (typeof ModalTypes)[keyof typeof ModalTypes];

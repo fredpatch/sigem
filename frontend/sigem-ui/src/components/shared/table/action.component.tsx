@@ -9,10 +9,14 @@ import { Row } from "@tanstack/react-table";
 import {
   Check,
   ClipboardList,
+  Droplets,
   Files,
+  Gauge,
+  MoreHorizontal,
   Pencil,
   RefreshCcwDot,
   Trash,
+  Wrench,
 } from "lucide-react";
 import { useModalStore } from "@/stores/modal-store";
 import { ModalTypes } from "@/types/modal.types";
@@ -32,6 +36,13 @@ import { Vehicle } from "@/modules/vehicules/types/vehicle.types";
 import { useVehicles } from "@/modules/vehicules/hooks/use-vehicle";
 import { VehicleDocument } from "@/modules/vehicules/types/vehicle-document.types";
 import { useVehicleDocuments } from "@/modules/vehicules/hooks/use-vehicle-documents";
+import { MGMaintenanceRow } from "@/modules/vehicules/types/mg.types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Action<T> = {
   label: string;
@@ -547,5 +558,62 @@ export const VehicleDocumentActionCell = ({ row }: VehicleDocumentsProps) => {
         ]}
       />
     </>
+  );
+};
+
+interface MgVehicleProps {
+  row: Row<MGMaintenanceRow>;
+}
+
+export const MGVehicleActionCell = ({ row }: MgVehicleProps) => {
+  const { openModal, setSelectedItem } = useModalStore();
+  const v = row.original;
+
+  const openUpdateMileage = () => {
+    setSelectedItem(v);
+    openModal(ModalTypes.VEHICLE_UPDATE_MILEAGE, v);
+  };
+
+  const openCompleteOilChange = () => {
+    setSelectedItem(v);
+    openModal(ModalTypes.VEHICLE_COMPLETE_OIL_CHANGE, v);
+  };
+
+  const openCompleteTech = () => {
+    setSelectedItem(v);
+    openModal(ModalTypes.VEHICLE_COMPLETE_TECH_VISIT, v);
+  };
+  return (
+    <div className="flex justify-end">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="w-56">
+          {/* <DropdownMenuItem onClick={openDetails}>
+            <Eye className="mr-2 h-4 w-4" />
+            Ouvrir détails
+          </DropdownMenuItem> */}
+
+          <DropdownMenuItem onClick={openUpdateMileage}>
+            <Gauge className="mr-2 h-4 w-4" />
+            Mettre à jour le kilométrage
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={openCompleteOilChange}>
+            <Droplets className="mr-2 h-4 w-4" />
+            Valider une vidange
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={openCompleteTech}>
+            <Wrench className="mr-2 h-4 w-4" />
+            Valider visite technique
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };

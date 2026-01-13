@@ -258,4 +258,20 @@ export class VehicleTaskController {
       .status(200)
       .json(response(completed, null, "Vehicle task completed", true, 200));
   });
+  completeMileage = catchError(async (req, res) => {
+    const { id } = req.params;
+    const payload = req.body as CompleteVehicleTaskDTO;
+
+    const completed = await this.taskService.completeTask(id, payload);
+
+    if (!completed) {
+      return res
+        .status(404)
+        .json(response(null, null, "Vehicle task not found", false, 404));
+    }
+
+    return res
+      .status(200)
+      .json(response(completed, null, "Vehicle task completed", true, 200));
+  });
 }

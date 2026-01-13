@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useModalStore } from "@/stores/modal-store";
-import { ModalTypes } from "@/types/modal.types";
+import { useVehicles } from "@/modules/vehicules/hooks/use-vehicle";
 import { formatDueLabel, taskTypeLabel } from "@/utils/helpers";
 import { AlertTriangle, ArrowUpRight, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function getId(v: any) {
   if (!v) return undefined;
@@ -21,12 +21,18 @@ export function UrgentTaskItem({
   task: any;
   variant: "danger" | "warning";
 }) {
-  const { openModal } = useModalStore();
+  const navigate = useNavigate();
+  const { listById } = useVehicles(
+    task.vehicleId && typeof task.vehicleId === "string"
+      ? task.vehicleId
+      : undefined
+  );
   const vehicleObj =
     task.vehicleId && typeof task.vehicleId === "object"
       ? task.vehicleId
       : null;
 
+  const { data: vehicle, isLoading } = listById;
   const vehicleId = getId(task.vehicleId);
   const taskId = getId(task._id);
 
@@ -36,34 +42,20 @@ export function UrgentTaskItem({
     vehicleObj?.label ||
     (vehicleId ? `Véhicule ${vehicleId.slice(-6)}` : "Véhicule");
 
+  console.log("Due", vehicle);
+
   const dueLabel = formatDueLabel(task);
   const typeLabel = taskTypeLabel(task);
 
-  const sev = String(task.severity ?? "info").toLowerCase();
-  const sevLabel =
-    sev === "critical" ? "Critique" : sev === "warning" ? "Attention" : "Info";
+  // const sev = String(task.severity ?? "info").toLowerCase();
+  // const sevLabel =
+  //   sev === "critical" ? "Critique" : sev === "warning" ? "Attention" : "Info";
 
   const clickable = Boolean(vehicleId);
 
-  const openDetails = () => {
-    if (!vehicleId) return;
-    openModal(ModalTypes.VEHICLE_DETAILS, {
-      vehicleId,
-      snapshot: vehicleObj
-        ? {
-            id: getId(vehicleObj.id ?? vehicleObj._id) ?? vehicleId,
-            plateNumber: vehicleObj.plateNumber,
-            brand: vehicleObj.brand,
-            model: vehicleObj.model,
-            status: vehicleObj.status,
-            currentMileage: vehicleObj.currentMileage,
-            assignedToName: vehicleObj.assignedToName,
-            assignedToDirection: vehicleObj.assignedToDirection,
-          }
-        : undefined,
-      from: "top-urgences",
-      taskId,
-    });
+  const goToDetails = () => {
+    if (!vehicleId || !taskId) return;
+    navigate("/vehicle-tasks");
   };
 
   // console.log(openDetails());
@@ -72,9 +64,9 @@ export function UrgentTaskItem({
     <div
       role={clickable ? "button" : undefined}
       tabIndex={clickable ? 0 : -1}
-      onClick={openDetails}
+      onClick={goToDetails}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") openDetails();
+        if (e.key === "Enter" || e.key === " ") goToDetails();
       }}
       className={[
         "flex items-start justify-between gap-3 rounded-lg border p-3",
@@ -85,7 +77,7 @@ export function UrgentTaskItem({
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <p className="truncate font-semibold">
-            {task?.vehicleLabel ?? vehicleLabel}
+            {task?.vehiclePlate ?? vehicleLabel}
           </p>
 
           {variant === "danger" ? (
@@ -98,9 +90,9 @@ export function UrgentTaskItem({
             </Badge>
           )}
 
-          <Badge variant="outline" className="shrink-0">
+          {/* <Badge variant="outline" className="shrink-0">
             {sevLabel}
-          </Badge>
+          </Badge> */}
         </div>
 
         <p className="mt-1 text-sm text-muted-foreground">{typeLabel}</p>
@@ -122,7 +114,7 @@ export function UrgentTaskItem({
           className="h-8 px-2"
           onClick={(e) => {
             e.stopPropagation();
-            openDetails();
+            goToDetails();
           }}
           disabled={!clickable}
         >
@@ -132,6 +124,8 @@ export function UrgentTaskItem({
         {/* <p className="text-[11px] text-muted-foreground uppercase">Statut</p> */}
         {/* <p className="text-sm font-semibold tabular-nums">{task.status}</p> */}
       </div>
+
+      {isLoading ? <div>Chargement du véhicule...</div> : null}
     </div>
   );
 }

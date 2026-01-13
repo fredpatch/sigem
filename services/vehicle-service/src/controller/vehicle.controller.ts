@@ -29,6 +29,7 @@ import {
 import { VehicleTaskType } from "src/types/vehicle-task-template.type";
 import { VehicleTaskStatus } from "src/types/vehicle-task.types";
 import { VehicleTaskTemplateEntity } from "src/models/vehicle-task-template.model";
+import { getMGMaintenanceTable } from "src/services/vehicle.mg-table.service";
 
 export interface ActorInfo {
   id?: string;
@@ -318,6 +319,14 @@ export class VehicleController {
     return res
       .status(200)
       .json(response(updated, null, "Mileage updated", true, 200));
+  });
+
+  getMgTable = catchError(async (req, res) => {
+    const dept = (req.query.dept as string) || "MG";
+    const rows = await getMGMaintenanceTable(String(dept));
+    return res
+      .status(200)
+      .json(response(rows, null, "MG Maintenance Table fetched", true, 200));
   });
 }
 

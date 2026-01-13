@@ -20,7 +20,7 @@ export const MGMonitoringOverview = () => {
           </p>
         </span>
 
-        <span className="relative left-15 absolute">
+        <span className="relative left-15">
           <NotificationBell />
         </span>
 

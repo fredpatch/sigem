@@ -245,7 +245,7 @@ export function formatDueLabel(task: any) {
     task.dueAt ?? task.dueDate ?? task.nextDueDate ?? task.expectedAt ?? null;
 
   const kmRemaining =
-    task.remainingKm ?? task.kmRemaining ?? task.kmLeft ?? null;
+    task.remainingKm ?? task.kmRemaining ?? task.dueMileage ?? null;
 
   // date
   if (dueAt) {

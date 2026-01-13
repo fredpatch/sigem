@@ -23,6 +23,12 @@ export function useVehicles(id?: string, listParams?: ListVehiclesQuery) {
     queryFn: () => VehicleAPI.list(listParams),
   });
 
+  // MG TABLE
+  const mgTable = useQuery({
+    queryKey: [VEHICLES_KEY, "mg-table"],
+    queryFn: () => VehicleAPI.getMgTable(),
+  });
+
   // SIMPLE LIST ACTIVE (pratique pour les selects)
   const listActive = useQuery({
     queryKey: [VEHICLES_KEY, "active"],
@@ -96,6 +102,7 @@ export function useVehicles(id?: string, listParams?: ListVehiclesQuery) {
     list,
     listActive,
     listById,
+    mgTable,
     create,
     update,
     updateMileage,

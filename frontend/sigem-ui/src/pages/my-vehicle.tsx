@@ -9,6 +9,7 @@ import { useVehicles } from "@/modules/vehicules/hooks/use-vehicle";
 import { OilChangeCard } from "@/modules/vehicules/_components/oil-change-card";
 import { useOilChangeInfo } from "@/modules/vehicules/hooks/use-oil-change";
 import { useAuthStore } from "@/modules/auth/store/use-auth.store";
+import { useCompleteVehicleTask } from "@/modules/vehicules/hooks/use-vehicle-tasks";
 
 function formatDate(d?: string) {
   if (!d) return "-";
@@ -21,6 +22,7 @@ export default function MyVehiclePage() {
   // const { mutateAsync: completeTask, isPending } = useCompleteVehicleTask();
   const { user } = useAuthStore();
   const { myVehicle, updateMileage } = useVehicles();
+  // const {mutateAsync} = useCompleteVehicleTask()
   const {
     data: vehicles = [],
     isLoading,
