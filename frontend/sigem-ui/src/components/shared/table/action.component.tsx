@@ -40,11 +40,7 @@ import {
 } from "@/modules/vehicules/types/types";
 import { Vehicle } from "@/modules/vehicules/types/vehicle.types";
 import { useVehicles } from "@/modules/vehicules/hooks/use-vehicle";
-import {
-  VehicleDocument,
-  VehicleDocumentType,
-} from "@/modules/vehicules/types/vehicle-document.types";
-import { useVehicleDocuments } from "@/modules/vehicules/hooks/use-vehicle-documents";
+import { VehicleDocumentType } from "@/modules/vehicules/types/vehicle-document.types";
 import { MGMaintenanceRow } from "@/modules/vehicules/types/mg.types";
 import {
   DropdownMenu,
@@ -592,6 +588,7 @@ export const MGVehicleActionCell = ({ row }: MgVehicleProps) => {
 
   const openCompleteOilChange = () => {
     setSelectedItem(v);
+    // openModal(ModalTypes.VEHICLE_COMPLETE_TASKS_FORM, v);
     openModal(ModalTypes.VEHICLE_COMPLETE_OIL_CHANGE, v);
   };
 

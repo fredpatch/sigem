@@ -16,7 +16,7 @@ export const useCompleteMgOilChange = () => {
       payload: MgUpdateVehicleOilChangeDTO;
     }) => {
       const { vehicleId, payload } = params;
-      return await VehicleAPI.updateMgMileage(vehicleId, payload);
+      return await VehicleAPI.completeMgOilChange(vehicleId, payload);
     },
     onSuccess: (res) => {
       toast.success(res?.message ?? "Vidange validée.");

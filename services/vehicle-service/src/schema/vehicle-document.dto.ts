@@ -15,8 +15,8 @@ export interface CreateVehicleDocumentDTO {
 
 export interface UpdateVehicleDocumentDTO {
   reference?: string;
-  issuedAt?: string;
-  expiresAt?: string;
+  issuedAt?: Date;
+  expiresAt?: Date;
   reminderDaysBefore?: number[];
 }
 

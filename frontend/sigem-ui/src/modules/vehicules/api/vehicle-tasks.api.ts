@@ -31,7 +31,7 @@ export const VehicleTaskAPI = {
   },
 
   async list(
-    params?: VehicleTaskFilterQuery
+    params?: VehicleTaskFilterQuery,
   ): Promise<VehicleTaskListResponse> {
     const res = await vehicleTasks.get<
       ApiResponse<VehicleTaskListResponse>,
@@ -48,7 +48,7 @@ export const VehicleTaskAPI = {
 
   async listByVehicle(
     vehicleId: string,
-    params?: Omit<VehicleTaskFilterQuery, "vehicleId">
+    params?: Omit<VehicleTaskFilterQuery, "vehicleId">,
   ): Promise<VehicleTaskListResponse> {
     const res = await vehicleTasks.get<
       ApiResponse<VehicleTaskListResponse>,
@@ -74,12 +74,13 @@ export const VehicleTaskAPI = {
       throw new Error(res.error || res.message || "Task not found");
     }
 
+    console.log("VehicleTaskAPI.getById response:", res);
     return res.data; // <- VehicleTask
   },
 
   async update(
     id: string,
-    payload: UpdateVehicleTaskDTO
+    payload: UpdateVehicleTaskDTO,
   ): Promise<VehicleTask> {
     const res = await vehicleTasks.patch<
       ApiResponse<VehicleTask>,
@@ -95,7 +96,7 @@ export const VehicleTaskAPI = {
 
   async complete(
     id: string,
-    payload: CompleteVehicleTaskDTO
+    payload: CompleteVehicleTaskDTO,
   ): Promise<VehicleTask> {
     const res = await vehicleTasks.post<
       ApiResponse<VehicleTask>,

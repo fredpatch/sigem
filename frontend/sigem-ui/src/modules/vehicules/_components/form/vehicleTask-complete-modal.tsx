@@ -5,7 +5,10 @@ import { ModalTypes } from "@/types/modal.types";
 import { GenericFormModal } from "@/components/shared/form/generic-form-modal";
 import { ReusableForm } from "@/components/shared/form/form.component";
 import { useConfirm } from "@/hooks/use-confirm";
-import { useCompleteVehicleTask } from "../../hooks/use-vehicle-tasks";
+import {
+  useCompleteVehicleTask,
+  useVehicleTask,
+} from "../../hooks/use-vehicle-tasks";
 import { VehicleTask } from "../../types/types";
 import {
   VehicleTaskCompleteFormValues,
@@ -20,13 +23,16 @@ export const VehicleTaskCompleteModal = () => {
   const [ConfirmDialog, confirm] = useConfirm();
   const { mutateAsync: completeTask, isPending } = useCompleteVehicleTask(); // à adapter selon ton hook
 
-  // console.log("Vehicle Task Complete Modal data:", data);
+  const vehicleId = (data as any)?.id;
+  const { data: vehicleTask, isLoading } = useVehicleTask(vehicleId);
 
-  const task = data as VehicleTask & {
+  const task = vehicleTask as VehicleTask & {
     vehiclePlate?: string;
     vehicleLabel?: string;
     vehicleCurrentMileage?: number;
   };
+
+  // console.log("Vehicle Task Complete Modal data:", vehicleTask);
 
   const taskType = task?.type;
   const triggerType = (task as any)?.triggerType;
@@ -116,6 +122,7 @@ export const VehicleTaskCompleteModal = () => {
   };
 
   if (name !== ModalTypes.VEHICLE_COMPLETE_TASKS_FORM) return null;
+  if (isLoading) return null;
 
   return (
     <>

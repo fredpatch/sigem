@@ -202,7 +202,7 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
       const days = daysUntil(v.insuranceExpiresAt);
       const cfg = expiryBadgeConfig(days);
 
-      console.log("Insurance", row.original.insuranceProvider);
+      // console.log("Insurance", row.original.insuranceProvider);
 
       return (
         <div className="flex flex-col items-center gap-1">

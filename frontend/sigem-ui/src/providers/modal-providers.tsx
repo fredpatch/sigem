@@ -12,6 +12,7 @@ import { VehicleTaskCompleteModal } from "@/modules/vehicules/_components/form/v
 import { VehicleCompleteOilChangeModal } from "@/modules/vehicules/_components/modals/vehicle-complete-oil-change-modal";
 import { VehicleDetailsModal } from "@/modules/vehicules/_components/modals/vehicle-details.modal";
 import { VehicleDocumentModal } from "@/modules/vehicules/_components/modals/vehicle-document.modal";
+import { VehicleUpdateMileageModal } from "@/modules/vehicules/_components/modals/vehicle-mileage-update";
 import { TemplateTasksModal } from "@/modules/vehicules/_components/tasks/template-tasks-modal";
 
 export function ModalGlobalProvider() {
@@ -35,6 +36,7 @@ export function ModalGlobalProvider() {
       <PurchaseModal />
       <VehicleCompleteOilChangeModal />
       <VehicleDocumentModal />
+      <VehicleUpdateMileageModal />
     </>
   );
 }

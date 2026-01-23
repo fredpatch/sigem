@@ -1,229 +1,115 @@
 // src/modules/vehicules/_components/vehicles-sidebar-content.tsx
 import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
-import { useVehicles } from "../hooks/use-vehicle";
-import { useVehicleDocumentsMonitoring } from "../hooks/use-vehicle-documents";
-import { VehicleDocument } from "../types/vehicle-document.types";
-import { computeDocumentKpis } from "../helpers/helpers";
+import { MGMaintenanceRow } from "../types/mg.types";
+import { useQueryClient } from "@tanstack/react-query";
+import { computeMgSidebarKpis } from "../hooks/use-mg-kpis";
 
-type VehicleStatus = "ACTIVE" | "IN_MAINTENANCE" | "INACTIVE" | "RETIRED";
-
-type Vehicle = {
-  id: string;
-  status: VehicleStatus;
-  currentMileage?: number | null;
-  assignedToName?: string | null;
-};
-
-type VehiclesListResponse = {
-  items: Vehicle[];
-  total: number;
-  page: number;
-  limit: number;
-};
+const MG_TABLE_QUERY_KEY = ["vehicles", "mg-table"];
 
 const VehiclesSidebarContent = () => {
-  const { list } = useVehicles(undefined, { page: 1, limit: 100 });
+  const qc = useQueryClient();
 
-  const { data, isLoading, isError } = list as {
-    data?: VehiclesListResponse;
-    isLoading: boolean;
-    isError: boolean;
-  };
+  const rows =
+    (qc.getQueryData(MG_TABLE_QUERY_KEY) as MGMaintenanceRow[] | undefined) ??
+    [];
 
-  const vehicles: Vehicle[] = data?.items ?? [];
-  const total = data?.total ?? vehicles.length;
+  // si tu veux savoir si ça charge encore:
+  const isFetching = qc.isFetching({ queryKey: MG_TABLE_QUERY_KEY }) > 0;
 
-  const {
-    active,
-    inMaintenance,
-    inactive,
-    retired,
-    assigned,
-    unassigned,
-    // avgMileage,
-  } = useMemo(() => {
-    let active = 0;
-    let inMaintenance = 0;
-    let inactive = 0;
-    let retired = 0;
-    let assigned = 0;
-    let unassigned = 0;
-    let mileageSum = 0;
-    let mileageCount = 0;
-
-    for (const v of vehicles) {
-      // statut
-      switch (v.status) {
-        case "ACTIVE":
-          active++;
-          break;
-        case "IN_MAINTENANCE":
-          inMaintenance++;
-          break;
-        case "INACTIVE":
-          inactive++;
-          break;
-        case "RETIRED":
-          retired++;
-          break;
-      }
-
-      // affectation
-      if (v.assignedToName) assigned++;
-      else unassigned++;
-
-      // kilométrage
-      if (typeof v.currentMileage === "number") {
-        mileageSum += v.currentMileage;
-        mileageCount++;
-      }
-    }
-
-    const avgMileage =
-      mileageCount > 0 ? Math.round(mileageSum / mileageCount) : 0;
-
-    return {
-      active,
-      inMaintenance,
-      inactive,
-      retired,
-      assigned,
-      unassigned,
-      avgMileage,
-    };
-  }, [vehicles]);
-
-  const {
-    data: docsData,
-    isLoading: isLoadingDocs,
-    isError: isDocsError,
-  } = useVehicleDocumentsMonitoring();
-
-  const docs: VehicleDocument[] = docsData ?? [];
-  const docKpis = useMemo(() => computeDocumentKpis(docs), [docs]);
-
-  const isLoadingKpis = isLoading || isLoadingDocs;
-  const hasError = isError;
+  const kpis = useMemo(() => computeMgSidebarKpis(rows), [rows]);
 
   return (
     <div className="space-y-4">
-      {/* Bloc résumé global */}
+      {/* Parc */}
       <div className="rounded-xl border bg-card px-4 py-3 shadow-sm">
-        <p className="text-xs uppercase text-muted-foreground">
-          Parc automobile
-        </p>
+        <p className="text-xs uppercase text-muted-foreground">Parc MG</p>
 
         <p className="mt-1 text-3xl font-semibold tabular-nums">
-          {isLoading ? (
+          {isFetching ? (
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           ) : (
-            total
+            kpis.total
           )}
         </p>
 
-        {hasError ? (
-          <p className="mt-1 text-xs text-destructive">
-            Impossible de charger les indicateurs véhicules.
-          </p>
-        ) : (
-          <p className="mt-1 text-xs text-muted-foreground">
-            Vue d&apos;ensemble du parc (statut, affectation, kilométrage).
-          </p>
-        )}
+        <p className="mt-1 text-xs text-muted-foreground">
+          Vue MG (docs + maintenance + affectation)
+        </p>
       </div>
 
-      {/* Statuts */}
+      {/* Urgences */}
       <div className="grid grid-cols-2 gap-3">
-        <KpiCard label="Actifs" value={active} loading={isLoadingKpis} />
         <KpiCard
-          label="En maintenance"
-          value={inMaintenance}
-          loading={isLoadingKpis}
+          label="Urgences"
+          value={kpis.urgent}
+          loading={isFetching}
+          subtitle="Docs expirés/bientôt + vidanges dues"
         />
-        <KpiCard label="Inactifs" value={inactive} loading={isLoadingKpis} />
-        <KpiCard label="Retirés" value={retired} loading={isLoadingKpis} />
+        <KpiCard
+          label="Conformité"
+          value={kpis.docs.compliancePct}
+          loading={isFetching}
+          subtitle="% documents valides"
+          valueFormatter={(v) => `${v}%`}
+        />
+      </div>
+
+      {/* Documents */}
+      <div className="rounded-xl border bg-card px-4 py-3 shadow-sm">
+        <p className="text-xs uppercase text-muted-foreground">
+          Documents du parc
+        </p>
+
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <SmallStat label="Expirés" value={kpis.docs.expired} tone="danger" />
+          <SmallStat label="Bientôt" value={kpis.docs.soon} tone="warning" />
+          <SmallStat label="Valides" value={kpis.docs.valid} tone="success" />
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <KpiCard
+            label="Assurance expirée"
+            value={kpis.docs.byType.insurance.expired}
+            loading={isFetching}
+          />
+          <KpiCard
+            label="Visite tech expirée"
+            value={kpis.docs.byType.tech.expired}
+            loading={isFetching}
+          />
+          <KpiCard
+            label="Parking expiré"
+            value={kpis.docs.byType.parking.expired}
+            loading={isFetching}
+          />
+          <KpiCard
+            label="Extincteur expiré"
+            value={kpis.docs.byType.extinguisher.expired}
+            loading={isFetching}
+          />
+        </div>
+      </div>
+
+      {/* Vidanges */}
+      <div className="grid grid-cols-3 gap-3">
+        <SmallStat label="Vidange due" value={kpis.oil.overdue} tone="danger" />
+        <SmallStat
+          label="Vidange bientôt"
+          value={kpis.oil.soon}
+          tone="warning"
+        />
+        <SmallStat label="Vidange ?" value={kpis.oil.missing} />
       </div>
 
       {/* Affectation */}
       <div className="grid grid-cols-2 gap-3">
-        <KpiCard
-          label="Affectés"
-          value={assigned}
-          loading={isLoadingKpis}
-          subtitle="Véhicules attribués à un agent"
-        />
+        <KpiCard label="Affectés" value={kpis.assigned} loading={isFetching} />
         <KpiCard
           label="Non affectés"
-          value={unassigned}
-          loading={isLoadingKpis}
-          subtitle="Véhicules disponibles"
+          value={kpis.unassigned}
+          loading={isFetching}
         />
-      </div>
-
-      {/* Kilométrage moyen */}
-      <div className="grid grid-cols-1 gap-3">
-        {/* <KpiCard
-          label="Km moyen"
-          value={avgMileage}
-          loading={isLoadingKpis}
-          subtitle="Kilométrage moyen des véhicules renseignés"
-          valueFormatter={(v) => (v ? `${v.toLocaleString("fr-FR")} km` : "--")}
-        /> */}
-      </div>
-
-      {/* Placeholder pour plus tard : couverture documents */}
-      <div className="rounded-xl border bg-card px-4 py-3 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase text-muted-foreground">
-              Documents du parc
-            </p>
-            <p className="mt-1 text-xl font-semibold tabular-nums">
-              {isLoadingDocs ? (
-                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-              ) : (
-                docKpis.total
-              )}
-            </p>
-          </div>
-        </div>
-
-        {isDocsError ? (
-          <p className="mt-1 text-xs text-destructive">
-            Impossible de charger les documents.
-          </p>
-        ) : (
-          <>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <SmallStat
-                label="Expirés"
-                value={docKpis.expired}
-                tone="danger"
-              />
-              <SmallStat label="Bientôt" value={docKpis.soon} tone="warning" />
-              <SmallStat label="Valides" value={docKpis.valid} tone="success" />
-            </div>
-
-            {/* <div className="mt-3 space-y-1.5">
-              {(Object.keys(docKpis.byType) as (keyof typeof docKpis.byType)[])
-                .filter((t) => docKpis.byType[t] > 0)
-                .map((t) => (
-                  <div
-                    key={t}
-                    className="flex items-center justify-between text-[11px]"
-                  >
-                    <span className="text-muted-foreground">
-                      {getDocTypeLabel(t as VehicleDocumentType)}
-                    </span>
-                    <span className="font-mono">
-                      {docKpis.byType[t].toString().padStart(2, "0")}
-                    </span>
-                  </div>
-                ))}
-            </div> */}
-          </>
-        )}
       </div>
     </div>
   );

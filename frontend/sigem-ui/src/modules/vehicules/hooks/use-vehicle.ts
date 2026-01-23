@@ -8,6 +8,7 @@ import {
 } from "../types/vehicle.types";
 import { VehicleAPI } from "../api/vehicle.api";
 import { useModalStore } from "@/stores/modal-store";
+import { MGMaintenanceRow } from "../types/mg.types";
 
 // import { toast } from "sonner"; // si tu veux des toasts
 
@@ -109,4 +110,9 @@ export function useVehicles(id?: string, listParams?: ListVehiclesQuery) {
     softDelete,
     myVehicle,
   };
+}
+
+export function useMgCachedRows(queryKey: unknown[]) {
+  const qc = useQueryClient();
+  return (qc.getQueryData(queryKey) as MGMaintenanceRow[] | undefined) ?? [];
 }

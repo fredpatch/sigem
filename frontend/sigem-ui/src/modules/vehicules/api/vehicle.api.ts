@@ -45,7 +45,7 @@ export const VehicleAPI = {
 
   async updateMileage(
     id: string,
-    payload: UpdateVehicleMileageDTO
+    payload: UpdateVehicleMileageDTO,
   ): Promise<Vehicle> {
     const res = await vehicles.patch(`/vehicles/${id}/mileage`, payload);
     return res.data;
@@ -61,13 +61,13 @@ export const VehicleAPI = {
     return res.data;
   },
 
-  async updateMgMileage(
+  async completeMgOilChange(
     vehicleId: string,
-    payload: MgUpdateVehicleOilChangeDTO
+    payload: MgUpdateVehicleOilChangeDTO,
   ) {
     const res = await vehicles.post(
       `/vehicles/${vehicleId}/mg/oil-change/complete`,
-      payload
+      payload,
     );
 
     return res.data;

@@ -27,7 +27,7 @@ export function useVehicleTasks(filters?: VehicleTaskFilterQuery) {
 
 export function useVehicleTasksByVehicle(
   vehicleId?: string,
-  filters?: VehicleTaskFilterQuery
+  filters?: VehicleTaskFilterQuery,
 ) {
   const enabled = !!vehicleId;
 
@@ -44,13 +44,13 @@ export function useVehicleTasksByVehicle(
   };
 }
 
-export function useVehicleTask(id?: string) {
+export function useVehicleTask(id: any) {
   const enabled = !!id;
 
   return useQuery<VehicleTask, Error>({
-    queryKey: [VEHICLE_TASKS_KEY, id],
-    queryFn: () => VehicleTaskAPI.getById(id!),
-    enabled,
+    queryKey: ["vehicle-tasks", id],
+    queryFn: () => VehicleTaskAPI.getById(id),
+    enabled: enabled,
   });
 }
 
@@ -68,7 +68,7 @@ export function useUpdateVehicleTask() {
       queryClient.invalidateQueries({ queryKey: [VEHICLE_TASKS_KEY] });
       queryClient.setQueryData<VehicleTask>(
         [VEHICLE_TASKS_KEY, task._id],
-        task
+        task,
       );
 
       closeModal();
@@ -90,7 +90,7 @@ export function useCompleteVehicleTask() {
       queryClient.invalidateQueries({ queryKey: [VEHICLE_TASKS_KEY] });
       queryClient.setQueryData<VehicleTask>(
         [VEHICLE_TASKS_KEY, task._id],
-        task
+        task,
       );
 
       closeModal();

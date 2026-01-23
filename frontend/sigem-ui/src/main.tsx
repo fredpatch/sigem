@@ -4,7 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { queryClient } from "./lib/query-client";
 import { QueryClientProvider } from "@tanstack/react-query";
-// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useAuthStore } from "./modules/auth/store/use-auth.store";
 import { SocketProvider } from "./providers/socket-provider";
 import { NotificationProvider } from "./providers/notification-provider";
@@ -18,9 +18,9 @@ createRoot(document.getElementById("root")!).render(
       <SocketProvider>
         <NotificationProvider>
           <App />
-          {/* <ReactQueryDevtools position="bottom" initialIsOpen={false} /> */}
+          <ReactQueryDevtools position="bottom" initialIsOpen={false} />
         </NotificationProvider>
       </SocketProvider>
     </QueryClientProvider>
-  </StrictMode>
+  </StrictMode>,
 );

@@ -3,7 +3,7 @@ import { useModalStore } from "@/stores/modal-store";
 import { ModalTypes } from "@/types/modal.types";
 import { useVehicles } from "../hooks/use-vehicle";
 import { Loader2 } from "lucide-react";
-import { Guidelines } from "@/common/guidelines";
+// import { Guidelines } from "@/common/guidelines";
 import { mgVehicleColumns } from "../_components/table/mg.columns";
 
 export const VehicleManagementPage = () => {

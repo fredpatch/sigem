@@ -19,7 +19,7 @@ import { computeNextFromTemplate } from "src/utils/helpers";
 
 export class VehicleTaskTemplateService {
   async createTemplate(
-    payload: CreateVehicleTaskTemplateDTO
+    payload: CreateVehicleTaskTemplateDTO,
   ): Promise<VehicleTaskTemplate> {
     const label = payload.label.trim();
     const code = generateTemplateCode(payload.type, label);
@@ -74,7 +74,7 @@ export class VehicleTaskTemplateService {
   async updateTemplate(
     id: string,
     dept: string,
-    payload: UpdateVehicleTaskTemplateDTO
+    payload: UpdateVehicleTaskTemplateDTO,
   ): Promise<VehicleTaskTemplate | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
@@ -129,7 +129,7 @@ export class VehicleTaskTemplateService {
     const updated = await VehicleTaskTemplateEntity.findOneAndUpdate(
       { _id: id, dept },
       { $set: update },
-      { new: true }
+      { new: true },
     );
 
     if (updated && payload.label !== undefined) {
@@ -256,7 +256,7 @@ export class VehicleTaskService {
       if (template.requiresDocument) {
         if (!payload.vehicleDocumentId) {
           throw new Error(
-            "A vehicleDocumentId is required for this type of task (template requiresDocument=true)"
+            "A vehicleDocumentId is required for this type of task (template requiresDocument=true)",
           );
         }
 
@@ -269,7 +269,7 @@ export class VehicleTaskService {
 
         if (!doc) {
           throw new Error(
-            "Vehicle document not found or does not belong to the specified vehicle"
+            "Vehicle document not found or does not belong to the specified vehicle",
           );
         }
 
@@ -291,7 +291,7 @@ export class VehicleTaskService {
       // Tâche manuelle: tous les champs nécessaires doivent être dans le payload
       if (!payload.type || !payload.triggerType || !payload.label) {
         throw new Error(
-          "type, triggerType and label are required when no templateId is provided"
+          "type, triggerType and label are required when no templateId is provided",
         );
       }
 
@@ -416,12 +416,12 @@ export class VehicleTaskService {
   async getTaskById(id: string): Promise<VehicleTask | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
-    return VehicleTaskEntity.findOne({ _id: id });
+    return await VehicleTaskEntity.findOne({ vehicleId: id });
   }
 
   async updateTask(
     id: string,
-    payload: UpdateVehicleTaskDTO
+    payload: UpdateVehicleTaskDTO,
   ): Promise<VehicleTask | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
@@ -453,13 +453,13 @@ export class VehicleTaskService {
     return VehicleTaskEntity.findOneAndUpdate(
       { _id: id },
       { $set: update },
-      { new: true }
+      { new: true },
     );
   }
 
   async completeTask(
     id: string,
-    payload: CompleteVehicleTaskDTO
+    payload: CompleteVehicleTaskDTO,
   ): Promise<VehicleTask | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
@@ -485,7 +485,7 @@ export class VehicleTaskService {
     const completedTask = await VehicleTaskEntity.findOneAndUpdate(
       { _id: id },
       { $set: update },
-      { new: true }
+      { new: true },
     );
 
     if (!completedTask) return null;
@@ -546,7 +546,7 @@ export class VehicleTaskService {
           {
             taskId: existing._id.toString(),
             templateId: existing.templateId?.toString(),
-          }
+          },
         );
       }
 
@@ -605,7 +605,7 @@ export class VehicleTaskService {
             taskId: existing._id.toString(),
             templateId: existing.templateId?.toString(),
             triggerType: template.triggerType,
-          }
+          },
         );
       } else {
         await VehicleDocumentEntity.findByIdAndUpdate(
@@ -622,7 +622,7 @@ export class VehicleTaskService {
               lastNotificationAt: null,
               notificationsCount: 0,
             },
-          }
+          },
         );
       }
     }
@@ -669,7 +669,7 @@ export class VehicleTaskService {
 
   async completeMileage(
     id: string,
-    payload: CompleteVehicleTaskDTO
+    payload: CompleteVehicleTaskDTO,
   ): Promise<VehicleTask | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
@@ -695,7 +695,7 @@ export class VehicleTaskService {
     const completedTask = await VehicleTaskEntity.findOneAndUpdate(
       { _id: id },
       { $set: update },
-      { new: true }
+      { new: true },
     );
 
     if (!completedTask) return null;
@@ -756,7 +756,7 @@ export class VehicleTaskService {
           {
             taskId: existing._id.toString(),
             templateId: existing.templateId?.toString(),
-          }
+          },
         );
       }
 
@@ -815,7 +815,7 @@ export class VehicleTaskService {
             taskId: existing._id.toString(),
             templateId: existing.templateId?.toString(),
             triggerType: template.triggerType,
-          }
+          },
         );
       } else {
         await VehicleDocumentEntity.findByIdAndUpdate(
@@ -832,7 +832,7 @@ export class VehicleTaskService {
               lastNotificationAt: null,
               notificationsCount: 0,
             },
-          }
+          },
         );
       }
     }

@@ -1,5 +1,12 @@
-import { TaskTriggerType } from "src/types/vehicle-task-template.type";
+import { VehicleTaskEntity } from "src/models/vehicle-task.model";
+import { Vehicle } from "src/models/vehicle.model";
+import { createRenewalTaskForDocument } from "src/schema/bootstrap-doc-task";
+import {
+  TaskTriggerType,
+  VehicleTaskType,
+} from "src/types/vehicle-task-template.type";
 import { VehicleTaskStatus } from "src/types/vehicle-task.types";
+import { Types } from "mongoose";
 
 const DEFAULT_NOTICE_DAYS = 14;
 const DEFAULT_NOTICE_KM = 500;
@@ -156,3 +163,89 @@ export function normalizeStatus(remainingKm: number, noticeKmBefore = 100) {
   if (remainingKm <= noticeKmBefore) return VehicleTaskStatus.DUE_SOON;
   return VehicleTaskStatus.PLANNED;
 }
+
+const OPEN_STATUSES = [
+  VehicleTaskStatus.PLANNED,
+  VehicleTaskStatus.DUE_SOON,
+  VehicleTaskStatus.OVERDUE,
+] as const;
+
+async function resolveVehicleDept(vehicleId: string) {
+  const v = await Vehicle.findById(vehicleId).select("dept").lean();
+  return v?.dept ?? "MG";
+}
+
+async function findOpenRenewalTaskForDoc(vehicleDocumentId: string) {
+  return VehicleTaskEntity.findOne({
+    vehicleDocumentId: new Types.ObjectId(vehicleDocumentId),
+    type: VehicleTaskType.DOCUMENT_RENEWAL,
+    status: { $in: OPEN_STATUSES },
+  });
+}
+
+/**
+ * Upsert la task renewal liée à un document:
+ * - si task ouverte existe => update dueAt + reset notif + status PLANNED
+ * - sinon => create via createRenewalTaskForDocument()
+ */
+export async function upsertRenewalTaskForDoc(params: {
+  dept: string;
+  vehicleId: string;
+  vehicleDocumentId: string;
+  documentType: any; // VehicleDocumentType
+  dueAt: Date;
+}) {
+  const { dept, vehicleId, vehicleDocumentId, documentType, dueAt } = params;
+
+  const existing = await findOpenRenewalTaskForDoc(vehicleDocumentId);
+
+  if (existing) {
+    return VehicleTaskEntity.findByIdAndUpdate(
+      existing._id,
+      {
+        $set: {
+          dueAt,
+          status: VehicleTaskStatus.PLANNED, // on “replanifie” après une maj doc
+          lastNotificationAt: null,
+          lastNotifiedState: null,
+          notificationsCount: 0,
+        },
+      },
+      { new: true },
+    );
+  }
+
+  return createRenewalTaskForDocument({
+    dept,
+    vehicleId,
+    vehicleDocumentId,
+    documentType,
+    dueAt,
+  });
+}
+
+export async function closeAllRenewalTasksForDoc(vehicleDocumentId: string) {
+  // Option A: soft-close (recommandé si tu veux historique)
+  return VehicleTaskEntity.updateMany(
+    {
+      vehicleDocumentId: new Types.ObjectId(vehicleDocumentId),
+      type: VehicleTaskType.DOCUMENT_RENEWAL,
+      status: { $in: OPEN_STATUSES },
+    },
+    {
+      $set: {
+        status: VehicleTaskStatus.COMPLETED,
+        completedAt: new Date(),
+        completionComment: "Document supprimé",
+      },
+    },
+  );
+
+  // Option B: hard delete (si tu préfères)
+  // return VehicleTaskEntity.deleteMany({
+  //   vehicleDocumentId: new Types.ObjectId(vehicleDocumentId),
+  //   type: VehicleTaskType.DOCUMENT_RENEWAL,
+  // });
+}
+
+export { resolveVehicleDept };

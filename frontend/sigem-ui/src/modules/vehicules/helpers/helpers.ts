@@ -1,7 +1,7 @@
 import { VehicleTask } from "../types/types";
 import {
   VehicleDocument,
-  VehicleDocumentType,
+  // VehicleDocumentType,
 } from "../types/vehicle-document.types";
 
 export const computeKpis = (items: VehicleTask[]) => {
@@ -57,7 +57,7 @@ export function computeDocumentKpis(docs: VehicleDocument[]) {
     const diffMs = exp.getTime() - now.getTime();
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
-    const docType = doc.type as VehicleDocumentType;
+    // const docType = doc.type as VehicleDocumentType;
     // if (byType[docType] !== undefined) {
     //   byType[docType] += 1;
     // } else {
@@ -123,3 +123,24 @@ export const statusConfig: any = {
   },
   RETIRED: { label: "Retiré", color: "bg-red-100 text-red-800 border-red-200" },
 };
+
+export function isMissingDate(d?: string | Date | null) {
+  if (!d) return true;
+  const dt = new Date(d as any);
+  return Number.isNaN(dt.getTime());
+}
+
+export function daysUntil(dateStr?: string | Date | null) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr as any);
+  if (Number.isNaN(d.getTime())) return null;
+  const diff = d.getTime() - Date.now();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+export function classifyDue(days: number | null, soonThreshold = 30) {
+  if (days == null) return "missing" as const;
+  if (days < 0) return "expired" as const;
+  if (days <= soonThreshold) return "soon" as const;
+  return "valide" as const;
+}

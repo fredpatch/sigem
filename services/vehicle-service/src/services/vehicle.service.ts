@@ -23,8 +23,83 @@ import {
   upsertVehicleDocAndTasksRefs,
   upsertVehicleRefs,
 } from "src/client/reference.client";
+import {
+  closeAllRenewalTasksForDoc,
+  upsertRenewalTaskForDoc,
+} from "src/utils/helpers";
+import { VehicleTaskEntity } from "src/models/vehicle-task.model";
+import {
+  TaskTriggerType,
+  VehicleTaskType,
+} from "src/types/vehicle-task-template.type";
+import { OPEN_STATUSES } from "src/types/mg.types";
+import { VehicleTaskTemplateEntity } from "src/models/vehicle-task-template.model";
+import { VehicleTaskStatus } from "src/types/task-planned.type";
 
 export class VehicleService {
+  async ensureOilChangeOpenTask(params: {
+    dept: string;
+    vehicleId: string;
+    currentMileage: number;
+  }) {
+    const { dept, vehicleId, currentMileage } = params;
+
+    const vid = new Types.ObjectId(vehicleId);
+
+    // 1) open task ?
+    let open = await VehicleTaskEntity.findOne({
+      dept,
+      vehicleId: vid,
+      type: VehicleTaskType.OIL_CHANGE,
+      status: { $in: OPEN_STATUSES as any },
+    });
+
+    // 2) template
+    const tpl = await VehicleTaskTemplateEntity.findOne({
+      dept,
+      active: true,
+      type: VehicleTaskType.OIL_CHANGE,
+    }).lean();
+
+    const everyKm = tpl?.everyKm ?? null;
+
+    // 3) create if missing
+    if (!open) {
+      open = await VehicleTaskEntity.create({
+        dept,
+        vehicleId: vid,
+        templateId: tpl?._id ?? undefined,
+
+        type: VehicleTaskType.OIL_CHANGE,
+        triggerType: TaskTriggerType.BY_MILEAGE,
+
+        label: tpl?.label ?? "Vidange",
+        description: tpl?.description ?? "",
+        dueAt: null,
+        dueMileage: everyKm ? currentMileage + everyKm : null,
+
+        status: VehicleTaskStatus.PLANNED,
+        severity: tpl?.defaultSeverity ?? "warning",
+        notificationsCount: 0,
+        lastNotificationAt: null,
+        lastNotifiedState: null,
+      });
+
+      return open;
+    }
+
+    // 4) sync dueMileage if missing (important when initial km was empty)
+    if ((open as any).dueMileage == null && everyKm) {
+      await VehicleTaskEntity.updateOne(
+        { _id: open._id },
+        { $set: { dueMileage: currentMileage + everyKm } },
+      );
+      (open as any).dueMileage = currentMileage + everyKm;
+    }
+
+    return open;
+  }
+
   async createVehicle(payload: CreateVehicleDTO): Promise<VehicleDoc> {
     const now = new Date();
 
@@ -248,7 +323,7 @@ export class VehicleService {
 
     const mileageUpdatedAt = payload.mileageUpdatedAt ?? new Date();
 
-    return Vehicle.findOneAndUpdate(
+    const updated = await Vehicle.findOneAndUpdate(
       { _id: id },
       {
         $set: {
@@ -258,12 +333,25 @@ export class VehicleService {
       },
       { new: true },
     ).select([
+      "dept",
       "plateNumber",
       "brand",
       "model",
       "currentMileage",
       "mileageUpdatedAt",
     ]);
+
+    if (!updated) return null;
+
+    // ✅ Sync tasks (minimum: oil change)
+    const dept = (updated as any).dept ?? "MG";
+    await this.ensureOilChangeOpenTask({
+      dept,
+      vehicleId: id,
+      currentMileage: updated.currentMileage ?? payload.currentMileage,
+    });
+
+    return updated;
   }
 
   async softDeleteVehicle(id: string): Promise<VehicleDoc | null> {
@@ -289,6 +377,7 @@ export class VehicleDocumentService {
       reference: payload.reference?.trim(),
       issuedAt: payload.issuedAt,
       expiresAt: payload.expiresAt,
+      notificationsCount: 0,
       reminderDaysBefore:
         payload.reminderDaysBefore && payload.reminderDaysBefore.length > 0
           ? payload.reminderDaysBefore
@@ -305,6 +394,16 @@ export class VehicleDocumentService {
       dept,
       documentReference: doc.reference ?? undefined,
     });
+
+    if (doc.expiresAt) {
+      await upsertRenewalTaskForDoc({
+        dept: "MG",
+        vehicleId: payload.vehicleId,
+        vehicleDocumentId: doc._id.toString(),
+        documentType: doc.type,
+        dueAt: doc.expiresAt,
+      });
+    }
 
     return { doc, veh };
   }
@@ -344,61 +443,69 @@ export class VehicleDocumentService {
   ): Promise<{ updated: VehicleDocumentAttrs | null; veh: any } | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
-    const update: Record<string, any> = {};
+    const existing = await VehicleDocumentEntity.findById(id);
+    if (!existing) return null;
 
+    // apply updates
     if (payload.reference !== undefined) {
-      update.reference = payload.reference?.trim();
+      existing.reference = payload.reference?.trim();
     }
     if (payload.issuedAt !== undefined) {
-      update.issuedAt = payload.issuedAt;
+      existing.issuedAt = payload.issuedAt;
     }
     if (payload.expiresAt !== undefined) {
-      update.expiresAt = payload.expiresAt;
+      existing.expiresAt = payload.expiresAt;
     }
     if (payload.reminderDaysBefore !== undefined) {
-      update.reminderDaysBefore =
+      existing.reminderDaysBefore =
         payload.reminderDaysBefore?.length > 0
           ? payload.reminderDaysBefore
           : [30, 15, 7];
     }
 
-    if (Object.keys(update).length === 0) {
-      const updated = await this.getVehicleDocumentById(id);
-      const veh = await Vehicle.findById(updated?.vehicleId).select(
-        "dept plateNumber brand model",
-      );
-      return { updated, veh };
+    await existing.save();
+
+    const vehicleId = existing.vehicleId.toString();
+
+    // case 1: expiry date exist => upsert task
+    if (existing.expiresAt) {
+      await upsertRenewalTaskForDoc({
+        dept: "MG",
+        vehicleId,
+        vehicleDocumentId: existing._id.toString(),
+        documentType: existing.type,
+        dueAt: existing.expiresAt,
+      });
+    } else {
+      // case 2: no expiry date => delete task if any
+      await closeAllRenewalTasksForDoc(existing._id.toString());
     }
 
-    const updated = await VehicleDocumentEntity.findByIdAndUpdate(
-      id,
-      { $set: update },
-      { new: true },
-    );
-
-    const veh = await Vehicle.findById(updated?.vehicleId).select(
+    const veh = await Vehicle.findById(existing.vehicleId).select(
       "dept plateNumber brand model",
     );
 
-    if (updated && payload.reference !== undefined) {
-      const veh = await Vehicle.findById(updated.vehicleId).select(
+    if (existing && payload.reference !== undefined) {
+      const veh = await Vehicle.findById(existing.vehicleId).select(
         "dept plateNumber brand model",
       );
       const dept = (veh as any)?.dept || "MG";
 
       await upsertVehicleDocAndTasksRefs({
         dept,
-        documentReference: updated.reference ?? undefined,
+        documentReference: existing.reference ?? undefined,
       });
     }
 
-    return { updated, veh };
+    return { updated: existing, veh };
   }
 
   async deleteVehicleDocument(id: string): Promise<boolean> {
-    if (!Types.ObjectId.isValid(id)) return false;
+    const existing = await VehicleDocumentEntity.findById(id);
+    if (!existing) return false;
 
-    const res = await VehicleDocumentEntity.findByIdAndDelete(id);
+    await closeAllRenewalTasksForDoc(existing._id.toString());
+    const res = await VehicleDocumentEntity.findOne({ _id: existing._id });
     return !!res;
   }
 }

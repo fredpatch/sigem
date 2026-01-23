@@ -23,11 +23,18 @@ export class MgController {
 
     const payload = MgCompleteOilChangeSchema.parse(req.body);
 
-    const task = await this.mgService.findOpenOilChangeTask({ vehicleId });
+    const task =
+      (await this.mgService.findOpenOilChangeTask({ vehicleId })) ??
+      (await this.mgService.ensureOpenOilChangeTask({
+        vehicleId,
+        dept: "MG",
+        currentMileage: payload.completedMileage ?? null,
+      }));
+
     if (!task) {
-      return res.status(404).json({
+      return res.status(500).json({
         ok: false,
-        message: "Aucune tâche de vidange ouverte trouvée pour ce véhicule.",
+        message: "Impossible d'initialiser la tâche de vidange.",
       });
     }
 
