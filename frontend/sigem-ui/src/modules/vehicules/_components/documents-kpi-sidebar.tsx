@@ -1,10 +1,7 @@
 // src/features/vehicles/components/vehicle-documents-sidebar.tsx
 import { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
-import {
-  VehicleDocumentType,
-  VehicleDocument,
-} from "../types/vehicle-document.types";
+import { VehicleDocument } from "../types/vehicle-document.types";
 import { useVehicleDocumentsMonitoring } from "../hooks/use-vehicle-documents";
 
 const EXPIRY_SOON_DAYS = 30;
@@ -17,7 +14,7 @@ export const VehicleDocumentsSidebarContent = () => {
   // Hook dédié "monitoring global" (tous docs du parc)
   const { data: items, isLoading, isError } = useVehicleDocumentsMonitoring();
 
-  const { total, expired, soon, valid, byType, filteredCounts } = useMemo(
+  const { total, expired, soon, valid, filteredCounts } = useMemo(
     () => computeDocumentKpis(items ?? [], statusFilter),
     [items, statusFilter]
   );
@@ -89,7 +86,7 @@ export const VehicleDocumentsSidebarContent = () => {
       </div>
 
       {/* Répartition par type */}
-      <div className="rounded-lg border bg-card px-3 py-2">
+      {/* <div className="rounded-lg border bg-card px-3 py-2">
         <p className="text-[11px] uppercase text-muted-foreground mb-1">
           Types de documents
         </p>
@@ -120,7 +117,7 @@ export const VehicleDocumentsSidebarContent = () => {
           />
           <TypeRow label="Autres" value={byType[VehicleDocumentType.OTHER]} />
         </ul>
-      </div>
+      </div> */}
 
       {/* Filtres par statut (impacte les KPI, pas encore le tableau) */}
       <div className="space-y-2">
@@ -259,15 +256,15 @@ function computeDocumentKpis(
   let soon = 0;
   let valid = 0;
 
-  const byType: Record<VehicleDocumentType, number> = {
-    [VehicleDocumentType.INSURANCE]: 0,
-    [VehicleDocumentType.TECH_INSPECTION]: 0,
-    [VehicleDocumentType.PARKING_CARD]: 0,
-    [VehicleDocumentType.EXTINGUISHER_CARD]: 0,
-    [VehicleDocumentType.REGISTRATION]: 0,
-    [VehicleDocumentType.TAX_STICKER]: 0,
-    [VehicleDocumentType.OTHER]: 0,
-  };
+  // const byType: Record<VehicleDocumentType, number> = {
+  //   [VehicleDocumentType.INSURANCE]: 0,
+  //   [VehicleDocumentType.TECH_INSPECTION]: 0,
+  //   [VehicleDocumentType.PARKING_CARD]: 0,
+  //   [VehicleDocumentType.EXTINGUISHER_CARD]: 0,
+  //   [VehicleDocumentType.REGISTRATION]: 0,
+  //   [VehicleDocumentType.TAX_STICKER]: 0,
+  //   [VehicleDocumentType.OTHER]: 0,
+  // };
 
   for (const doc of docs) {
     const exp = doc.expiresAt ? new Date(doc.expiresAt) : null;
@@ -276,12 +273,12 @@ function computeDocumentKpis(
     const diffMs = exp.getTime() - now.getTime();
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
-    const docType = doc.type as VehicleDocumentType;
-    if (byType[docType] !== undefined) {
-      byType[docType] += 1;
-    } else {
-      byType[VehicleDocumentType.OTHER] += 1;
-    }
+    // const docType = doc.type as VehicleDocumentType;
+    // if (byType[docType] !== undefined) {
+    //   byType[docType] += 1;
+    // } else {
+    //   byType[VehicleDocumentType.OTHER] += 1;
+    // }
 
     if (diffDays < 0) {
       expired++;
@@ -303,5 +300,5 @@ function computeDocumentKpis(
     filteredCounts = { expired: 0, soon: 0, valid };
   }
 
-  return { total, expired, soon, valid, byType, filteredCounts };
+  return { total, expired, soon, valid, filteredCounts };
 }

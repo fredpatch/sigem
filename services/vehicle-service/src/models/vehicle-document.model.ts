@@ -9,6 +9,7 @@ export interface VehicleDocument {
   reference?: string; // Numéro police, réf carte, etc.
   issuedAt?: Date;
   expiresAt: Date;
+  provider?: string; // Assureur, prestataire, etc.
 
   reminderDaysBefore: number[]; // ex.: [30, 15, 7]
 
@@ -48,6 +49,10 @@ const VehicleDocumentSchema = new Schema<VehicleDocument>(
       required: true,
       index: true,
     },
+    provider: {
+      type: String,
+      trim: true,
+    },
     reminderDaysBefore: {
       type: [Number],
       default: [30, 15, 7],
@@ -64,13 +69,13 @@ const VehicleDocumentSchema = new Schema<VehicleDocument>(
   {
     timestamps: true,
     collection: "vehicle_documents",
-  }
+  },
 );
 
 // Index utile : un document de type X par véhicule (optionnel mais conseillé)
 VehicleDocumentSchema.index(
   { vehicleId: 1, type: 1 },
-  { unique: false } // mets true si tu veux un seul doc de chaque type par véhicule
+  { unique: false }, // mets true si tu veux un seul doc de chaque type par véhicule
 );
 
 // Normalisation JSON

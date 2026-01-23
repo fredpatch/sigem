@@ -1,4 +1,5 @@
 import { MgCompleteOilChangeSchema } from "src/schema/mg-vehicle-actions.dto";
+import { MgCreateVehicleSchema } from "src/schema/mg-vehicle-create.dto";
 import { MgService } from "src/services/vehicle-mg.service";
 import { VehicleTaskService } from "src/services/vehicle-task.service";
 import { catchError } from "src/utils/catch-error";
@@ -15,10 +16,10 @@ export class MgController {
   completeOilChangeTask = catchError(async (req, res) => {
     const { vehicleId } = req.params;
 
-    console.log("MGController.completeOilChangeTask", {
-      vehicleId,
-      body: req.body,
-    });
+    // console.log("MGController.completeOilChangeTask", {
+    //   vehicleId,
+    //   body: req.body,
+    // });
 
     const payload = MgCompleteOilChangeSchema.parse(req.body);
 
@@ -47,6 +48,20 @@ export class MgController {
       data: completed,
       ok: true,
       message: "Tâche de vidange complétée avec succès.",
+    });
+  });
+
+  createMgVehicle = catchError(async (req, res) => {
+    const dept = "MG";
+    const input = MgCreateVehicleSchema.parse(req.body);
+
+    // 1) Create vehicle
+    const createVehicle = await this.mgService.createMgVehicle(input, dept);
+
+    return res.status(201).json({
+      createVehicle,
+      ok: true,
+      message: "Véhicule créé avec succès.",
     });
   });
 }

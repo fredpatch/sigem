@@ -72,4 +72,9 @@ export const VehicleAPI = {
 
     return res.data;
   },
+
+  async mgCreateVehicle(payload: any) {
+    const res = await vehicles.post("/vehicles/mg/create", payload);
+    return res.data;
+  },
 };

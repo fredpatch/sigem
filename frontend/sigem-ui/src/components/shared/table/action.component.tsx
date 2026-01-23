@@ -11,10 +11,13 @@ import {
   ClipboardList,
   Droplets,
   Files,
+  FireExtinguisher,
   Gauge,
   MoreHorizontal,
+  ParkingCircle,
   Pencil,
   RefreshCcwDot,
+  ShieldCheck,
   Trash,
   Wrench,
 } from "lucide-react";
@@ -31,10 +34,16 @@ import {
 import { useAsset } from "@/modules/assets/hooks/useAsset";
 import { useCategory } from "@/modules/categories/hooks/useCategory";
 import { useLocation } from "@/modules/locations/hooks/useLocation";
-import { VehicleTask } from "@/modules/vehicules/types/types";
+import {
+  // VehicleDocumentType,
+  VehicleTask,
+} from "@/modules/vehicules/types/types";
 import { Vehicle } from "@/modules/vehicules/types/vehicle.types";
 import { useVehicles } from "@/modules/vehicules/hooks/use-vehicle";
-import { VehicleDocument } from "@/modules/vehicules/types/vehicle-document.types";
+import {
+  VehicleDocument,
+  VehicleDocumentType,
+} from "@/modules/vehicules/types/vehicle-document.types";
 import { useVehicleDocuments } from "@/modules/vehicules/hooks/use-vehicle-documents";
 import { MGMaintenanceRow } from "@/modules/vehicules/types/mg.types";
 import {
@@ -477,89 +486,89 @@ export const VehicleActionCell = ({ row }: VehicleProps) => {
   );
 };
 
-interface VehicleDocumentsProps {
-  row: Row<VehicleDocument>;
-}
+// interface VehicleDocumentsProps {
+//   row: Row<VehicleDocument>;
+// }
 
-export const VehicleDocumentActionCell = ({ row }: VehicleDocumentsProps) => {
-  const { openModal, setSelectedItem } = useModalStore();
-  const { remove } = useVehicleDocuments();
-  const { mutateAsync: deleteDocument, isPending } = remove;
-  const [ConfirmDialog, confirm] = useConfirm();
+// export const VehicleDocumentActionCell = ({ row }: VehicleDocumentsProps) => {
+//   const { openModal, setSelectedItem } = useModalStore();
+//   const { remove } = useVehicleDocuments();
+//   const { mutateAsync: deleteDocument, isPending } = remove;
+//   const [ConfirmDialog, confirm] = useConfirm();
 
-  const handleEdit = () => {
-    const doc = row.original;
-    setSelectedItem(doc);
-    openModal(ModalTypes.VEHICLE_DOCUMENT_FORM, doc);
-  };
+//   const handleEdit = () => {
+//     const doc = row.original;
+//     setSelectedItem(doc);
+//     openModal(ModalTypes.VEHICLE_DOCUMENT_FORM, doc);
+//   };
 
-  const handleTask = () => {
-    const doc = row.original;
-    setSelectedItem(doc);
-    const label = `${doc.vehicleId.brand} ${doc.vehicleId.model}`;
-    openModal(ModalTypes.VEHICLE_TASK_PLAN_FROM_DOCUMENT, {
-      vehicleId: doc.vehicleId,
-      vehicleDocumentId: doc.id,
-      documentType: doc.type,
-      vehiclePlate: doc.vehicleId.plateNumber,
-      vehicleLabel: label,
-    });
-  };
+//   const handleTask = () => {
+//     const doc = row.original;
+//     setSelectedItem(doc);
+//     const label = `${doc.vehicleId.brand} ${doc.vehicleId.model}`;
+//     openModal(ModalTypes.VEHICLE_TASK_PLAN_FROM_DOCUMENT, {
+//       vehicleId: doc.vehicleId,
+//       vehicleDocumentId: doc.id,
+//       documentType: doc.type,
+//       vehiclePlate: doc.vehicleId.plateNumber,
+//       vehicleLabel: label,
+//     });
+//   };
 
-  const handleDelete = async () => {
-    const doc = row.original;
+//   const handleDelete = async () => {
+//     const doc = row.original;
 
-    setSelectedItem(doc);
+//     setSelectedItem(doc);
 
-    const ok = await confirm({
-      title: "Supprimer ce document ?",
-      description:
-        "Vous êtes sur le point de supprimer définitivement ce document véhicule. Cette opération est irréversible. Voulez-vous continuer ?",
-      confirmText: "Oui, supprimer",
-      cancelText: "Annuler",
-      confirmVariant: "destructive",
-      dangerIcon: true,
-      loading: isPending,
-      autoCloseDelay: 5000,
-    });
+//     const ok = await confirm({
+//       title: "Supprimer ce document ?",
+//       description:
+//         "Vous êtes sur le point de supprimer définitivement ce document véhicule. Cette opération est irréversible. Voulez-vous continuer ?",
+//       confirmText: "Oui, supprimer",
+//       cancelText: "Annuler",
+//       confirmVariant: "destructive",
+//       dangerIcon: true,
+//       loading: isPending,
+//       autoCloseDelay: 5000,
+//     });
 
-    if (!ok) return;
+//     if (!ok) return;
 
-    await deleteDocument(doc.id);
-    // Optionnel: toast de succès ici
-    // toast.success("Document véhicule supprimé");
-  };
+//     await deleteDocument(doc.id);
+//     // Optionnel: toast de succès ici
+//     // toast.success("Document véhicule supprimé");
+//   };
 
-  return (
-    <>
-      <ConfirmDialog />
-      <ActionTable
-        row={row}
-        actions={[
-          {
-            label: "Planifier un suivi",
-            variant: "default",
-            onClick: handleTask,
-            icon: <ClipboardList className="h-4 w-4" />,
-          },
-          {
-            label: "Modifier le document",
-            variant: "outline",
-            onClick: handleEdit,
-            icon: <Pencil className="h-4 w-4" />,
-          },
-          {
-            label: "Supprimer le document",
-            variant: "destructive",
-            disabled: isPending,
-            onClick: handleDelete,
-            icon: <Trash className="h-4 w-4" />,
-          },
-        ]}
-      />
-    </>
-  );
-};
+//   return (
+//     <>
+//       <ConfirmDialog />
+//       <ActionTable
+//         row={row}
+//         actions={[
+//           {
+//             label: "Planifier un suivi",
+//             variant: "default",
+//             onClick: handleTask,
+//             icon: <ClipboardList className="h-4 w-4" />,
+//           },
+//           {
+//             label: "Modifier le document",
+//             variant: "outline",
+//             onClick: handleEdit,
+//             icon: <Pencil className="h-4 w-4" />,
+//           },
+//           {
+//             label: "Supprimer le document",
+//             variant: "destructive",
+//             disabled: isPending,
+//             onClick: handleDelete,
+//             icon: <Trash className="h-4 w-4" />,
+//           },
+//         ]}
+//       />
+//     </>
+//   );
+// };
 
 interface MgVehicleProps {
   row: Row<MGMaintenanceRow>;
@@ -568,6 +577,13 @@ interface MgVehicleProps {
 export const MGVehicleActionCell = ({ row }: MgVehicleProps) => {
   const { openModal, setSelectedItem } = useModalStore();
   const v = row.original;
+
+  const openDocModal = (documentType: VehicleDocumentType) => {
+    openModal(ModalTypes.VEHICLE_DOCUMENT_MODAL, {
+      vehicle: v,
+      documentType,
+    });
+  };
 
   const openUpdateMileage = () => {
     setSelectedItem(v);
@@ -580,8 +596,24 @@ export const MGVehicleActionCell = ({ row }: MgVehicleProps) => {
   };
 
   const openCompleteTech = () => {
+    openDocModal("TECH_INSPECTION");
+  };
+
+  const openUpdateParkingCard = () => {
+    openDocModal("PARKING_CARD");
+  };
+
+  const openUpdateInsurance = () => {
+    openDocModal("INSURANCE");
+  };
+
+  const openUpdateExtinguisherCard = () => {
+    openDocModal("EXTINGUISHER_CARD");
+  };
+
+  const openEdit = () => {
     setSelectedItem(v);
-    openModal(ModalTypes.VEHICLE_COMPLETE_TECH_VISIT, v);
+    openModal(ModalTypes.VEHICLE_MANAGEMENT_FORM, v);
   };
   return (
     <div className="flex justify-end">
@@ -593,10 +625,10 @@ export const MGVehicleActionCell = ({ row }: MgVehicleProps) => {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-56">
-          {/* <DropdownMenuItem onClick={openDetails}>
-            <Eye className="mr-2 h-4 w-4" />
-            Ouvrir détails
-          </DropdownMenuItem> */}
+          <DropdownMenuItem onClick={openEdit}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Modifier les informations du véhicule
+          </DropdownMenuItem>
 
           <DropdownMenuItem onClick={openUpdateMileage}>
             <Gauge className="mr-2 h-4 w-4" />
@@ -612,8 +644,39 @@ export const MGVehicleActionCell = ({ row }: MgVehicleProps) => {
             <Wrench className="mr-2 h-4 w-4" />
             Valider visite technique
           </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={openUpdateParkingCard}>
+            <ParkingCircle className="mr-2 h-4 w-4" />
+            Mettre à jour la carte parking
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={openUpdateInsurance}>
+            <ShieldCheck className="mr-2 h-4 w-4" />
+            Mettre à jour l'assurance
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={openUpdateExtinguisherCard}>
+            <FireExtinguisher className="mr-2 h-4 w-4" />
+            Mettre à jour la carte extincteur
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
 };
+
+// <>
+//   <ActionTable
+//     row={row}
+//     actions={[
+//
+//
+
+//       {
+//         label: "Mettre à jour la carte extincteur",
+//         variant: "outline",
+//         onClick: () => openDocModal("EXTINGUISHER_CARD"),
+//         icon: <Files className="h-4 w-4" />,
+//       },
+//     ]}
+//   />
+// </>

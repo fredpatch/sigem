@@ -9,7 +9,8 @@ export const vehicleFormSchema = z.object({
   brand: z.string().min(1, "La marque est obligatoire").max(100, "Trop long"),
   model: z.string().min(1, "Le modèle est obligatoire").max(100, "Trop long"),
 
-  type: z.string().optional().nullable(), // Berline, 4x4...
+  type: z.string().optional().nullable(),
+
   year: z
     .union([
       z
@@ -43,7 +44,7 @@ export const vehicleFormSchema = z.object({
   firstRegistrationDate: z.string().optional().nullable(), // "yyyy-MM-dd"
 
   // --- PROPRIÉTÉ ---
-  ownership: z.string().optional().nullable().default("ANAC"), // ex. "ANAC"
+  ownership: z.string().optional().nullable().default("ANAC"),
 
   // --- COMPTEUR KM ---
   currentMileage: z
@@ -64,6 +65,31 @@ export const vehicleFormSchema = z.object({
   assignedToDirection: z.string().optional().nullable(),
   assignedToFunction: z.string().optional().nullable(),
 
+  // =======================
+  // DOCUMENTS (CREATE ONLY)
+  // =======================
+
+  // INSURANCE
+  insuranceProvider: z.string().trim().optional(),
+  insuranceReference: z.string().trim().optional(),
+  insuranceIssuedAt: z.string().optional(), // YYYY-MM-DD
+  insuranceExpiresAt: z.string().optional(), // YYYY-MM-DD
+
+  // TECH INSPECTION
+  techInspectionReference: z.string().trim().optional(),
+  techInspectionIssuedAt: z.string().optional(),
+  techInspectionExpiresAt: z.string().optional(),
+
+  // PARKING CARD
+  parkingCardReference: z.string().trim().optional(),
+  parkingCardIssuedAt: z.string().optional(),
+  parkingCardExpiresAt: z.string().optional(),
+
+  // EXTINGUISHER CARD
+  extinguisherReference: z.string().trim().optional(),
+  extinguisherIssuedAt: z.string().optional(),
+  extinguisherExpiresAt: z.string().optional(),
+
   // --- STATUT & NOTES ---
   status: z
     .enum(["ACTIVE", "IN_MAINTENANCE", "INACTIVE", "RETIRED"])
@@ -76,11 +102,11 @@ export const VehicleUpdateSchema = vehicleFormSchema.partial().extend({
   id: z.string().min(1, "Vehicle Id required"),
 });
 
+export type VehicleFormValues = z.infer<typeof vehicleFormSchema>;
 export type VehicleCreateFormValues = z.infer<typeof vehicleFormSchema>;
 export type VehicleUpdateFormValues = z.infer<typeof vehicleFormSchema>;
-export type VehicleFormValues = z.infer<typeof vehicleFormSchema>;
 
-export const defaultValues = {
+export const defaultValues: VehicleFormValues = {
   plateNumber: "",
   brand: "",
   model: "",
@@ -101,7 +127,24 @@ export const defaultValues = {
   assignedToDirection: "",
   assignedToFunction: "",
 
-  status: "ACTIVE",
+  // docs defaults
+  insuranceProvider: "",
+  insuranceReference: "",
+  insuranceIssuedAt: "",
+  insuranceExpiresAt: "",
 
+  techInspectionReference: "",
+  techInspectionIssuedAt: "",
+  techInspectionExpiresAt: "",
+
+  parkingCardReference: "",
+  parkingCardIssuedAt: "",
+  parkingCardExpiresAt: "",
+
+  extinguisherReference: "",
+  extinguisherIssuedAt: "",
+  extinguisherExpiresAt: "",
+
+  status: "ACTIVE",
   maintenanceNotes: "",
 };

@@ -25,7 +25,7 @@ export function UrgentTaskItem({
   const { listById } = useVehicles(
     task.vehicleId && typeof task.vehicleId === "string"
       ? task.vehicleId
-      : undefined
+      : undefined,
   );
   const vehicleObj =
     task.vehicleId && typeof task.vehicleId === "object"
@@ -42,7 +42,7 @@ export function UrgentTaskItem({
     vehicleObj?.label ||
     (vehicleId ? `Véhicule ${vehicleId.slice(-6)}` : "Véhicule");
 
-  console.log("Due", vehicle);
+  // console.log("Due", vehicle);
 
   const dueLabel = formatDueLabel(task);
   const typeLabel = taskTypeLabel(task);
@@ -55,7 +55,7 @@ export function UrgentTaskItem({
 
   const goToDetails = () => {
     if (!vehicleId || !taskId) return;
-    navigate("/vehicle-tasks");
+    navigate("/vehicle-management");
   };
 
   // console.log(openDetails());

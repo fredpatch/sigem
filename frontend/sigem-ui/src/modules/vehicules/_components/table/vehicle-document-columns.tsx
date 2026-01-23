@@ -18,7 +18,6 @@ import TitleComponent from "@/components/shared/table/title.component";
 import { BadgeWithToolTip } from "@/components/shared/badge-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { VehicleDocument } from "../../types/vehicle-document.types";
-import { VehicleDocumentActionCell } from "@/components/shared/table/action.component";
 
 const MotionDiv = motion.div;
 const EXPIRY_SOON_DAYS = 30;
@@ -48,12 +47,12 @@ function getDocumentTypeLabel(type: VehicleDocument["type"]) {
       return "Carte parking";
     case "EXTINGUISHER_CARD":
       return "Carte extincteur";
-    case "REGISTRATION":
-      return "Carte grise";
-    case "TAX_STICKER":
-      return "Vignette / taxe";
-    case "OTHER":
-      return "Autre document";
+    // case "REGISTRATION":
+    //   return "Carte grise";
+    // case "TAX_STICKER":
+    //   return "Vignette / taxe";
+    // case "OTHER":
+    //   return "Autre document";
     default:
       return type;
   }
@@ -136,47 +135,47 @@ export const vehicleDocumentColumns: ColumnDef<VehicleDocumentRow>[] = [
   },
 
   // --- VEHICLE ---
-  {
-    id: "vehicleId.model",
-    header: () => (
-      <TitleComponent className="flex justify-start" label="Véhicule" />
-    ),
-    accessorKey: "vehicleId.model",
-    cell: ({ row }) => {
-      const { model, brand, plateNumber } = row.original.vehicleId;
+  // {
+  //   id: "vehicleId.model",
+  //   header: () => (
+  //     <TitleComponent className="flex justify-start" label="Véhicule" />
+  //   ),
+  //   accessorKey: "vehicleId.model",
+  //   cell: ({ row }) => {
+  //     const {  } = row.original.vehicleId;
 
-      const vehicleLabel = `${brand} ${model}`;
-      const displayLabel = vehicleLabel || "Véhicule non renseigné";
-      const displayPlate = plateNumber || "(plaque inconnue)";
+  //     const vehicleLabel = `${brand} ${model}`;
+  //     const displayLabel = vehicleLabel || "Véhicule non renseigné";
+  //     const displayPlate = plateNumber || "(plaque inconnue)";
 
-      return (
-        <MotionDiv
-          className="flex items-center gap-3 py-1"
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/5 border border-primary/10">
-            <CarFront className="h-4 w-4 text-primary" />
-          </div>
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-sm font-medium text-foreground/90 truncate">
-              {displayLabel}
-            </span>
-            <span className="text-[11px] font-mono text-muted-foreground/80 uppercase tracking-tight">
-              {displayPlate}
-            </span>
-            {/* {id && (
-              <span className="text-[10px] text-muted-foreground/60">
-                ID: {id}
-              </span>
-            )} */}
-          </div>
-        </MotionDiv>
-      );
-    },
-    enableSorting: true,
-  },
+  //     return (
+  //       <MotionDiv
+  //         className="flex items-center gap-3 py-1"
+  //         initial={{ opacity: 0, x: -10 }}
+  //         animate={{ opacity: 1, x: 0 }}
+  //         transition={{ duration: 0.2 }}
+  //       >
+  //         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/5 border border-primary/10">
+  //           <CarFront className="h-4 w-4 text-primary" />
+  //         </div>
+  //         <div className="flex flex-col gap-0.5 min-w-0">
+  //           <span className="text-sm font-medium text-foreground/90 truncate">
+  //             {displayLabel}
+  //           </span>
+  //           <span className="text-[11px] font-mono text-muted-foreground/80 uppercase tracking-tight">
+  //             {displayPlate}
+  //           </span>
+  //           {/* {id && (
+  //             <span className="text-[10px] text-muted-foreground/60">
+  //               ID: {id}
+  //             </span>
+  //           )} */}
+  //         </div>
+  //       </MotionDiv>
+  //     );
+  //   },
+  //   enableSorting: true,
+  // },
 
   // --- DOCUMENT (TYPE + RÉF) ---
   {
@@ -365,16 +364,16 @@ export const vehicleDocumentColumns: ColumnDef<VehicleDocumentRow>[] = [
   // },
 
   // --- ACTIONS ---
-  {
-    id: "actions",
-    header: () => (
-      <span className="flex justify-end text-xs font-medium text-muted-foreground">
-        Actions
-      </span>
-    ),
-    cell: ({ row }) => {
-      return <VehicleDocumentActionCell row={row} />;
-    },
-    enableSorting: false,
-  },
+  // {
+  //   id: "actions",
+  //   header: () => (
+  //     <span className="flex justify-end text-xs font-medium text-muted-foreground">
+  //       Actions
+  //     </span>
+  //   ),
+  //   cell: ({ row }) => {
+  //     return <VehicleDocumentActionCell row={row} />;
+  //   },
+  //   enableSorting: false,
+  // },
 ];

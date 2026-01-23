@@ -19,12 +19,14 @@ export const ComplianceCard = ({
 }: {
   title: string;
   doc?: {
+    provider?: string | null;
     reference?: string | null;
     issuedAt?: string | null;
     expiresAt?: string | null;
   };
 }) => {
   const b = getExpiryBadge(doc?.expiresAt ?? null);
+  // console.log("ComplianceCard doc:", { doc });
 
   return (
     <div className="rounded-lg border bg-muted/30 p-3">
@@ -38,8 +40,8 @@ export const ComplianceCard = ({
       <div className="grid grid-cols-1 gap-1">
         <p className="mt-2 text-xs text-muted-foreground">
           Réf :{" "}
-          {doc?.reference ? (
-            <span className="font-mono text-foreground">{doc.reference}</span>
+          {doc?.provider ? (
+            <span className="font-mono text-foreground">{doc.provider}</span>
           ) : (
             "-"
           )}

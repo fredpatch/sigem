@@ -1,7 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { MgUpdateVehicleOilChangeDTO } from "../types/mg.types";
+import {
+  MgCreateVehiclePayload,
+  MgUpdateVehicleOilChangeDTO,
+} from "../types/mg.types";
 import { VehicleAPI } from "../api/vehicle.api";
 import { toast } from "sonner";
+import { useModalStore } from "@/stores/modal-store";
 
 export const useCompleteMgOilChange = () => {
   const qc = useQueryClient();
@@ -27,6 +31,23 @@ export const useCompleteMgOilChange = () => {
         err?.message ??
         "Impossible de valider la vidange.";
       toast.error(msg);
+    },
+  });
+};
+
+export const useMgCreateVehicle = () => {
+  const qc = useQueryClient();
+  const { closeModal } = useModalStore();
+
+  return useMutation({
+    mutationKey: ["mg-create-vehicle"],
+    mutationFn: async (payload: MgCreateVehiclePayload) => {
+      return await VehicleAPI.mgCreateVehicle(payload);
+    },
+    onSuccess: (res) => {
+      toast.success(res?.message ?? "Véhicule créé avec succès.");
+      qc.invalidateQueries({ queryKey: ["vehicles", "mg-table"] });
+      closeModal();
     },
   });
 };

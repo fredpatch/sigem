@@ -3,7 +3,6 @@ import { useModalStore } from "@/stores/modal-store";
 import { ModalTypes } from "@/types/modal.types";
 import { useVehicles } from "../hooks/use-vehicle";
 import { Loader2 } from "lucide-react";
-import { vehicleColumns } from "../_components/table/columns_vehicles";
 import { Guidelines } from "@/common/guidelines";
 import { mgVehicleColumns } from "../_components/table/mg.columns";
 
@@ -29,21 +28,14 @@ export const VehicleManagementPage = () => {
           <TableComponent
             emptyState="Aucun véhicule"
             onSubmit={() => openModal(ModalTypes.VEHICLE_MANAGEMENT_FORM)}
-            filterKeys={[
-              "plateNumber",
-              "brand",
-              "model",
-              "assignedToName",
-              "ownership",
-              "energy",
-            ]}
+            filterKeys={["plateNumber", "assignedToName"]}
             items={vehicles || []}
             columns={mgVehicleColumns}
             onBulkAction={(selected: any[]) => console.log(selected)}
           />
         )}
 
-        <div className="pb-4">
+        {/* <div className="pb-4">
           <Guidelines
             variant="info"
             title="Comment gérer le parc automobile ?"
@@ -60,7 +52,7 @@ export const VehicleManagementPage = () => {
               "Le kilométrage doit être mis à jour régulièrement pour fiabiliser les alertes d’entretien.",
             ]}
           />
-        </div>
+        </div> */}
       </section>
     </>
   );

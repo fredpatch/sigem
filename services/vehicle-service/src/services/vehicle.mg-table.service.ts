@@ -10,8 +10,14 @@ import { MGMaintenanceRow } from "src/schema/maintenance-row.dto";
 
 // Functions
 function pickDoc(
-  docs: Array<{ type: string; expiresAt?: Date; reference?: string }>,
-  type: string
+  docs: Array<{
+    type: string;
+    expiresAt?: Date;
+    reference?: string;
+    issuedAt?: Date;
+    provider?: string;
+  }>,
+  type: string,
 ) {
   return docs.find((d) => d.type === type) ?? null;
 }
@@ -60,7 +66,7 @@ function pickLastCompletedTask(tasks: any[]) {
 }
 
 export async function getMGMaintenanceTable(
-  dept = "MG"
+  dept = "MG",
 ): Promise<MGMaintenanceRow[]> {
   // 1) véhicules
   const vehicles = await Vehicle.find({ dept, status: "ACTIVE" })
@@ -123,8 +129,10 @@ export async function getMGMaintenanceTable(
     const insuranceDoc = pickDoc(vDocs, VehicleDocumentType.INSURANCE);
     const extinguisherDoc = pickDoc(
       vDocs,
-      VehicleDocumentType.EXTINGUISHER_CARD
+      VehicleDocumentType.EXTINGUISHER_CARD,
     );
+    const techDoc = pickDoc(vDocs, VehicleDocumentType.TECH_INSPECTION);
+    const parkingDoc = pickDoc(vDocs, VehicleDocumentType.PARKING_CARD);
 
     // --- TASKS (à standardiser selon ton design) ---
     // ⚠️ Ici je suppose:
@@ -132,16 +140,29 @@ export async function getMGMaintenanceTable(
     // - Vidange est OIL_CHANGE
     // - Checking est MAINTENANCE label=CHECKING (ou type OTHER si tu veux)
     const oilTasks = vTasks.filter(
-      (t) => t.type === VehicleTaskType.OIL_CHANGE
+      (t) => t.type === VehicleTaskType.OIL_CHANGE,
     );
 
     const lastOil = pickLastCompletedTask(oilTasks);
     const nextOil = pickNextTask(oilTasks);
 
+    const lastOilChangeNote =
+      (lastOil?.completionComment &&
+        String(lastOil.completionComment).trim()) ||
+      null;
+    const lastOilChangeAt = lastOil?.completedAt ?? null;
+
     // TODO: à ajuster selon ton implémentation réelle pour la visite technique
-    const techTasks = vTasks.filter(
-      (t) => t.type === VehicleTaskType.DOCUMENT_RENEWAL
-    );
+    const docById = new Map<string, any>();
+    for (const d of vDocs) docById.set(String(d._id), d);
+
+    const techTasks = vTasks.filter((t) => {
+      if (t.type !== VehicleTaskType.DOCUMENT_RENEWAL) return false;
+      const doc = t.vehicleDocumentId
+        ? docById.get(String(t.vehicleDocumentId))
+        : null;
+      return doc?.type === VehicleDocumentType.TECH_INSPECTION;
+    });
     const lastTech = pickLastCompletedTask(techTasks);
     const nextTech = pickNextTask(techTasks);
 
@@ -149,9 +170,19 @@ export async function getMGMaintenanceTable(
     const checkingTasks = vTasks.filter(
       (t) =>
         t.type === VehicleTaskType.MAINTENANCE &&
-        /check/i.test(String(t.label ?? ""))
+        /check/i.test(String(t.label ?? "")),
     );
-    const lastChecking = pickLastCompletedTask(checkingTasks);
+    const baseNotes = v.maintenanceNotes?.trim() || null;
+
+    const mergedNotes =
+      [
+        lastOilChangeNote
+          ? `Dernière vidange le ${lastOilChangeAt?.toLocaleDateString()} : ${lastOilChangeNote}`
+          : null,
+        baseNotes ? `Notes véhicule : ${baseNotes}` : null,
+      ]
+        .filter((n) => n)
+        .join(" | ") || null;
 
     return {
       id: vId,
@@ -161,16 +192,26 @@ export async function getMGMaintenanceTable(
       model: v.model,
       energy: v.energy ?? null,
       assignedToName: v.assignedToName ?? null,
+      assignedToDirection: v.assignedToDirection ?? null,
       fiscalPower: v.fiscalPower ?? null,
 
       firstRegistrationDate: v.firstRegistrationDate ?? null,
       ownership: v.ownership ?? null,
       acquisitionDate: v.acquisitionDate ?? null,
 
-      insuranceProvider: v.insuranceProvider ?? null, // si tu l’as dans Vehicle
-      insuranceExpiresAt: insuranceDoc?.expiresAt ?? null,
+      insuranceProvider: insuranceDoc?.provider ?? null, // si tu l’as dans Vehicle
 
+      insuranceExpiresAt: insuranceDoc?.expiresAt ?? null,
+      insuranceIssuedAt: insuranceDoc?.issuedAt ?? null,
+
+      extinguisherIssuedAt: extinguisherDoc?.issuedAt ?? null,
       extinguisherExpiresAt: extinguisherDoc?.expiresAt ?? null,
+
+      techInspectionIssuedAt: techDoc?.issuedAt ?? null,
+      techInspectionExpiresAt: techDoc?.expiresAt ?? null,
+
+      parkingCardIssuedAt: parkingDoc?.issuedAt ?? null,
+      parkingCardExpiresAt: parkingDoc?.expiresAt ?? null,
 
       lastTechVisitAt: lastTech?.completedAt ?? null,
       nextTechVisitAt: nextTech?.dueAt ?? null,
@@ -179,9 +220,9 @@ export async function getMGMaintenanceTable(
       lastOilChangeKm: lastOil?.completedMileage ?? lastOil?.dueMileage ?? null,
       nextOilChangeKm: nextOil?.dueMileage ?? null,
 
-      lastCheckingKm: lastChecking?.completedMileage ?? null,
+      lastCheckingKm: lastOil?.completedMileage ?? lastOil?.dueMileage ?? null,
 
-      maintenanceNotes: v.maintenanceNotes ?? null,
+      maintenanceNotes: mergedNotes,
     } satisfies MGMaintenanceRow;
   });
 }

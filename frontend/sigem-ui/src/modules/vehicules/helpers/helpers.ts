@@ -40,15 +40,15 @@ export function computeDocumentKpis(docs: VehicleDocument[]) {
   let soon = 0;
   let valid = 0;
 
-  const byType: Record<VehicleDocumentType, number> = {
-    [VehicleDocumentType.INSURANCE]: 0,
-    [VehicleDocumentType.TECH_INSPECTION]: 0,
-    [VehicleDocumentType.PARKING_CARD]: 0,
-    [VehicleDocumentType.EXTINGUISHER_CARD]: 0,
-    [VehicleDocumentType.REGISTRATION]: 0,
-    [VehicleDocumentType.TAX_STICKER]: 0,
-    [VehicleDocumentType.OTHER]: 0,
-  };
+  // const byType: Record<VehicleDocumentType, number> = {
+  //   [VehicleDocumentType.INSURANCE]: 0,
+  //   [VehicleDocumentType.TECH_INSPECTION]: 0,
+  //   [VehicleDocumentType.PARKING_CARD]: 0,
+  //   [VehicleDocumentType.EXTINGUISHER_CARD]: 0,
+  //   [VehicleDocumentType.REGISTRATION]: 0,
+  //   [VehicleDocumentType.TAX_STICKER]: 0,
+  //   [VehicleDocumentType.OTHER]: 0,
+  // };
 
   for (const doc of docs) {
     const exp = doc.expiresAt ? new Date(doc.expiresAt) : null;
@@ -58,11 +58,11 @@ export function computeDocumentKpis(docs: VehicleDocument[]) {
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
     const docType = doc.type as VehicleDocumentType;
-    if (byType[docType] !== undefined) {
-      byType[docType] += 1;
-    } else {
-      byType[VehicleDocumentType.OTHER] += 1;
-    }
+    // if (byType[docType] !== undefined) {
+    //   byType[docType] += 1;
+    // } else {
+    //   byType[VehicleDocumentType.OTHER] += 1;
+    // }
 
     if (diffDays < 0) {
       expired++;
@@ -73,28 +73,7 @@ export function computeDocumentKpis(docs: VehicleDocument[]) {
     }
   }
 
-  return { total, expired, soon, valid, byType };
-}
-
-export function getDocTypeLabel(type: VehicleDocumentType) {
-  switch (type) {
-    case VehicleDocumentType.INSURANCE:
-      return "Assurance";
-    case VehicleDocumentType.TECH_INSPECTION:
-      return "Visite technique";
-    case VehicleDocumentType.PARKING_CARD:
-      return "Carte parking";
-    case VehicleDocumentType.EXTINGUISHER_CARD:
-      return "Carte extincteur";
-    case VehicleDocumentType.REGISTRATION:
-      return "Carte grise";
-    case VehicleDocumentType.TAX_STICKER:
-      return "Vignette / taxe";
-    case VehicleDocumentType.OTHER:
-      return "Autre";
-    default:
-      return type;
-  }
+  return { total, expired, soon, valid };
 }
 
 export const getDocumentStatus = (doc: VehicleDocument) => {

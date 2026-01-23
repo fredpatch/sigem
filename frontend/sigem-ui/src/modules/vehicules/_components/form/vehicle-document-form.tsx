@@ -89,13 +89,6 @@ export const VehicleDocumentForm = ({ form, isEdit }: Props) => {
           label="Référence (numéro de police, carte...)"
           error={errors.reference?.message}
         >
-          {/* <Input
-            id="reference"
-            className="placeholder:text-muted"
-            placeholder="Ex: Police NSIA 2025-1234"
-            {...register("reference")}
-          /> */}
-
           <ReferenceComboboxField
             control={form.control}
             name="reference"

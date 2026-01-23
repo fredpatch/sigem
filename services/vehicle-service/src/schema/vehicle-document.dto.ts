@@ -26,6 +26,7 @@ export interface CreateVehicleDocumentInput {
   reference?: string;
   issuedAt?: Date;
   expiresAt: Date;
+  provider?: string;
 
   reminderDaysBefore?: number[];
 }

@@ -6,6 +6,7 @@ export type MGMaintenanceRow = {
   model: string;
   energy?: string | null;
   assignedToName?: string | null;
+  assignedToDirection?: string | null;
   fiscalPower?: number | null;
 
   firstRegistrationDate?: Date | null;
@@ -13,9 +14,18 @@ export type MGMaintenanceRow = {
   acquisitionDate?: Date | null;
 
   insuranceProvider?: string | null;
+
+  insuranceIssuedAt?: Date | null;
   insuranceExpiresAt?: Date | null;
 
+  extinguisherIssuedAt?: Date | null;
   extinguisherExpiresAt?: Date | null;
+
+  techInspectionIssuedAt?: Date | null;
+  techInspectionExpiresAt?: Date | null;
+
+  parkingCardIssuedAt?: Date | null;
+  parkingCardExpiresAt?: Date | null;
 
   lastTechVisitAt?: Date | null;
   nextTechVisitAt?: Date | null;

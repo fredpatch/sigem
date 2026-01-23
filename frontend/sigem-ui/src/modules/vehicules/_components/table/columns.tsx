@@ -369,16 +369,16 @@ export const vehicleTasksColumns: ColumnDef<VehicleTask>[] = [
   },
 
   // --- ACTIONS ---
-  {
-    id: "actions",
-    header: () => (
-      <span className="flex justify-end text-xs font-medium text-muted-foreground">
-        Actions
-      </span>
-    ),
-    cell: ({ row }) => {
-      return <VehicleTaskActionCell row={row} />;
-    },
-    enableSorting: false,
-  },
+  // {
+  //   id: "actions",
+  //   header: () => (
+  //     <span className="flex justify-end text-xs font-medium text-muted-foreground">
+  //       Actions
+  //     </span>
+  //   ),
+  //   cell: ({ row }) => {
+  //     return <VehicleTaskActionCell row={row} />;
+  //   },
+  //   enableSorting: false,
+  // },
 ];

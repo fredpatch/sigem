@@ -1,5 +1,6 @@
 import { api } from "@/lib/axios";
 import {
+  UpsertVehicleDocumentPayload,
   VehicleDocument,
   VehicleDocumentType,
 } from "../types/vehicle-document.types";
@@ -8,6 +9,7 @@ export interface CreateVehicleDocumentDto {
   vehicleId: string;
   type: VehicleDocumentType;
   reference?: string | null;
+  provider?: string | null;
   issuedAt?: string | null;
   expiresAt: string;
   reminderDaysBefore?: number[];
@@ -18,6 +20,7 @@ export interface UpdateVehicleDocumentDto {
   issuedAt?: string | null;
   expiresAt?: string;
   reminderDaysBefore?: number[];
+  provider?: string | null;
 }
 
 class VehicleDocumentsAPI {
@@ -40,27 +43,34 @@ class VehicleDocumentsAPI {
   async listById(id: string): Promise<VehicleDocument> {
     const { data } = await api.get(`/vehicle-documents/documents/${id}`);
 
-    console.log(data);
+    // console.log(data);
 
     return data;
   }
 
-  async create(payload: CreateVehicleDocumentDto): Promise<VehicleDocument> {
-    const { vehicleId, ...body } = payload;
-    const { data } = await api.post<VehicleDocument>(
+  async listByVehicle(vehicleId: string) {
+    const { data } = await api.get(`/vehicle-documents/${vehicleId}/documents`);
+    return data;
+  }
+
+  async create(
+    vehicleId: string,
+    payload: Omit<UpsertVehicleDocumentPayload, "vehicleId">,
+  ) {
+    const { data } = await api.post(
       `/vehicle-documents/${vehicleId}/documents`,
-      body
+      payload,
     );
     return data;
   }
 
   async update(
-    id: string,
-    payload: UpdateVehicleDocumentDto
-  ): Promise<VehicleDocument> {
-    const { data } = await api.patch<VehicleDocument>(
-      `/vehicle-documents/documents/${id}`,
-      payload
+    docId: string,
+    payload: Omit<UpsertVehicleDocumentPayload, "vehicleId">,
+  ) {
+    const { data } = await api.patch(
+      `/vehicle-documents/documents/${docId}`,
+      payload,
     );
     return data;
   }

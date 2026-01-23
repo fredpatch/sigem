@@ -12,7 +12,7 @@ export function generateSecurePassword(length = 12) {
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
   return Array.from(
     { length },
-    () => chars[Math.floor(Math.random() * chars.length)]
+    () => chars[Math.floor(Math.random() * chars.length)],
   ).join("");
 }
 // role: z.enum(["SUPER_ADMIN", "ADMIN", "MG_AGT", "MG_COS", "MG_COB"]),
@@ -179,7 +179,7 @@ function buildRow(task: VehicleTask): UrgencyRow {
  */
 export function getTopOverdueTasks(
   tasks: VehicleTask[],
-  limit = 5
+  limit = 5,
 ): VehicleTask[] {
   return tasks
     .filter((t) => String((t as any).status) === "OVERDUE")
@@ -200,7 +200,7 @@ export function getTopOverdueTasks(
  */
 export function getTopDueSoonTasks(
   tasks: VehicleTask[],
-  limit = 5
+  limit = 5,
 ): VehicleTask[] {
   // console.log(tasks);
   return tasks
@@ -220,7 +220,7 @@ export function getTopDueSoonTasks(
  */
 export function uniqueByVehicle(
   tasks: VehicleTask[],
-  limit = 5
+  limit = 5,
 ): VehicleTask[] {
   const seen = new Set<string>();
   const out: VehicleTask[] = [];
@@ -274,7 +274,7 @@ export function formatDueLabel(task: any) {
 
 export function taskTypeLabel(task: any) {
   const type = String(
-    task.type ?? task.taskType ?? task.templateType ?? "OTHER"
+    task.type ?? task.taskType ?? task.templateType ?? "OTHER",
   );
   const map: Record<string, string> = {
     OIL_CHANGE: "Vidange",
@@ -298,13 +298,13 @@ export const getExpiryBadge = (iso?: string | null) => {
   const now = new Date();
   const d = new Date(iso);
   const diffDays = Math.ceil(
-    (d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    (d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
   );
 
   if (diffDays < 0) return { label: "Expiré", variant: "destructive" as const };
   if (diffDays <= 30)
     return { label: `Bientôt (${diffDays}j)`, variant: "secondary" as const };
-  return { label: "Valide", variant: "outline" as const };
+  return { label: "Valide", variant: "valide" as const };
 };
 
 export const fmt = (v?: string | number | null) => {

@@ -118,7 +118,7 @@ export class VehicleService {
       null,
       "Vehicles list fetched",
       true,
-      200
+      200,
     );
   }
 
@@ -135,7 +135,7 @@ export class VehicleService {
 
   async updateVehicle(
     id: string,
-    payload: UpdateVehicleDTO
+    payload: UpdateVehicleDTO,
   ): Promise<VehicleDoc | null> {
     // console.log(id);
     if (!Types.ObjectId.isValid(id)) return null;
@@ -218,7 +218,7 @@ export class VehicleService {
     const updated = await Vehicle.findOneAndUpdate(
       { _id: id },
       { $set: update },
-      { new: true }
+      { new: true },
     );
 
     // --- Dictionaires --- //
@@ -242,7 +242,7 @@ export class VehicleService {
 
   async updateVehicleMileage(
     id: string,
-    payload: UpdateVehicleMileageDTO
+    payload: UpdateVehicleMileageDTO,
   ): Promise<VehicleDoc | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
@@ -256,7 +256,7 @@ export class VehicleService {
           mileageUpdatedAt,
         },
       },
-      { new: true }
+      { new: true },
     ).select([
       "plateNumber",
       "brand",
@@ -273,7 +273,7 @@ export class VehicleService {
     return Vehicle.findOneAndUpdate(
       { _id: id },
       { $set: { status: VehicleStatus.INACTIVE } },
-      { new: true }
+      { new: true },
     );
   }
 }
@@ -285,6 +285,7 @@ export class VehicleDocumentService {
     const doc = await VehicleDocumentEntity.create({
       vehicleId,
       type: payload.type,
+      provider: payload.provider?.trim(),
       reference: payload.reference?.trim(),
       issuedAt: payload.issuedAt,
       expiresAt: payload.expiresAt,
@@ -296,7 +297,7 @@ export class VehicleDocumentService {
 
     // dept via Vehicle
     const veh = await Vehicle.findById(payload.vehicleId).select(
-      "dept plateNumber brand model"
+      "dept plateNumber brand model",
     );
     const dept = (veh as any)?.dept || "MG";
 
@@ -309,7 +310,7 @@ export class VehicleDocumentService {
   }
 
   async listVehicleDocuments(
-    vehicleId: string
+    vehicleId: string,
   ): Promise<VehicleDocumentAttrs[]> {
     if (!Types.ObjectId.isValid(vehicleId)) return [];
 
@@ -321,13 +322,16 @@ export class VehicleDocumentService {
   async listAllDocuments() {
     const vehicles = await VehicleDocumentEntity.find({})
       .sort({ expiresAt: 1 })
-      .populate({ path: "vehicleId", select: "plateNumber brand model" });
+      .populate({
+        path: "vehicleId",
+        select: "plateNumber brand model provider",
+      });
 
     return vehicles;
   }
 
   async getVehicleDocumentById(
-    id: string
+    id: string,
   ): Promise<VehicleDocumentAttrs | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
@@ -336,7 +340,7 @@ export class VehicleDocumentService {
 
   async updateVehicleDocument(
     id: string,
-    payload: UpdateVehicleDocumentDTO
+    payload: UpdateVehicleDocumentDTO,
   ): Promise<{ updated: VehicleDocumentAttrs | null; veh: any } | null> {
     if (!Types.ObjectId.isValid(id)) return null;
 
@@ -361,7 +365,7 @@ export class VehicleDocumentService {
     if (Object.keys(update).length === 0) {
       const updated = await this.getVehicleDocumentById(id);
       const veh = await Vehicle.findById(updated?.vehicleId).select(
-        "dept plateNumber brand model"
+        "dept plateNumber brand model",
       );
       return { updated, veh };
     }
@@ -369,16 +373,16 @@ export class VehicleDocumentService {
     const updated = await VehicleDocumentEntity.findByIdAndUpdate(
       id,
       { $set: update },
-      { new: true }
+      { new: true },
     );
 
     const veh = await Vehicle.findById(updated?.vehicleId).select(
-      "dept plateNumber brand model"
+      "dept plateNumber brand model",
     );
 
     if (updated && payload.reference !== undefined) {
       const veh = await Vehicle.findById(updated.vehicleId).select(
-        "dept plateNumber brand model"
+        "dept plateNumber brand model",
       );
       const dept = (veh as any)?.dept || "MG";
 

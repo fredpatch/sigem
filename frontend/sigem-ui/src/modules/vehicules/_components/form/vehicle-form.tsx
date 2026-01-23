@@ -263,9 +263,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
                   <SelectContent>
                     <SelectItem value="SERVICE">Service</SelectItem>
                     <SelectItem value="FONCTION">Fonction</SelectItem>
-                    {/* <SelectItem value="SUV">SUV</SelectItem>
-                    <SelectItem value="PICKUP">Pickup</SelectItem>
-                    <SelectItem value="OTHER">Autre</SelectItem> */}
                   </SelectContent>
                 </Select>
               </FormFieldWrapper>
@@ -293,7 +290,7 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
           </CardContent>
         </Card>
 
-        {/* Section 3: Administrative & Insurance */}
+        {/* Section 3: Administrative*/}
         <Card className="border-l-4 mr-4 border-l-amber-500">
           <CardContent className="pt-0">
             <div className="flex items-center gap-3 mb-6">
@@ -399,6 +396,125 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
         </CardContent>
       </Card>
 
+      {!isEdit && (
+        <Card className="mt-4 border border-amber-200 bg-amber-50/30">
+          <CardContent className="pt-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-amber-600" />
+              <h4 className="font-medium">Assurance</h4>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormFieldWrapper label="Assureur">
+                <Input
+                  placeholder="NSIA, Ogar..."
+                  {...register("insuranceProvider")}
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Référence / Police (optionnel)">
+                <Input
+                  placeholder="N° police..."
+                  {...register("insuranceReference")}
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Début de validité">
+                <Input type="date" {...register("insuranceIssuedAt")} />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Fin de validité (expire le)">
+                <Input type="date" {...register("insuranceExpiresAt")} />
+              </FormFieldWrapper>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isEdit && (
+        <Card className="mt-4 border border-amber-200 bg-amber-50/30">
+          <CardContent className="pt-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-amber-600" />
+              <h4 className="font-medium">Visite technique</h4>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormFieldWrapper label="Référence">
+                <Input
+                  {...register("techInspectionReference")}
+                  placeholder="Référence..."
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Début">
+                <Input type="date" {...register("techInspectionIssuedAt")} />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Expire le">
+                <Input type="date" {...register("techInspectionExpiresAt")} />
+              </FormFieldWrapper>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isEdit && (
+        <Card className="mt-4 border border-amber-200 bg-amber-50/30">
+          <CardContent className="pt-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-amber-600" />
+              <h4 className="font-medium">Carte parking (optionnel)</h4>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormFieldWrapper label="Référence (optionnel)">
+                <Input
+                  {...register("parkingCardReference")}
+                  placeholder="Référence..."
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Début (optionnel)">
+                <Input type="date" {...register("parkingCardIssuedAt")} />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Expire le">
+                <Input type="date" {...register("parkingCardExpiresAt")} />
+              </FormFieldWrapper>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isEdit && (
+        <Card className="mt-4 border border-amber-200 bg-amber-50/30">
+          <CardContent className="pt-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-amber-600" />
+              <h4 className="font-medium">Carte extincteur (optionnel)</h4>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormFieldWrapper label="Référence (optionnel)">
+                <Input
+                  {...register("extinguisherReference")}
+                  placeholder="Référence..."
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Début (optionnel)">
+                <Input type="date" {...register("extinguisherIssuedAt")} />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper label="Expire le">
+                <Input type="date" {...register("extinguisherExpiresAt")} />
+              </FormFieldWrapper>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Notes / observations */}
       <Card className="border-l-4 mr-4 border-l-lime-800">
         <CardContent>
@@ -419,203 +535,3 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
     </div>
   );
 };
-
-// Petite fonction utilitaire pour structurer proprement
-// const SectionTitle = ({ title }: { title: string }) => (
-//   <p className="font-semibold text-sm text-primary mt-2">{title}</p>
-// );
-{
-  /* <div className="md:col-span-2 lg:col-span-3">
-              <div className="flex items-center gap-2 mb-3 mt-2">
-                <Shield className="w-4 h-4 text-amber-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  Assurance & Sécurité
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <FormFieldWrapper
-                  label="Assureur"
-                  error={errors.insuranceProvider?.message}
-                >
-                  <Select
-                    value={insuranceProvider}
-                    onValueChange={(v: any) => setValue("insuranceProvider", v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="NSIA">NSIA</SelectItem>
-                      <SelectItem value="INGENIUM">Ingenium</SelectItem>
-                      <SelectItem value="OTHER">Autre</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormFieldWrapper>
-
-                <FormFieldWrapper
-                  label="Validité assurance"
-                  error={errors.insuranceValidity?.message}
-                >
-                  <Input type="date" {...register("insuranceValidity")} />
-                </FormFieldWrapper>
-
-                <FormFieldWrapper
-                  label="Carte extincteur"
-                  error={errors.extinguisherCardValidity?.message}
-                >
-                  <Input
-                    type="date"
-                    {...register("extinguisherCardValidity")}
-                  />
-                </FormFieldWrapper>
-              </div>
-            </div> */
-}
-
-{
-  /* <div className="md:col-span-2 lg:col-span-3">
-              <div className="flex items-center gap-2 mb-3 mt-2">
-                <Calendar className="w-4 h-4 text-amber-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  Visite technique
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormFieldWrapper
-                  label="Dernière visite"
-                  error={errors.lastTechnicalVisitDate?.message}
-                >
-                  <Input type="date" {...register("lastTechnicalVisitDate")} />
-                </FormFieldWrapper>
-
-                <FormFieldWrapper
-                  label="Prochaine visite"
-                  error={errors.nextTechnicalVisitDate?.message}
-                >
-                  <Input type="date" {...register("nextTechnicalVisitDate")} />
-                </FormFieldWrapper>
-              </div>
-            </div> */
-}
-
-{
-  /* Section 4: Maintenance */
-}
-{
-  /* <Card className="border-l-4 mr-4 border-l-emerald-500">
-        <CardContent className="pt-0">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <Wrench className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg text-gray-900">
-                Maintenance
-              </h3>
-              <p className="text-xs text-gray-500">Suivi des interventions</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm font-medium text-gray-700 mb-3">
-                Vidange d'huile
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormFieldWrapper
-                  label="Fréquence"
-                  error={errors.oilChangeFrequencyKm?.message}
-                >
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder="5000"
-                      {...register("oilChangeFrequencyKm", {
-                        valueAsNumber: true,
-                      })}
-                    />
-                    <span className="absolute right-3 top-2 text-sm text-gray-400">
-                      km
-                    </span>
-                  </div>
-                </FormFieldWrapper>
-
-                <FormFieldWrapper
-                  label="Dernière vidange"
-                  error={errors.lastOilChangeKm?.message}
-                >
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder="15000"
-                      {...register("lastOilChangeKm", { valueAsNumber: true })}
-                    />
-                    <span className="absolute right-3 top-2 text-sm text-gray-400">
-                      km
-                    </span>
-                  </div>
-                </FormFieldWrapper>
-
-                <FormFieldWrapper
-                  label="Prochaine vidange"
-                  error={errors.nextOilChangeKm?.message}
-                >
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder="20000"
-                      {...register("nextOilChangeKm", { valueAsNumber: true })}
-                    />
-                    <span className="absolute right-3 top-2 text-sm text-gray-400">
-                      km
-                    </span>
-                  </div>
-                </FormFieldWrapper>
-              </div>
-            </div>
-
-            <div>
-              <div className="text-sm font-medium text-gray-700 mb-3">
-                Checking général
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormFieldWrapper
-                  label="Dernier checking"
-                  error={errors.lastCheckingKm?.message}
-                >
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder="18000"
-                      {...register("lastCheckingKm", { valueAsNumber: true })}
-                    />
-                    <span className="absolute right-3 top-2 text-sm text-gray-400">
-                      km
-                    </span>
-                  </div>
-                </FormFieldWrapper>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card> */
-}
-
-{
-  /* <FormFieldWrapper
-              label="Consommation moy."
-              error={errors.averageConsumption?.message}
-            >
-              <div className="relative">
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="7.5"
-                  {...register("averageConsumption", { valueAsNumber: true })}
-                />
-                <span className="absolute right-3 top-2 text-sm text-gray-400">
-                  L/100km
-                </span>
-              </div>
-            </FormFieldWrapper> */
-}

@@ -32,6 +32,8 @@ vehicleRouter.post(
   mgController.completeOilChangeTask
 );
 
+vehicleRouter.post("/mg/create", authenticate, mgController.createMgVehicle);
+
 // --- Vehicles ---
 // Prefix final (via api-gateway) : /v1/vehicles
 

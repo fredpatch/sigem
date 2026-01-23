@@ -7,6 +7,7 @@ import {
   Wrench,
   Droplets,
   CheckCircle2,
+  Building2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -63,7 +64,7 @@ function expiryBadgeConfig(days: number | null) {
       cls: "bg-sky-500/10 text-sky-700 border-sky-500/20",
     };
   return {
-    label: `OK (${days}j)`,
+    label: `Valide (${days}j)`,
     cls: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
   };
 }
@@ -159,7 +160,7 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
     ),
     cell: ({ row }) => {
       const v = row.original;
-      if (!v.assignedToName) {
+      if (!v.assignedToName && !v.assignedToDirection) {
         return (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <User2 className="h-3.5 w-3.5 text-muted-foreground/60" />
@@ -168,9 +169,21 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
         );
       }
       return (
-        <div className="flex items-center gap-2">
-          <User2 className="h-3.5 w-3.5 text-muted-foreground/70" />
-          <span className="text-sm font-medium">{v.assignedToName}</span>
+        <div className="flex flex-col gap-0.5">
+          {v.assignedToName && (
+            <div className="inline-flex items-center gap-1.5">
+              <User2 className="h-3.5 w-3.5 text-muted-foreground/70" />
+              <span className="text-sm font-medium">{v.assignedToName}</span>
+            </div>
+          )}
+          {v.assignedToDirection && (
+            <div className="inline-flex items-center gap-1.5">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground/60" />
+              <span className="text-xs text-muted-foreground">
+                {v.assignedToDirection}
+              </span>
+            </div>
+          )}
         </div>
       );
     },
@@ -189,6 +202,8 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
       const days = daysUntil(v.insuranceExpiresAt);
       const cfg = expiryBadgeConfig(days);
 
+      console.log("Insurance", row.original.insuranceProvider);
+
       return (
         <div className="flex flex-col items-center gap-1">
           <div className="inline-flex items-center gap-1.5">
@@ -199,13 +214,31 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
           </div>
           <Badge
             variant="outline"
-            className={cn("text-[11px] px-2 py-0.5 border", cfg.cls)}
+            className={cn(
+              "text-[11px] px-2 py-0.5 border w-full rounded-lg flex justify-center",
+              cfg.cls,
+            )}
           >
             {cfg.label}
           </Badge>
-          <span className="text-[11px] text-muted-foreground tabular-nums">
+          {/* <span className="text-[11px] text-muted-foreground tabular-nums">
             {formatDate(v.insuranceExpiresAt)}
-          </span>
+          </span> */}
+
+          <div className="flex flex-col space-y-px">
+            <div className="text-[11px] text-muted-foreground">
+              Délivrée:{" "}
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {formatDate(v.insuranceIssuedAt)}
+              </span>
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              Expire:{" "}
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {formatDate(v.insuranceExpiresAt)}
+              </span>
+            </div>
+          </div>
         </div>
       );
     },
@@ -228,56 +261,149 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
         <div className="flex flex-col items-center gap-1">
           <div className="inline-flex items-center gap-1.5">
             <Flame className="h-3.5 w-3.5 text-muted-foreground/60" />
-            <span className="text-xs text-muted-foreground">Carte</span>
+            <span className="text-xs text-muted-foreground">
+              Carte extincteur
+            </span>
           </div>
           <Badge
             variant="outline"
-            className={cn("text-[11px] px-2 py-0.5 border", cfg.cls)}
+            className={cn(
+              "text-[11px] px-2 flex justify-center w-full py-0.5 border rounded-lg",
+              cfg.cls,
+            )}
           >
             {cfg.label}
           </Badge>
-          <span className="text-[11px] text-muted-foreground tabular-nums">
-            {formatDate(v.extinguisherExpiresAt)}
-          </span>
+          {/* <span className="text-[11px] text-muted-foreground tabular-nums">
+          </span> */}
+          <div className="flex flex-col space-y-px">
+            <div className="text-[11px] text-muted-foreground">
+              Délivrée:{" "}
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {formatDate(v.extinguisherIssuedAt)}
+              </span>
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              Expire:{" "}
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {formatDate(v.extinguisherExpiresAt)}
+              </span>
+            </div>
+          </div>
         </div>
       );
     },
     enableSorting: true,
   },
 
-  // VISITE TECHNIQUE
+  // VISITE TECHNIQUE (DOC)
   {
-    id: "tech",
-    accessorFn: (row) => row.nextTechVisitAt ?? "",
+    id: "techInspection",
+    accessorFn: (row) => row.techInspectionExpiresAt ?? "",
     header: () => (
       <TitleComponent className="flex justify-center" label="Visite tech." />
     ),
     cell: ({ row }) => {
       const v = row.original;
-      const days = daysUntil(v.nextTechVisitAt);
+
+      const days = daysUntil(v.techInspectionExpiresAt);
       const cfg = expiryBadgeConfig(days);
 
       return (
         <div className="flex flex-col items-center gap-1">
           <div className="inline-flex items-center gap-1.5">
             <Wrench className="h-3.5 w-3.5 text-muted-foreground/60" />
-            <span className="text-xs text-muted-foreground">Prochaine</span>
+            <span className="text-xs text-muted-foreground">Validité</span>
           </div>
+
           <Badge
             variant="outline"
-            className={cn("text-[11px] px-2 py-0.5 border", cfg.cls)}
+            className={cn(
+              "text-[11px] px-2 py-0.5 border rounded-lg flex justify-center w-full",
+              cfg.cls,
+            )}
           >
             {cfg.label}
           </Badge>
-          <span className="text-[11px] text-muted-foreground tabular-nums">
-            {formatDate(v.nextTechVisitAt)}
-          </span>
 
-          {v.lastTechVisitAt && (
-            <span className="text-[10px] text-muted-foreground/70">
-              Dernière: {formatDate(v.lastTechVisitAt)}
-            </span>
-          )}
+          <div className="flex flex-col space-y-px">
+            <div className="text-[11px] text-muted-foreground">
+              Délivrée:{" "}
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {formatDate(v.techInspectionIssuedAt)}
+              </span>
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              Expire:{" "}
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {formatDate(v.techInspectionExpiresAt)}
+              </span>
+            </div>
+          </div>
+
+          {/* {v.techInspectionReference && (
+          <span className="text-[10px] text-muted-foreground/70">
+            Ref: {v.techInspectionReference}
+          </span>
+        )} */}
+        </div>
+      );
+    },
+    enableSorting: true,
+  },
+  // CARTE PARKING (DOC)
+  {
+    id: "parkingCard",
+    accessorFn: (row) => row.parkingCardExpiresAt ?? "",
+    header: () => (
+      <TitleComponent className="flex justify-center" label="Parking" />
+    ),
+    cell: ({ row }) => {
+      const v = row.original;
+
+      const days = daysUntil(v.parkingCardExpiresAt);
+      const cfg = expiryBadgeConfig(days);
+
+      return (
+        <div className="flex flex-col items-center gap-1">
+          <div className="inline-flex items-center gap-1.5">
+            <Shield className="h-3.5 w-3.5 text-muted-foreground/60" />
+            <span className="text-xs text-muted-foreground">Carte parking</span>
+          </div>
+
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-[11px] px-2 py-0.5 border rounded-lg flex justify-center w-full",
+              cfg.cls,
+            )}
+          >
+            {cfg.label}
+          </Badge>
+
+          {/* <span className="text-[11px] text-muted-foreground tabular-nums">
+            {formatDate(v.parkingCardExpiresAt)}
+          </span> */}
+          <div className="flex flex-col space-y-px">
+            <div className="text-[11px] text-muted-foreground">
+              Délivrée:{" "}
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {formatDate(v.parkingCardIssuedAt)}
+              </span>
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              Expire:{" "}
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {formatDate(v.parkingCardExpiresAt)}
+              </span>
+            </div>
+          </div>
+
+          {/* {v.parkingCardReference && (
+          <span className="text-[10px] text-muted-foreground/70">
+            Ref: {v.parkingCardReference}
+          </span>
+        )} */}
         </div>
       );
     },
@@ -336,7 +462,7 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
             <span className="text-xs text-muted-foreground">Dernier</span>
           </div>
           <span className="text-sm font-medium">
-            {formatMileage(v.lastOilChangeKm)}
+            {formatMileage(v.lastCheckingKm)}
           </span>
         </div>
       );

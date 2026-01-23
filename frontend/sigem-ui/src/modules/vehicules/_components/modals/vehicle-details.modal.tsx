@@ -14,8 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getDocTypeLabel, getDocumentStatus } from "../../helpers/helpers";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { fmt, labelEnergy, labelUsage } from "@/utils/helpers";
 import { ComplianceCard } from "@/modules/assets/_components/compliance-card";
 import { Car } from "lucide-react";
@@ -156,7 +154,7 @@ export const VehicleDetailsModal = () => {
   };
 
   const docs = docsQuery.data ?? [];
-  const docCount = docsQuery.data?.length ?? 0;
+  // const docCount = docsQuery.data?.length ?? 0;
 
   const docsByType = (docs as VehicleDocument[]).reduce(
     (acc, d) => {
@@ -175,7 +173,7 @@ export const VehicleDetailsModal = () => {
       }
       return acc;
     },
-    {} as Record<string, VehicleDocument>
+    {} as Record<string, VehicleDocument>,
   );
 
   const titleLabel =
@@ -187,7 +185,7 @@ export const VehicleDetailsModal = () => {
   return (
     <Dialog open onOpenChange={closeModal}>
       <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] flex flex-col">
-        <div className="bg-gradient-to-br from-primary/5 via-primary/3 to-background px-6 pt-6 pb-4 border-b">
+        <div className="bg-linear-to-br from-primary/5 via-primary/3 to-background px-6 pt-6 pb-4 border-b">
           <DialogHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
@@ -241,16 +239,6 @@ export const VehicleDetailsModal = () => {
               </p>
               <p className="text-sm">
                 {vehicle.type || (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </p>
-            </div>
-            <div>
-              <p className="text-[11px] uppercase text-muted-foreground">
-                VIN (n° de série)
-              </p>
-              <p className="text-sm font-mono">
-                {vehicle.vin || (
                   <span className="text-muted-foreground">-</span>
                 )}
               </p>
@@ -357,76 +345,6 @@ export const VehicleDetailsModal = () => {
             </div>
           </section>
 
-          {/* <Separator /> */}
-
-          {/* <section className="space-y-3">
-            <div>
-              <p className="text-[11px] uppercase text-muted-foreground">
-                Maintenance
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Indicateurs kilométriques et périodicités.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="rounded-lg border bg-muted/30 p-3">
-                <p className="text-xs font-semibold">Vidange</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Fréquence :{" "}
-                  {vehicle.oilChangeFrequencyKm
-                    ? `${fmt(vehicle.oilChangeFrequencyKm)} km`
-                    : "-"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Dernière :{" "}
-                  {vehicle.lastOilChangeKm
-                    ? `${fmt(vehicle.lastOilChangeKm)} km`
-                    : "-"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Prochaine :{" "}
-                  {vehicle.nextOilChangeKm
-                    ? `${fmt(vehicle.nextOilChangeKm)} km`
-                    : "-"}
-                </p>
-              </div>
-
-              <div className="rounded-lg border bg-muted/30 p-3">
-                <p className="text-xs font-semibold">Checking</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Dernier contrôle :{" "}
-                  {vehicle.lastCheckingKm
-                    ? `${fmt(vehicle.lastCheckingKm)} km`
-                    : "-"}
-                </p>
-              </div>
-
-              <div className="rounded-lg border bg-muted/30 p-3 col-span-2">
-                <p className="text-xs font-semibold">Conso / Puissance</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Conso moyenne :{" "}
-                  {vehicle.averageConsumption
-                    ? `${fmt(vehicle.averageConsumption)} L/100km`
-                    : "-"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Puissance fiscale :{" "}
-                  {vehicle.fiscalPower ? `${fmt(vehicle.fiscalPower)} CV` : "-"}
-                </p>
-              </div>
-            </div>
-
-            {vehicle.maintenanceNotes ? (
-              <div className="rounded-lg border bg-muted/30 p-3">
-                <p className="text-xs font-semibold">Notes</p>
-                <p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">
-                  {vehicle.maintenanceNotes}
-                </p>
-              </div>
-            ) : null}
-          </section> */}
-
           <Separator />
 
           <section className="space-y-3">
@@ -455,11 +373,11 @@ export const VehicleDetailsModal = () => {
               />
             </div>
           </section>
-          <Separator />
+          {/* <Separator /> */}
 
           {/* Documents liés : KPI + mini-table */}
           <section className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
+            {/* <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-[11px] uppercase text-muted-foreground">
                   Documents liés
@@ -479,10 +397,10 @@ export const VehicleDetailsModal = () => {
                   </p>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* Mini-table */}
-            {!docsQuery.isLoading && docCount > 0 && (
+            {/* {!docsQuery.isLoading && docCount > 0 && (
               <div className="rounded-lg border bg-muted/40">
                 <ScrollArea className="max-h-72">
                   <table className="w-full text-xs">
@@ -505,6 +423,7 @@ export const VehicleDetailsModal = () => {
                     <tbody>
                       {docs.map((doc) => {
                         const status = getDocumentStatus(doc);
+                        console.log(doc);
                         return (
                           <tr
                             key={doc.id}
@@ -540,7 +459,7 @@ export const VehicleDetailsModal = () => {
                   </table>
                 </ScrollArea>
               </div>
-            )}
+            )} */}
           </section>
         </div>
       </DialogContent>

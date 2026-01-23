@@ -3,11 +3,8 @@ import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { useVehicles } from "../hooks/use-vehicle";
 import { useVehicleDocumentsMonitoring } from "../hooks/use-vehicle-documents";
-import {
-  VehicleDocument,
-  VehicleDocumentType,
-} from "../types/vehicle-document.types";
-import { computeDocumentKpis, getDocTypeLabel } from "../helpers/helpers";
+import { VehicleDocument } from "../types/vehicle-document.types";
+import { computeDocumentKpis } from "../helpers/helpers";
 
 type VehicleStatus = "ACTIVE" | "IN_MAINTENANCE" | "INACTIVE" | "RETIRED";
 
@@ -208,7 +205,7 @@ const VehiclesSidebarContent = () => {
               <SmallStat label="Valides" value={docKpis.valid} tone="success" />
             </div>
 
-            <div className="mt-3 space-y-1.5">
+            {/* <div className="mt-3 space-y-1.5">
               {(Object.keys(docKpis.byType) as (keyof typeof docKpis.byType)[])
                 .filter((t) => docKpis.byType[t] > 0)
                 .map((t) => (
@@ -224,7 +221,7 @@ const VehiclesSidebarContent = () => {
                     </span>
                   </div>
                 ))}
-            </div>
+            </div> */}
           </>
         )}
       </div>

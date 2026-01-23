@@ -23,6 +23,9 @@ type ModalName =
   | "vehicleUpdateMileage"
   | "vehicleCompleteOilChange"
   | "vehicleCompleteTechVisit"
+  | "vehicleUpdateParkingCard"
+  | "vehicleUpdateInsurance"
+  | "vehicleDocumentModal"
   | null;
 
 interface ModalState {
