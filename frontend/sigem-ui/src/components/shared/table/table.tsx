@@ -51,42 +51,81 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { TableToolbar } from "./table-toolbar";
+import { DateRange } from "react-day-picker";
+import { DateRangePickerControlled } from "../date-range";
 
 declare module "@tanstack/react-table" {
   // allows us to define custom properties for our columns
   interface ColumnMeta<TData extends RowData, TValue> {
-    filterVariant?: "text" | "range" | "select";
+    filterVariant?: "text" | "range" | "select" | "date-range";
+    label?: string;
+    placeholder?: string;
+    valueLabels?: Record<string, string>;
+
+    // ✅ NEW export
+    exportValue?: (row: TData) => string | number | null | undefined;
   }
 }
 
+export interface TableToolbarConfig {
+  tableId?: string;
+
+  enableGlobalSearch?: boolean;
+  globalSearchPlaceholder?: string;
+
+  enableResetFilters?: boolean;
+
+  /** clés des colonnes à afficher comme filtres */
+  columnFilters?: string[];
+
+  /** presets métier (chips) */
+  presets?: {
+    label: string;
+    apply: (table: any) => void;
+  }[];
+
+  /** activer export (on branchera après) */
+  enableExport?: boolean;
+  export?: {
+    enableColumnPicker?: boolean;
+    defaultToVisibleColumns?: boolean; // true par défaut
+    formats?: Array<"csv" | "xlsx" | "pdf">; // défaut: ["csv"]
+    filename?: string; // défaut auto
+  };
+}
+
 export interface TableProps<TData, TValue> {
+  // EXISTANT
   items: TData[];
   columns: ColumnDef<TData, TValue>[];
-  filterKey?: string;
-  filterKeys?: string[]; // pour activer plusieurs filtres
-  renderRowActions?: (row: TData) => React.ReactNode;
+
+  // NEW
+  toolbar?: TableToolbarConfig;
+
+  // EXISTANT
   emptyState?: React.ReactNode;
-  btnActionIcon?: React.ReactNode;
   onSubmit?: () => void;
   onBulkAction?: (selectedRows: TData[]) => void;
   isEnabled?: boolean;
+  btnActionIcon?: React.ReactNode;
+  renderRowActions?: (row: TData) => React.ReactNode;
 }
 
 export function TableComponent<TData, TValue>({
   items,
   columns,
+  toolbar,
   onSubmit,
-  filterKey,
-  filterKeys,
   isEnabled,
   emptyState,
-  onBulkAction,
   btnActionIcon,
   renderRowActions,
 }: TableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
   const [columnOrder, setColumnOrder] = useState<string[]>(
-    columns.map((column) => column.id as string)
+    columns.map((column) => column.id as string),
   );
   const [sorting, setSorting] = useState<SortingState>([
     // {
@@ -95,21 +134,20 @@ export function TableComponent<TData, TValue>({
     // },
   ]);
 
-  const effectiveFilterKeys = useMemo(() => {
-    if (filterKeys && filterKeys.length > 0) return filterKeys;
-    return filterKey ? [filterKey] : []; // compat
-  }, [filterKeys, filterKey]);
-
   const table = useReactTable({
     data: items,
     columns,
     columnResizeMode: "onChange",
     onColumnOrderChange: setColumnOrder,
+
     state: {
       sorting,
       columnOrder,
       columnFilters,
+      globalFilter,
     },
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: "includesString",
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(), //client-side filtering
@@ -144,58 +182,17 @@ export function TableComponent<TData, TValue>({
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
     useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
+    useSensor(KeyboardSensor, {}),
   );
 
   return (
     <div className="space-y-4 bg-white p-4 rounded-md mt-4 shadow-2xl">
       {/* Filters */}
+      {toolbar && <TableToolbar table={table} config={toolbar} />}
+
       <div className="flex flex-wrap justify-between gap-3">
-        {/* Bloc filtres multiples */}
-        <div className="flex flex-1 gap-3">
-          {effectiveFilterKeys.map((key) => {
-            const col = table.getColumn(key);
-            if (!col) return null;
-
-            return (
-              <div key={key} className="w-full">
-                <h3 className="capitalize">
-                  {/* Filter by <span className="font-bold">{key}</span> */}
-                </h3>
-                <Filter column={col} />
-              </div>
-            );
-          })}
-        </div>
-
         {/* Buttons */}
         <div className="flex items-center justify-end gap-2">
-          {table.getSelectedRowModel().rows.length > 0 && (
-            <div className="flex items-center justify-end">
-              {onBulkAction && (
-                <Button
-                  variant="destructive"
-                  size="default"
-                  onClick={() => {
-                    const selected = table
-                      .getSelectedRowModel()
-                      .rows.map((r) => r.original);
-
-                    // Extract the ids from the selected rows
-                    const ids = selected.map((item: any) => item._id);
-
-                    onBulkAction(ids);
-                  }}
-                >
-                  Bulk Deactivate
-                  <p className="text-[1rem]  text-white">
-                    ({table.getSelectedRowModel().rows.length})
-                  </p>
-                </Button>
-              )}
-            </div>
-          )}
-
           {isEnabled && (
             <Button onClick={onSubmit} size="icon">
               {btnActionIcon}
@@ -254,12 +251,21 @@ export function TableComponent<TData, TValue>({
   );
 }
 
-function Filter({ column }: { column: Column<any, unknown> }) {
+export function Filter({ column }: { column: Column<any, unknown> }) {
   const id = useId();
   const columnFilterValue = column?.getFilterValue();
-  const { filterVariant } = column?.columnDef.meta ?? {};
+  const meta = column?.columnDef.meta ?? {};
+  const { filterVariant } = meta;
+
+  // const columnHeader =
+  //   typeof column?.columnDef.header === "string" ? column.columnDef.header : "";
   const columnHeader =
-    typeof column?.columnDef.header === "string" ? column.columnDef.header : "";
+    meta.label ??
+    (typeof column?.columnDef.header === "string"
+      ? column.columnDef.header
+      : "") ??
+    column.id;
+
   const sortedUniqueValues = useMemo(() => {
     if (filterVariant === "range") return [];
 
@@ -278,6 +284,34 @@ function Filter({ column }: { column: Column<any, unknown> }) {
     return Array.from(new Set(flattenedValues)).sort();
   }, [column.getFacetedUniqueValues(), filterVariant]);
 
+  if (filterVariant === "date-range") {
+    const [from, to] = (columnFilterValue as [string?, string?]) ?? [];
+
+    const value: DateRange | undefined =
+      from || to
+        ? {
+            from: from ? new Date(from) : undefined,
+            to: to ? new Date(to) : undefined,
+          }
+        : undefined;
+
+    return (
+      <DateRangePickerControlled
+        label={columnHeader}
+        value={value}
+        onChange={(range) => {
+          const next: [string?, string?] = [
+            range?.from ? range.from.toISOString() : undefined,
+            range?.to ? range.to.toISOString() : undefined,
+          ];
+          // si rien, on reset
+          const isEmpty = !next[0] && !next[1];
+          column.setFilterValue(isEmpty ? undefined : next);
+        }}
+      />
+    );
+  }
+
   if (filterVariant === "range") {
     return (
       <div className="space-y-2">
@@ -285,7 +319,7 @@ function Filter({ column }: { column: Column<any, unknown> }) {
         <div className="flex">
           <Input
             id={`${id}-range-1`}
-            className="flex-1 rounded-e-none [-moz-appearance:_textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+            className="flex-1 rounded-e-none [-moz-appearance:textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
             value={(columnFilterValue as [number, number])?.[0] ?? ""}
             onChange={(e) =>
               column.setFilterValue((old: [number, number]) => [
@@ -299,7 +333,7 @@ function Filter({ column }: { column: Column<any, unknown> }) {
           />
           <Input
             id={`${id}-range-2`}
-            className="-ms-px flex-1 rounded-s-none [-moz-appearance:_textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+            className="-ms-px flex-1 rounded-s-none [-moz-appearance:textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
             value={(columnFilterValue as [number, number])?.[1] ?? ""}
             onChange={(e) =>
               column.setFilterValue((old: [number, number]) => [
@@ -353,7 +387,7 @@ function Filter({ column }: { column: Column<any, unknown> }) {
 
     return (
       <div className="space-y-2 -translate-y-1">
-        <Label htmlFor={`${id}-input`}>{columnHeader}</Label>
+        {/* <Label htmlFor={`${id}-input`}>{columnHeader}</Label> */}
         <div className="relative">
           <Input
             id={`${id}-input`}

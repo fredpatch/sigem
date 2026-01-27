@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { upsertVehicleRefs } from "src/client/reference.client";
 import { VehicleDocumentEntity } from "src/models/vehicle-document.model";
 import { VehicleTaskTemplateEntity } from "src/models/vehicle-task-template.model";
 import { VehicleTaskEntity } from "src/models/vehicle-task.model";
@@ -175,6 +176,15 @@ export class MgService {
 
       tasksCreated.push(task);
     }
+
+    await upsertVehicleRefs({
+      dept: "MG",
+      brand: input.vehicle.brand,
+      model: input.vehicle.model,
+      type: input.vehicle.type ?? undefined,
+      ownership: input.vehicle.ownership ?? undefined,
+      assignedToDirection: input.vehicle.assignedToDirection ?? undefined,
+    });
 
     return {
       vehicle: createdVehicle.toJSON(),

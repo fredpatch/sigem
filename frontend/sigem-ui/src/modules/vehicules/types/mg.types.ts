@@ -36,6 +36,9 @@ export type MGMaintenanceRow = {
   lastCheckingKm?: number | null;
 
   maintenanceNotes?: string | null;
+
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 };
 
 export type MgUpdateVehicleOilChangeDTO = {

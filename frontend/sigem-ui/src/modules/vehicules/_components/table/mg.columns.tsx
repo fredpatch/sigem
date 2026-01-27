@@ -20,6 +20,7 @@ import { motion } from "framer-motion";
 import { MGMaintenanceRow } from "../../types/mg.types";
 import TitleComponent from "@/components/shared/table/title.component";
 import { MGVehicleActionCell } from "@/components/shared/table/action.component";
+import { join, safe, safeDate, safeDaysUntil } from "../../helpers";
 
 const MotionDiv = motion.div;
 
@@ -104,6 +105,11 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "plateNumber",
     accessorKey: "plateNumber",
+    meta: {
+      label: "Véhicule",
+      exportValue: (v) =>
+        `${join([v.brand, v.model])} (${safe(v.plateNumber)})`,
+    },
     header: () => (
       <TitleComponent className="flex justify-start" label="Véhicule" />
     ),
@@ -155,6 +161,13 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "assignedToName",
     accessorKey: "assignedToName",
+    meta: {
+      label: "Utilisateur",
+      exportValue: (v) =>
+        v.assignedToName
+          ? `${v.assignedToName}${v.assignedToDirection ? ` (${v.assignedToDirection})` : ""}`
+          : "Non affecté",
+    },
     header: () => (
       <TitleComponent className="flex justify-start" label="Utilisateur" />
     ),
@@ -194,6 +207,11 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "insurance",
     accessorFn: (row) => row.insuranceExpiresAt ?? "",
+    meta: {
+      label: "Assurance",
+      exportValue: (v) =>
+        `${safe(v.insuranceProvider)} - ${safeDaysUntil(v.insuranceExpiresAt)}`,
+    },
     header: () => (
       <TitleComponent className="flex justify-center" label="Assurance" />
     ),
@@ -221,9 +239,6 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
           >
             {cfg.label}
           </Badge>
-          {/* <span className="text-[11px] text-muted-foreground tabular-nums">
-            {formatDate(v.insuranceExpiresAt)}
-          </span> */}
 
           <div className="flex flex-col space-y-px">
             <div className="text-[11px] text-muted-foreground">
@@ -248,6 +263,10 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   // EXTINCTEUR
   {
     id: "extinguisher",
+    meta: {
+      label: "Extincteur",
+      exportValue: (v) => safeDaysUntil(v.extinguisherExpiresAt),
+    },
     accessorFn: (row) => row.extinguisherExpiresAt ?? "",
     header: () => (
       <TitleComponent className="flex justify-center" label="Extincteur" />
@@ -300,6 +319,10 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "techInspection",
     accessorFn: (row) => row.techInspectionExpiresAt ?? "",
+    meta: {
+      label: "Visite tech.",
+      exportValue: (v) => safeDaysUntil(v.techInspectionExpiresAt),
+    },
     header: () => (
       <TitleComponent className="flex justify-center" label="Visite tech." />
     ),
@@ -355,8 +378,12 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "parkingCard",
     accessorFn: (row) => row.parkingCardExpiresAt ?? "",
+    meta: {
+      label: "Carte parking",
+      exportValue: (v) => safeDaysUntil(v.parkingCardExpiresAt),
+    },
     header: () => (
-      <TitleComponent className="flex justify-center" label="Parking" />
+      <TitleComponent className="flex justify-center" label="Carte parking" />
     ),
     cell: ({ row }) => {
       const v = row.original;
@@ -414,6 +441,11 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "oil",
     accessorFn: (row) => row.nextOilChangeKm ?? 0,
+    meta: {
+      label: "Vidange",
+      exportValue: (v) =>
+        `Dernière: ${safe(v.lastOilChangeKm)} km | Prochaine: ${safe(v.nextOilChangeKm)} km`,
+    },
     header: () => (
       <TitleComponent className="flex justify-center" label="Vidange" />
     ),
@@ -450,6 +482,11 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "checking",
     accessorFn: (row) => row.lastCheckingKm ?? 0,
+    meta: {
+      label: "Checking",
+      exportValue: (v) =>
+        safe(v.lastCheckingKm) !== "-" ? `${v.lastCheckingKm} km` : "-",
+    },
     header: () => (
       <TitleComponent className="flex justify-center" label="Checking" />
     ),
@@ -474,6 +511,10 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "maintenanceNotes",
     accessorKey: "maintenanceNotes",
+    meta: {
+      label: "Notes",
+      exportValue: (v) => safe(v.maintenanceNotes)?.replace(/\r?\n|\r/g, " "),
+    },
     header: () => (
       <TitleComponent className="flex justify-start" label="Notes" />
     ),
@@ -487,6 +528,35 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
     },
     enableSorting: false,
   },
+
+  {
+    id: "createdAt",
+    accessorKey: "createdAt",
+    header: () => (
+      <TitleComponent className="flex justify-start" label="Date d’ajout" />
+    ),
+    cell: ({ row }) => {
+      const v = row.original;
+      return (
+        <span className="text-sm text-muted-foreground flex justify-center tabular-nums">
+          {formatDate(v.createdAt)}
+        </span>
+      );
+    },
+    meta: {
+      label: "Ajouté le",
+      filterVariant: "date-range",
+      exportValue: (v) => safeDate(v.createdAt),
+    },
+    filterFn: (row, _id, value) => {
+      const [from, to] = value ?? [];
+      const d = new Date(row.getValue(_id));
+      if (from && d < new Date(from)) return false;
+      if (to && d > new Date(to)) return false;
+      return true;
+    },
+  },
+
   {
     id: "actions",
     header: () => (

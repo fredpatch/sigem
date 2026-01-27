@@ -223,6 +223,9 @@ export async function getMGMaintenanceTable(
       lastCheckingKm: lastOil?.completedMileage ?? lastOil?.dueMileage ?? null,
 
       maintenanceNotes: mergedNotes,
+
+      createdAt: v.createdAt,
+      updatedAt: v.updatedAt,
     } satisfies MGMaintenanceRow;
   });
 }

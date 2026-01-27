@@ -23,7 +23,9 @@ const VehiclesSidebarContent = () => {
     <div className="space-y-4">
       {/* Parc */}
       <div className="rounded-xl border bg-card px-4 py-3 shadow-sm">
-        <p className="text-xs uppercase text-muted-foreground">Parc MG</p>
+        <p className="text-xs uppercase text-muted-foreground">
+          Parc Automobile
+        </p>
 
         <p className="mt-1 text-3xl font-semibold tabular-nums">
           {isFetching ? (
@@ -34,7 +36,7 @@ const VehiclesSidebarContent = () => {
         </p>
 
         <p className="mt-1 text-xs text-muted-foreground">
-          Vue MG (docs + maintenance + affectation)
+          Vue (docs + maintenance + affectation)
         </p>
       </div>
 

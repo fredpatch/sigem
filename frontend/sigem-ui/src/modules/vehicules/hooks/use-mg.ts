@@ -22,6 +22,10 @@ export const useCompleteMgOilChange = () => {
       toast.success(res?.message ?? "Vidange validée.");
       // IMPORTANT: invalider la table MG
       qc.invalidateQueries({ queryKey: ["vehicles", "mg-table"] });
+      qc.invalidateQueries({ queryKey: ["vehicles", "my"] });
+      qc.invalidateQueries({
+        queryKey: ["vehicles", res?.vehicleId, "oil-change"],
+      });
       // si tu as aussi des widgets/alerts:
       qc.invalidateQueries({ queryKey: ["vehicle-tasks"] });
     },

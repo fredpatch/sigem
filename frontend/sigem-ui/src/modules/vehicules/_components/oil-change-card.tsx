@@ -42,23 +42,41 @@ export function OilChangeCard({
   remainingKm,
   apiStatus,
 }: Props) {
+  console.log("OilChangeCard:", {
+    currentMileage,
+    nextDueKm,
+    intervalKm,
+    lastDoneKm,
+    lastDoneAt,
+    remainingKm,
+    apiStatus,
+  });
+
+  const hasCurrentKm = typeof currentMileage === "number" && currentMileage > 0;
+
+  const computedRemaining =
+    hasCurrentKm && typeof nextDueKm === "number"
+      ? nextDueKm - currentMileage
+      : undefined;
+
+  // On prend remainingKm de l'API seulement si on ne peut pas calculer,
+  // ou si c'est cohérent avec le calcul.
   const remaining =
-    typeof remainingKm === "number"
-      ? remainingKm
-      : typeof nextDueKm === "number"
-        ? nextDueKm - (currentMileage ?? 0)
+    typeof computedRemaining === "number"
+      ? computedRemaining
+      : typeof remainingKm === "number"
+        ? remainingKm
         : undefined;
 
+  // Status : idéalement basé sur remaining (calculé)
   const status =
-    apiStatus && apiStatus !== "UNKNOWN"
-      ? apiStatus
-      : typeof remaining !== "number"
-        ? "UNKNOWN"
-        : remaining <= 0
-          ? "OVERDUE"
-          : remaining <= (thresholdSoonKm ?? 500)
-            ? "DUE_SOON"
-            : "PLANNED";
+    typeof remaining !== "number"
+      ? "UNKNOWN"
+      : remaining <= 0
+        ? "OVERDUE"
+        : remaining <= thresholdSoonKm
+          ? "DUE_SOON"
+          : "PLANNED";
 
   const progress =
     typeof intervalKm === "number" &&
@@ -66,7 +84,7 @@ export function OilChangeCard({
     typeof remaining === "number"
       ? Math.max(
           0,
-          Math.min(100, ((intervalKm - remaining) / intervalKm) * 100)
+          Math.min(100, ((intervalKm - remaining) / intervalKm) * 100),
         )
       : undefined;
 
@@ -145,12 +163,14 @@ export function OilChangeCard({
               <div
                 className={cn(
                   "font-semibold",
-                  status === "OVERDUE" && "text-destructive"
+                  status === "OVERDUE" && "text-destructive",
                 )}
               >
-                {typeof remaining === "number"
-                  ? formatKm(Math.abs(remaining))
-                  : "-"}
+                {!hasCurrentKm && typeof remainingKm !== "number"
+                  ? "- (kilométrage manquant)"
+                  : typeof remaining === "number"
+                    ? formatKm(Math.abs(remaining))
+                    : "-"}
                 {typeof remaining === "number" && remaining < 0
                   ? " (dépassé)"
                   : ""}

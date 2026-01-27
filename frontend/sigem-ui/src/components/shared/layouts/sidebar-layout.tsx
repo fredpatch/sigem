@@ -8,9 +8,12 @@ import {
   BookA,
   Car,
   ChevronsUpDown,
+  ClipboardList,
   Cog,
+  Files,
   HandHelping,
   HelpCircle,
+  KeySquare,
   LayoutDashboard,
   Loader2,
   LogOut,
@@ -96,7 +99,7 @@ export const SideNavBar = () => {
                   <div className="p-1 border-gray-200">
                     <div
                       className={cn(
-                        `flex items-center space-x-2 ${!isCollapsed && "-mt-2"}`
+                        `flex items-center space-x-2 ${!isCollapsed && "-mt-2"}`,
                       )}
                     >
                       <div
@@ -141,7 +144,7 @@ export const SideNavBar = () => {
                             className={cn(
                               "flex h-8 text-white w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-white/50 hover:text-primary",
                               location?.includes("notifications") &&
-                                "bg-primary/30 text-black"
+                                "bg-primary/30 text-black",
                             )}
                           >
                             <div className="flex flex-row items-center">
@@ -155,7 +158,7 @@ export const SideNavBar = () => {
                                     {count !== undefined && count > 0 && (
                                       <Badge
                                         className={cn(
-                                          "flex h-fit w-fit items-center gap-1.5 rounded border-none bg-secondary/90 px-1.5 text-blue-600 dark:bg-blue-700 dark:text-blue-300"
+                                          "flex h-fit w-fit items-center gap-1.5 rounded border-none bg-secondary/90 px-1.5 text-blue-600 dark:bg-blue-700 dark:text-blue-300",
                                         )}
                                         variant="outline"
                                       >
@@ -211,6 +214,7 @@ export const SideNavBar = () => {
                       "MG_AGT",
                     ].includes(role!) && (
                       <>
+                        <Separator className="my-3" />
                         <NavBarLink
                           to={"/providers"}
                           pathName={"providers"}
@@ -218,18 +222,7 @@ export const SideNavBar = () => {
                           icon={<BookA className="h-4 w-4" />}
                           title={"Annuaire fournisseurs"}
                         />
-                      </>
-                    )}
 
-                    {/* Providers management catalog */}
-                    {[
-                      "SUPER_ADMIN",
-                      "ADMIN",
-                      "MG_COB",
-                      "MG_COS",
-                      "MG_AGT",
-                    ].includes(role!) && (
-                      <>
                         <NavBarLink
                           to={"/products"}
                           pathName={"products"}
@@ -237,8 +230,6 @@ export const SideNavBar = () => {
                           icon={<PackageSearch className="h-4 w-4" />}
                           title={"Catalogue Produits"}
                         />
-
-                        <Separator className="mb-6" />
 
                         <NavBarLink
                           to={"/purchases"}
@@ -254,18 +245,8 @@ export const SideNavBar = () => {
                           icon={<HandHelping className="h-4 w-4" />}
                           title={"Demandes d'achats"}
                         />
-                      </>
-                    )}
 
-                    {[
-                      "SUPER_ADMIN",
-                      "ADMIN",
-                      "MG_COB",
-                      "MG_COS",
-                      "MG_AGT",
-                    ].includes(role!) && (
-                      <>
-                        <Separator className="mt-6" />
+                        <Separator className="my-3" />
 
                         <NavBarLink
                           to={"/assets"}
@@ -275,18 +256,13 @@ export const SideNavBar = () => {
                           title={"Gestion du patrimoine"}
                         />
 
-                        <Separator className="mb-6" />
-
-                        {navLinks?.map((link) => (
-                          <NavBarLink
-                            key={link.id}
-                            to={link.to}
-                            pathName={link.pathName}
-                            isCollapsed={isCollapsed}
-                            icon={<link.icon className="h-4 w-4" />}
-                            title={link.title}
-                          />
-                        ))}
+                        <NavBarLink
+                          to={"/vehicle-management"}
+                          pathName={"vehicle-management"}
+                          isCollapsed={isCollapsed}
+                          icon={<KeySquare className="h-4 w-4" />}
+                          title={"Parc automobile"}
+                        />
                       </>
                     )}
 
@@ -298,8 +274,8 @@ export const SideNavBar = () => {
                       title={"Mon véhicule"}
                     />
 
-                    <Separator className="mt-6" />
-                    {/* Category management */}
+                    {/* SUPER ADMIN SECTION */}
+                    <Separator className="my-3" />
                     {[
                       "SUPER_ADMIN",
                       "ADMIN",
@@ -313,13 +289,32 @@ export const SideNavBar = () => {
                           icon={<Settings className="h-4 w-4" />}
                           title={"Categories"}
                         />
+
+                        <NavBarLink
+                          to={"/vehicle-documents"}
+                          pathName={"vehicle-documents"}
+                          isCollapsed={isCollapsed}
+                          icon={<Files className="h-4 w-4" />}
+                          title={"Documents des véhicules"}
+                        />
+
+                        <NavBarLink
+                          to={"/vehicle-tasks"}
+                          pathName={"vehicle-tasks"}
+                          isCollapsed={isCollapsed}
+                          icon={<ClipboardList className="h-4 w-4" />}
+                          title={"Suivi des véhicules"}
+                        />
                       </>
                     )}
 
                     {/* Location management */}
-                    {["SUPER_ADMIN", "ADMIN", "MG_COB", "MG_COS"].includes(
-                      role!
-                    ) && (
+                    {[
+                      "SUPER_ADMIN",
+                      "ADMIN",
+                      // "MG_COB",
+                      //  "MG_COS"
+                    ].includes(role!) && (
                       <>
                         <NavBarLink
                           to={"/locations"}
@@ -333,7 +328,7 @@ export const SideNavBar = () => {
 
                     {/* User management */}
                     {["SUPER_ADMIN", "ADMIN", "MG_COB", "MG_COS"].includes(
-                      role!
+                      role!,
                     ) && (
                       <>
                         <NavBarLink
@@ -345,7 +340,7 @@ export const SideNavBar = () => {
                         />
                       </>
                     )}
-                    <Separator className="mb-6" />
+                    <Separator className="my-3" />
 
                     {/* <Separator className="mt-6" /> */}
                   </div>
@@ -439,7 +434,7 @@ const NavBarLink = ({
       to={to}
       className={cn(
         "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-background hover:text-foreground",
-        location.includes(pathName) && "bg-background text-primary"
+        location.includes(pathName) && "bg-background text-primary",
       )}
     >
       <div className="flex flex-row items-center">
@@ -504,3 +499,28 @@ export const AvatarIcon = (user: UserAuth) => {
     </div>
   );
 };
+
+{
+  /* {[
+                      "SUPER_ADMIN",
+                      "ADMIN",
+                      "MG_COB",
+                      "MG_COS",
+                      "MG_AGT",
+                    ].includes(role!) && (
+                      <>
+                        <Separator className="mb-6" />
+
+                        {navLinks?.map((link) => (
+                          <NavBarLink
+                            key={link.id}
+                            to={link.to}
+                            pathName={link.pathName}
+                            isCollapsed={isCollapsed}
+                            icon={<link.icon className="h-4 w-4" />}
+                            title={link.title}
+                          />
+                        ))}
+                      </>
+                    )} */
+}

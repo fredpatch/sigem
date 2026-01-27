@@ -9,7 +9,7 @@ import { useVehicles } from "@/modules/vehicules/hooks/use-vehicle";
 import { OilChangeCard } from "@/modules/vehicules/_components/oil-change-card";
 import { useOilChangeInfo } from "@/modules/vehicules/hooks/use-oil-change";
 import { useAuthStore } from "@/modules/auth/store/use-auth.store";
-import { useCompleteVehicleTask } from "@/modules/vehicules/hooks/use-vehicle-tasks";
+import { useCompleteMgOilChange } from "@/modules/vehicules/hooks/use-mg";
 
 function formatDate(d?: string) {
   if (!d) return "-";
@@ -18,11 +18,10 @@ function formatDate(d?: string) {
 }
 
 export default function MyVehiclePage() {
-  //   const { data: vehicles = [], isLoading, error, refetch, isFetching } =
-  // const { mutateAsync: completeTask, isPending } = useCompleteVehicleTask();
   const { user } = useAuthStore();
-  const { myVehicle, updateMileage } = useVehicles();
-  // const {mutateAsync} = useCompleteVehicleTask()
+  const { myVehicle } = useVehicles();
+  const complete = useCompleteMgOilChange();
+
   const {
     data: vehicles = [],
     isLoading,
@@ -83,9 +82,11 @@ export default function MyVehiclePage() {
     );
   }
 
-  const submitting = updateMileage.isPending;
+  const submitting = complete.isPending;
 
   const currentKm = primary.currentMileage ?? 0;
+
+  console.log("MyVehiclePage:", { primary, currentKm, oilData: oil.data });
 
   return (
     <div className="p-6 max-w-2xl space-y-4 mx-auto">
@@ -176,17 +177,25 @@ export default function MyVehiclePage() {
             />
 
             <Button
-              onClick={() => {
+              onClick={async () => {
                 const next = Number(value);
                 if (!Number.isFinite(next) || next <= 0) return;
                 if (next < currentKm) {
                   // on laisse passer si tu veux, mais UX: avertir
                   // (tu peux aussi bloquer côté backend)
                 }
-                updateMileage.mutate({
-                  id: primary.id,
-                  payload: { currentMileage: next },
+
+                await complete.mutateAsync({
+                  vehicleId: primary.id,
+                  payload: {
+                    completedMileage: next,
+                    completedAt: new Date().toISOString(),
+                    completionComment:
+                      "Mise à jour du kilométrage via accès invité",
+                  },
                 });
+                await refetch();
+                await oil.refetch();
                 setValue("");
               }}
               disabled={submitting || !value}
@@ -210,7 +219,7 @@ export default function MyVehiclePage() {
 
       {/* TODO next: bloc “Vidange / prochaine échéance” quand on branche vehicle-tasks/alerts */}
       <OilChangeCard
-        currentMileage={primary.currentMileage}
+        currentMileage={currentKm} // ✅ on passe le vrai km affiché
         nextDueKm={oil.data?.nextDueKm}
         intervalKm={oil.data?.intervalKm}
         lastDoneKm={oil.data?.lastDoneKm}

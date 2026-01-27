@@ -37,4 +37,7 @@ export type MGMaintenanceRow = {
   lastCheckingKm?: number | null;
 
   maintenanceNotes?: string | null;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 };
