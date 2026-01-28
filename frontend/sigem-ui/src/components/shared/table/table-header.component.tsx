@@ -77,8 +77,8 @@ const DraggableTableHeader = ({ header }: { header: Header<any, unknown> }) => {
         header.column.getIsSorted() === "asc"
           ? "ascending"
           : header.column.getIsSorted() === "desc"
-          ? "descending"
-          : "none"
+            ? "descending"
+            : "none"
       }
     >
       <div className="flex items-center justify-start gap-0.5">

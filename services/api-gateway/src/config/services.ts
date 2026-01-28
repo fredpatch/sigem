@@ -26,5 +26,6 @@ export const service = {
     products: "products",
     purchases: "purchases",
     purchaseRequests: "purchase-requests",
+    supplies: "supplies",
   },
 };

@@ -10,20 +10,22 @@ import {
   ChevronsUpDown,
   ClipboardList,
   Cog,
+  Container,
   Files,
-  HandHelping,
+  // HandHelping,
   HelpCircle,
   KeySquare,
   LayoutDashboard,
   Loader2,
   LogOut,
   MessageSquareText,
-  PackageSearch,
+  // PackageSearch,
   Pin,
   Settings,
-  ShoppingBag,
+  // ShoppingBag,
   User,
   Users,
+  Warehouse,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, NavLink, useNavigate } from "react-router-dom";
@@ -40,7 +42,7 @@ import {
 import {
   accountMenuLinks,
   contentVariants,
-  navLinks,
+  // navLinks,
   sidebarVariants,
   staggerVariants,
   transitionProps,
@@ -224,6 +226,30 @@ export const SideNavBar = () => {
                         />
 
                         <NavBarLink
+                          to={"/supplies"}
+                          pathName={"supplies"}
+                          isCollapsed={isCollapsed}
+                          icon={<Container className="h-4 w-4" />}
+                          title={"Gestion des fournitures"}
+                        />
+
+                        <NavBarLink
+                          to={"/stocks"}
+                          pathName={"stocks"}
+                          isCollapsed={isCollapsed}
+                          icon={<Warehouse className="h-4 w-4" />}
+                          title={"Gestion des stocks"}
+                        />
+
+                        {/* <NavBarLink
+                          to={"/stocks"}
+                          pathName={"stocks"}
+                          isCollapsed={isCollapsed}
+                          icon={<Warehouse className="h-4 w-4" />}
+                          title={"Gestion des stocks"}
+                        /> */}
+
+                        {/* <NavBarLink
                           to={"/products"}
                           pathName={"products"}
                           isCollapsed={isCollapsed}
@@ -244,7 +270,7 @@ export const SideNavBar = () => {
                           isCollapsed={isCollapsed}
                           icon={<HandHelping className="h-4 w-4" />}
                           title={"Demandes d'achats"}
-                        />
+                        /> */}
 
                         <Separator className="my-3" />
 

@@ -5,6 +5,7 @@ import initMiddlewares from "./middlewares";
 import { productRouter } from "./routes/products.route";
 import { purchaseRouter } from "./routes/purchases.route";
 import { purchaseRequestRouter } from "./routes/purchase-request.route";
+import suppliesRoutes from "./modules/supplies/routes/supplies.route";
 
 export const API_VERSION = "v1";
 
@@ -19,6 +20,7 @@ const application = async () => {
   app.use(`/${API_VERSION}`, purchaseRouter);
   app.use(`/${API_VERSION}`, productRouter);
   app.use(`/${API_VERSION}`, providerRouter);
+  app.use(`/${API_VERSION}/supplies`, suppliesRoutes());
 
   // 404
   app.use((_req, res) =>
@@ -31,7 +33,7 @@ const application = async () => {
         "Verify the API version in the URL",
         "Ensure the endpoint exists and the HTTP(S) method is correct",
       ],
-    })
+    }),
   );
 
   // errors

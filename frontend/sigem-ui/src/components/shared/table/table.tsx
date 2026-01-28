@@ -54,6 +54,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { TableToolbar } from "./table-toolbar";
 import { DateRange } from "react-day-picker";
 import { DateRangePickerControlled } from "../date-range";
+import { cn } from "@/lib/utils";
 
 declare module "@tanstack/react-table" {
   // allows us to define custom properties for our columns
@@ -107,6 +108,8 @@ export interface TableProps<TData, TValue> {
   emptyState?: React.ReactNode;
   onSubmit?: () => void;
   onBulkAction?: (selectedRows: TData[]) => void;
+  onRowClick?: (row: TData) => void;
+
   isEnabled?: boolean;
   btnActionIcon?: React.ReactNode;
   renderRowActions?: (row: TData) => React.ReactNode;
@@ -117,6 +120,7 @@ export function TableComponent<TData, TValue>({
   columns,
   toolbar,
   onSubmit,
+  onRowClick,
   isEnabled,
   emptyState,
   btnActionIcon,
@@ -211,38 +215,46 @@ export function TableComponent<TData, TValue>({
       >
         <Table>
           <TableHeaderComponent columnOrder={columnOrder} table={table} />
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <SortableContext
-                      key={cell.id}
-                      items={columnOrder}
-                      strategy={horizontalListSortingStrategy}
-                    >
+
+          <SortableContext
+            // key={cell.id}
+            items={columnOrder}
+            strategy={horizontalListSortingStrategy}
+          >
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    onClick={() => onRowClick?.(row.original)}
+                    className={cn(
+                      onRowClick &&
+                        "cursor-pointer hover:bg-muted/30 transition-colors",
+                    )}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
                       <DragAlongCell key={cell.id} cell={cell} />
-                    </SortableContext>
-                  ))}
-                  {renderRowActions && (
-                    <TableCell>{renderRowActions(row.original)}</TableCell>
-                  )}
+                    ))}
+                    {renderRowActions && (
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        {renderRowActions(row.original)}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    {emptyState || "No results."}
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  {emptyState || "No results."}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+              )}
+            </TableBody>
+          </SortableContext>
         </Table>
       </DndContext>
 

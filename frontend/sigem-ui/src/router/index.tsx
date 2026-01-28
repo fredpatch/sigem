@@ -40,6 +40,7 @@ import { ProductsLayout } from "@/pages/products-layout";
 import { PurchasesLayout } from "@/pages/purchases-layout";
 import { PurchaseRequestsLayout } from "@/pages/purchase-requests-layout";
 import { PurchaseDetailPage } from "@/modules/providers/_components/purchases/Purchase-details";
+import { SuppliesPage } from "@/modules/supplier/pages/supplies.page";
 
 const router = createBrowserRouter([
   { path: "/", element: <RootRedirect /> },
@@ -342,6 +343,42 @@ const router = createBrowserRouter([
         ),
       },
 
+      {
+        path: "/supplies",
+        element: (
+          <RouteGuard
+            allowedRoles={[
+              "SUPER_ADMIN",
+              "ADMIN",
+              "MG_COS",
+              "MG_AGT",
+              "MG_COB",
+              "GUEST",
+            ]}
+          >
+            <SuppliesPage />
+          </RouteGuard>
+        ),
+      },
+
+      {
+        path: "/stocks",
+        element: (
+          <RouteGuard
+            allowedRoles={[
+              "SUPER_ADMIN",
+              "ADMIN",
+              "MG_COS",
+              "MG_AGT",
+              "MG_COB",
+              "GUEST",
+            ]}
+          >
+            {/* <StocksPage /> */}
+            <>Stocks Page</>
+          </RouteGuard>
+        ),
+      },
       {
         path: "/my-vehicle",
         element: (
