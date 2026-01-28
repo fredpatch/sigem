@@ -1,38 +1,26 @@
 import { useMemo, useState } from "react";
 import {
-  useAutoPricePlan,
-  useChangePlanStatus,
   useCreateSupplyPlan,
   useSupplyPlan,
   useSupplyPlans,
 } from "../hooks/supplies.queries";
 import PlanDrawer from "../_components/PlanDrawer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 
 import SupplyItemsTab from "../_components/SupplyItemsTab";
 import SupplierPricesTab from "../_components/SupplierPricesTab";
+
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProvidersList } from "@/modules/providers/hooks/use-providers";
 import { Guidelines } from "@/common/guidelines";
+import { SUPPLY_STATUS_LABEL_FR } from "../supply-status.fr";
+import { SupplyPlanStatus } from "../hooks/supply-plan.transitions";
+import { buildSupplyPlanColumns } from "../_components/columns";
 import {
-  SUPPLY_STATUS_LABEL_FR,
-  SUPPLY_STATUS_VARIANT,
-  toSupplyPlanStatus,
-} from "../supply-status.fr";
-import {
-  allowedNextStatuses,
-  SupplyPlanStatus,
-} from "../hooks/supply-plan.transitions";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+  TableComponent,
+  TableToolbarConfig,
+} from "@/components/shared/table/table";
 
 const STATUSES = [
   "DRAFT",
@@ -47,14 +35,11 @@ const STATUSES = [
 
 export const SuppliesPage = () => {
   const [status, setStatus] = useState<any>("");
-  const [q, setQ] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
 
-  const plansQ = useSupplyPlans(status || undefined, q || undefined);
+  const plansQ = useSupplyPlans(status || undefined, undefined);
   const selectedPlanQ = useSupplyPlan(selected || undefined);
   const createPlan = useCreateSupplyPlan();
-  const autoPrice = useAutoPricePlan();
-  const changeStatus = useChangePlanStatus();
   const providersQ = useProvidersList({
     page: 1,
     limit: 100,
@@ -65,7 +50,6 @@ export const SuppliesPage = () => {
   const plans = (plansQ.data?.items ?? []) as any[];
 
   const safePlans = Array.isArray(plans) ? plans : [];
-  const next = allowedNextStatuses(status);
 
   const providers = useMemo(() => {
     const arr = (providersQ.data?.items ??
@@ -109,6 +93,85 @@ export const SuppliesPage = () => {
     });
     setSelected(doc);
   };
+
+  const columns = useMemo(
+    () => buildSupplyPlanColumns({ supplierSummary }),
+    [providerMap],
+  );
+
+  const plansToolbar: TableToolbarConfig = {
+    tableId: "supplies:plans",
+    enableGlobalSearch: true,
+    globalSearchPlaceholder: "Rechercher (référence, fournisseur...)",
+    enableResetFilters: true,
+    columnFilters: ["createdAt", "total"],
+    enableExport: true,
+    export: {
+      formats: ["csv", "xlsx", "pdf"],
+      filename: "previsionnel-fournitures",
+      enableColumnPicker: true,
+    },
+
+    presets: [
+      //   {
+      //     label: "Commandé",
+      //     apply: (table) => {
+      //       table.resetColumnFilters();
+      //       table
+      //         .getColumn("status")
+      //         ?.setFilterValue("ORDERED" satisfies SupplyPlanStatus);
+      //     },
+      //   },
+      //   {
+      //     label: "Livré",
+      //     apply: (table) => {
+      //       table.resetColumnFilters();
+      //       table
+      //         .getColumn("status")
+      //         ?.setFilterValue("DELIVERED" satisfies SupplyPlanStatus);
+      //     },
+      //   },
+      //   {
+      //     label: "En cours",
+      //     apply: (table) => {
+      //       table.resetColumnFilters();
+      //       // on garde ceux qui ne sont pas TERMINÉ/ANNULÉ via globalFilter text (simple)
+      //       // option: mieux via filterFn custom (voir bonus ci-dessous)
+      //       table.setGlobalFilter(""); // clean
+      //       // Astuce simple: filtrer status via select n’accepte qu’une valeur.
+      //       // Donc ici on met plutôt un preset "Non terminés" via custom filterFn (bonus).
+      //       // En attendant, on met DRAFT comme point d’entrée.
+      //       table.getColumn("status")?.setFilterValue("DRAFT");
+      //     },
+      //   },
+      //   {
+      //     label: "Tout",
+      //     apply: (table) => {
+      //       table.resetColumnFilters();
+      //       table.setGlobalFilter("");
+      //     },
+      //   },
+      //   {
+      //     label: "En attente de devis",
+      //     apply: (table) => {
+      //       table.resetColumnFilters();
+      //       table
+      //         .getColumn("status")
+      //         ?.setFilterValue("WAITING_QUOTE" satisfies SupplyPlanStatus);
+      //     },
+      //   },
+      //   {
+      //     label: "En attente de facture",
+      //     apply: (table) => {
+      //       table.resetColumnFilters();
+      //       table
+      //         .getColumn("status")
+      //         ?.setFilterValue("WAITING_INVOICE" satisfies SupplyPlanStatus);
+      //     },
+      //   },
+    ],
+  };
+
   return (
     <div className="space-y-4 mx-auto">
       <div>
@@ -164,120 +227,27 @@ export const SuppliesPage = () => {
                     ))}
                   </select>
 
-                  <Input
+                  {/* <Input
                     placeholder="Recherche référence (AP-2026-0001)"
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
                     className="w-[260px]"
-                  />
+                  /> */}
                 </div>
               </div>
 
-              <div className="border rounded-md overflow-hidden">
-                <div className="grid grid-cols-12 gap-2 px-3 py-2 text-xs bg-muted/40">
-                  <div className="col-span-2 font-medium">Référence</div>
-                  <div className="col-span-2 flex items-start text-left font-medium">
-                    Statut
-                  </div>
-                  <div className="col-span-2 font-medium">Date</div>
-                  <div className="col-span-2 font-medium">Fournisseur</div>
-                  <div className="col-span-2 font-medium">Total</div>
-                  <div className="col-span-2 font-medium text-right">
-                    Actions
-                  </div>
-                </div>
-
-                {plansQ.isLoading && (
-                  <div className="p-3 text-sm">Chargement...</div>
-                )}
-                {plansQ.isError && (
-                  <div className="p-3 text-sm text-red-600">
-                    {String((plansQ.error as any)?.message)}
-                  </div>
-                )}
-
-                {!plansQ.isLoading && safePlans.length === 0 && (
-                  <div className="p-3 text-sm text-muted-foreground">
+              <TableComponent
+                items={safePlans}
+                columns={columns as any}
+                toolbar={plansToolbar}
+                isLoading={plansQ.isLoading}
+                emptyState={
+                  <div className="text-sm text-muted-foreground">
                     Aucune prévision.
                   </div>
-                )}
-
-                {safePlans.map((p: any) => {
-                  const status = toSupplyPlanStatus(p?.status);
-
-                  return (
-                    <div
-                      key={p._id}
-                      className="grid grid-cols-12 gap-2 px-3 py-2 text-sm border-t hover:bg-muted/30 transition-colors cursor-pointer"
-                      onClick={() => setSelected(p._id)}
-                    >
-                      <button
-                        className="col-span-2 text-left hover:underline"
-                        onClick={() => setSelected(p._id)}
-                      >
-                        {p.reference}
-                      </button>
-
-                      <div className="col-span-2">
-                        <Badge
-                          className="py-1 rounded-lg"
-                          variant={SUPPLY_STATUS_VARIANT[status]}
-                        >
-                          {SUPPLY_STATUS_LABEL_FR[status]}
-                        </Badge>
-                      </div>
-
-                      <div className="col-span-2 text-muted-foreground">
-                        {p.createdAt
-                          ? new Date(p.createdAt).toLocaleString()
-                          : "-"}
-                      </div>
-
-                      <div className="col-span-2 font-medium">
-                        {supplierSummary(p)}
-                      </div>
-                      <div className="col-span-2 font-medium">
-                        {p.estimatedTotal ?? 0} {p.currency ?? "XAF"}
-                      </div>
-
-                      {/* ACTIONS */}
-                      <div
-                        className="col-span-2 flex justify-end gap-2"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => autoPrice.mutate(p._id)}
-                          disabled={autoPrice.isPending}
-                        >
-                          Prix auto
-                        </Button>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="sm" variant="outline">
-                              Statut <ChevronDown className="ml-2 h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {allowedNextStatuses(status).map((st) => (
-                              <DropdownMenuItem
-                                key={st}
-                                onClick={() =>
-                                  changeStatus.mutate({ id: p._id, to: st })
-                                }
-                              >
-                                {SUPPLY_STATUS_LABEL_FR[st]}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                }
+                onRowClick={(row: any) => setSelected(row._id)}
+              />
 
               <PlanDrawer
                 plan={selectedPlanQ.data ?? null}

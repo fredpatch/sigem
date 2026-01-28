@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { CSSProperties, useId, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useId, useMemo, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,6 +55,9 @@ import { TableToolbar } from "./table-toolbar";
 import { DateRange } from "react-day-picker";
 import { DateRangePickerControlled } from "../date-range";
 import { cn } from "@/lib/utils";
+import { loadTableState, saveTableState } from "@/utils/table-persist";
+import { Skeleton } from "@/components/ui/skeleton";
+// import { useDebouncedValue } from "@/modules/users/_components/use-debounced";
 
 declare module "@tanstack/react-table" {
   // allows us to define custom properties for our columns
@@ -109,6 +112,7 @@ export interface TableProps<TData, TValue> {
   onSubmit?: () => void;
   onBulkAction?: (selectedRows: TData[]) => void;
   onRowClick?: (row: TData) => void;
+  isLoading?: boolean; // ✅ NEW
 
   isEnabled?: boolean;
   btnActionIcon?: React.ReactNode;
@@ -121,22 +125,45 @@ export function TableComponent<TData, TValue>({
   toolbar,
   onSubmit,
   onRowClick,
+  isLoading,
   isEnabled,
   emptyState,
   btnActionIcon,
   renderRowActions,
 }: TableProps<TData, TValue>) {
+  const tableId = toolbar?.tableId;
+
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [columnOrder, setColumnOrder] = useState<string[]>(
-    columns.map((column) => column.id as string),
-  );
+  // const debouncedGlobalFilter = useDebouncedValue(globalFilter, 200);
+
+  const [columnOrder, setColumnOrder] = useState<string[]>(() => {
+    const saved = loadTableState(tableId)?.columnOrder;
+    const base = columns.map((c) => c.id as string);
+    // si saved invalide → fallback base
+    if (!saved?.length) return base;
+    const available = new Set(base);
+    const cleaned = saved.filter((id) => available.has(id));
+    // ensure all columns exist
+    const missing = base.filter((id) => !cleaned.includes(id));
+    return [...cleaned, ...missing];
+  });
+  const persisted = loadTableState(tableId);
+
+  // const [columnOrder, setColumnOrder] = useState<string[]>(
+  //   columns.map((column) => column.id as string),
+  // );
   const [sorting, setSorting] = useState<SortingState>([
     // {
     //   id: filterKey || "email",
     //   desc: false,
     // },
   ]);
+
+  useEffect(() => {
+    if (!tableId) return;
+    saveTableState(tableId, { columnOrder });
+  }, [tableId, columnOrder]);
 
   const table = useReactTable({
     data: items,
@@ -165,11 +192,17 @@ export function TableComponent<TData, TValue>({
 
     initialState: {
       pagination: {
-        pageSize: 8,
-        pageIndex: 0,
+        pageSize: persisted?.pageSize ?? 8,
+        pageIndex: persisted?.pageIndex ?? 0,
       },
     },
   });
+
+  useEffect(() => {
+    if (!tableId) return;
+    const s = table.getState().pagination;
+    saveTableState(tableId, { pageSize: s.pageSize, pageIndex: s.pageIndex });
+  }, [tableId, table]);
 
   // Reorder Column after drag & drop
   function handleDragEnd(event: DragEndEvent) {
@@ -221,39 +254,58 @@ export function TableComponent<TData, TValue>({
             items={columnOrder}
             strategy={horizontalListSortingStrategy}
           >
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onClick={() => onRowClick?.(row.original)}
-                    className={cn(
-                      onRowClick &&
-                        "cursor-pointer hover:bg-muted/30 transition-colors",
-                    )}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <DragAlongCell key={cell.id} cell={cell} />
+            {isLoading ? (
+              Array.from({ length: table.getState().pagination.pageSize }).map(
+                (_, i) => (
+                  <TableRow key={`sk-${i}`}>
+                    {table.getVisibleLeafColumns().map((c) => (
+                      <TableCell key={`sk-${i}-${c.id}`}>
+                        <Skeleton className="h-4 w-full" />
+                      </TableCell>
                     ))}
                     {renderRowActions && (
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        {renderRowActions(row.original)}
+                      <TableCell>
+                        <Skeleton className="h-8 w-20" />
                       </TableCell>
                     )}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    {emptyState || "No results."}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+                ),
+              )
+            ) : (
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      onClick={() => onRowClick?.(row.original)}
+                      className={cn(
+                        onRowClick &&
+                          "cursor-pointer hover:bg-muted/30 transition-colors",
+                      )}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <DragAlongCell key={cell.id} cell={cell} />
+                      ))}
+                      {renderRowActions && (
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          {renderRowActions(row.original)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      {emptyState || "No results."}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            )}
           </SortableContext>
         </Table>
       </DndContext>
@@ -327,8 +379,8 @@ export function Filter({ column }: { column: Column<any, unknown> }) {
   if (filterVariant === "range") {
     return (
       <div className="space-y-2">
-        <Label>{columnHeader}</Label>
-        <div className="flex">
+        {/* <Label>{columnHeader}</Label> */}
+        <div className="flex gap-2">
           <Input
             id={`${id}-range-1`}
             className="flex-1 rounded-e-none [-moz-appearance:textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
