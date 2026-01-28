@@ -106,4 +106,21 @@ export const suppliesApi = {
     const res = await api.post(`/supplies/plans/${id}/status`, body);
     return res.data;
   },
+
+  // DASHBOARD
+  getDashboard: async (params?: { from?: string; to?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.from) q.set("from", params.from);
+    if (params?.to) q.set("to", params.to);
+
+    const res = await api.get(`/supplies/dashboard?${q.toString()}`);
+    return res.data;
+  },
+
+  getSideKpis: async (params?: { days?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.days) q.set("days", String(params.days));
+    const res = await api.get(`/supplies/dashboard/side?${q.toString()}`);
+    return res.data;
+  },
 };

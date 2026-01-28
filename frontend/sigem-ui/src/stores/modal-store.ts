@@ -26,6 +26,7 @@ type ModalName =
   | "vehicleUpdateParkingCard"
   | "vehicleUpdateInsurance"
   | "vehicleDocumentModal"
+  | "supplyPlan"
   | null;
 
 interface ModalState {

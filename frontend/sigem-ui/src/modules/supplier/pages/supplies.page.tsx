@@ -1,10 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  useCreateSupplyPlan,
-  useSupplyPlan,
-  useSupplyPlans,
-} from "../hooks/supplies.queries";
-import PlanDrawer from "../_components/PlanDrawer";
+import { useCreateSupplyPlan, useSupplyPlans } from "../hooks/supplies.queries";
 import { Button } from "@/components/ui/button";
 
 import SupplyItemsTab from "../_components/SupplyItemsTab";
@@ -21,6 +16,8 @@ import {
   TableComponent,
   TableToolbarConfig,
 } from "@/components/shared/table/table";
+import { useModalStore } from "@/stores/modal-store";
+import { ModalTypes } from "@/types/modal.types";
 
 const STATUSES = [
   "DRAFT",
@@ -35,10 +32,13 @@ const STATUSES = [
 
 export const SuppliesPage = () => {
   const [status, setStatus] = useState<any>("");
-  const [selected, setSelected] = useState<any | null>(null);
+  const { openModal } = useModalStore();
+
+  const openPlan = (id: string) => {
+    openModal(ModalTypes.SUPPLY_PLAN, id);
+  };
 
   const plansQ = useSupplyPlans(status || undefined, undefined);
-  const selectedPlanQ = useSupplyPlan(selected || undefined);
   const createPlan = useCreateSupplyPlan();
   const providersQ = useProvidersList({
     page: 1,
@@ -48,6 +48,7 @@ export const SuppliesPage = () => {
   } as any);
 
   const plans = (plansQ.data?.items ?? []) as any[];
+  // console.log("Modal selectedItem:", { selectedItem, selected, openPlan });
 
   const safePlans = Array.isArray(plans) ? plans : [];
 
@@ -91,11 +92,11 @@ export const SuppliesPage = () => {
       // le backend prend createdByUserId depuis getUserId() (header/x-user-id ou req.user)
       lines: [],
     });
-    setSelected(doc);
+    openPlan(doc._id);
   };
 
   const columns = useMemo(
-    () => buildSupplyPlanColumns({ supplierSummary }),
+    () => buildSupplyPlanColumns({ supplierSummary, onOpenPlan: openPlan }),
     [providerMap],
   );
 
@@ -174,27 +175,6 @@ export const SuppliesPage = () => {
 
   return (
     <div className="space-y-4 mx-auto">
-      <div>
-        <h1 className="text-xl font-semibold">Fournitures</h1>
-        <p className="text-sm text-muted-foreground">
-          Prévisionnel, Articles et Prix fournisseurs - tout sur un seul écran.
-        </p>
-      </div>
-
-      <Guidelines
-        variant="info"
-        title="Approvisionnement prévisionnel : comment ça marche ?"
-        description="Suivez vos besoins, comparez les prix fournisseurs et tracez les étapes jusqu’à la livraison."
-        items={[
-          "1) Créez d’abord les Articles (rame papier, eau, toner…).",
-          "2) Renseignez les Prix fournisseurs (fournisseur + article + prix).",
-          "3) Créez une Prévision puis ajoutez des lignes (article, quantité, fournisseur).",
-          "Utilisez “Prix auto” pour proposer le meilleur prix disponible.",
-          "Faites évoluer le statut : En attente devis → Commandé → Livré → Terminé (ou Annulé).",
-          "Les prix sont “snapshot” : un changement de prix plus tard ne modifie pas l’historique.",
-        ]}
-      />
-
       <Card className="p-3">
         <Tabs defaultValue="plans" className="w-full">
           <TabsList className="flex flex-wrap">
@@ -246,14 +226,13 @@ export const SuppliesPage = () => {
                     Aucune prévision.
                   </div>
                 }
-                onRowClick={(row: any) => setSelected(row._id)}
               />
 
-              <PlanDrawer
+              {/* <PlanDrawer
                 plan={selectedPlanQ.data ?? null}
                 open={!!selected}
                 onOpenChange={(o) => !o && setSelected(null)}
-              />
+              /> */}
             </div>
           </TabsContent>
 
@@ -272,6 +251,20 @@ export const SuppliesPage = () => {
           </TabsContent>
         </Tabs>
       </Card>
+
+      <Guidelines
+        variant="info"
+        title="Approvisionnement prévisionnel : comment ça marche ?"
+        description="Suivez vos besoins, comparez les prix fournisseurs et tracez les étapes jusqu’à la livraison."
+        items={[
+          "1) Créez d’abord les Articles (rame papier, eau, toner…).",
+          "2) Renseignez les Prix fournisseurs (fournisseur + article + prix).",
+          "3) Créez une Prévision puis ajoutez des lignes (article, quantité, fournisseur).",
+          "Utilisez “Prix auto” pour proposer le meilleur prix disponible.",
+          "Faites évoluer le statut : En attente devis → Commandé → Livré → Terminé (ou Annulé).",
+          "Les prix sont “snapshot” : un changement de prix plus tard ne modifie pas l’historique.",
+        ]}
+      />
     </div>
   );
 };

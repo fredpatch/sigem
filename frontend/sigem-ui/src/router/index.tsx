@@ -41,6 +41,7 @@ import { PurchasesLayout } from "@/pages/purchases-layout";
 import { PurchaseRequestsLayout } from "@/pages/purchase-requests-layout";
 import { PurchaseDetailPage } from "@/modules/providers/_components/purchases/Purchase-details";
 import { SuppliesPage } from "@/modules/supplier/pages/supplies.page";
+import { SupplierManagementLayoutPage } from "@/pages/supplier-management-layout.page";
 
 const router = createBrowserRouter([
   { path: "/", element: <RootRedirect /> },
@@ -356,9 +357,15 @@ const router = createBrowserRouter([
               "GUEST",
             ]}
           >
-            <SuppliesPage />
+            <SupplierManagementLayoutPage />
           </RouteGuard>
         ),
+        children: [
+          {
+            index: true,
+            element: <SuppliesPage />,
+          },
+        ],
       },
 
       {
@@ -375,9 +382,15 @@ const router = createBrowserRouter([
             ]}
           >
             {/* <StocksPage /> */}
-            <>Stocks Page</>
+            <>Stocks Layout</>
           </RouteGuard>
         ),
+        children: [
+          {
+            index: true,
+            element: <>Stocks Page</>,
+          },
+        ],
       },
       {
         path: "/my-vehicle",

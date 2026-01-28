@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
+  suppliesKeys,
   useAutoPricePlan,
   useChangePlanStatus,
   useSupplyItems,
@@ -47,6 +48,9 @@ import {
   itemVariants,
   successVariants,
 } from "@/common/constant";
+import { useQueryClient } from "@tanstack/react-query";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 export default function PlanDrawer({
   plan,
@@ -57,11 +61,13 @@ export default function PlanDrawer({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
+  const qc = useQueryClient();
   const itemsQ = useSupplyItems("");
   const updatePlan = useUpdateSupplyPlan();
   const autoPrice = useAutoPricePlan();
   const changeStatus = useChangePlanStatus();
   const nextStatuses = allowedNextStatuses(plan?.status as SupplyPlanStatus);
+  const [publierPrixFournisseur, setPublierPrixFournisseur] = useState(false);
 
   const [lines, setLines] = useState<any[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -69,6 +75,13 @@ export default function PlanDrawer({
   useEffect(() => {
     setLines(plan?.lines || []);
   }, [plan?._id, plan?.updatedAt]);
+
+  useEffect(() => {
+    const hasManualPrice = lines.some(
+      (l) => l.selectedSupplierId && l.selectedUnitPrice != null,
+    );
+    if (hasManualPrice) setPublierPrixFournisseur(true);
+  }, [lines]);
 
   const items = useMemo(
     () =>
@@ -98,7 +111,14 @@ export default function PlanDrawer({
 
   const save = async () => {
     if (!plan?._id) return;
-    await updatePlan.mutateAsync({ id: plan._id, body: { lines } });
+
+    await updatePlan.mutateAsync({
+      id: plan._id,
+      body: { lines, publishSupplierPrices: publierPrixFournisseur },
+    });
+
+    // refresh plan
+    qc.invalidateQueries({ queryKey: [...suppliesKeys.plans, plan._id] });
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
   };
@@ -113,7 +133,7 @@ export default function PlanDrawer({
     await autoPrice.mutateAsync(plan._id);
 
     // 3) optionnel: si tes hooks invalident déjà le detail, pas besoin.
-    // sinon: refetch côté parent / invalidate detail query (voir plus bas)
+    qc.invalidateQueries({ queryKey: [...suppliesKeys.plans, plan._id] });
 
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
@@ -178,6 +198,21 @@ export default function PlanDrawer({
                 </motion.div>
               )}
             </AnimatePresence>
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/20 px-3 py-2 mr-4">
+              <Switch
+                checked={publierPrixFournisseur}
+                onCheckedChange={setPublierPrixFournisseur}
+              />
+              <div className="min-w-0">
+                <Label className="text-sm font-medium">
+                  Mettre à jour la grille des prix fournisseur
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Activez uniquement si ce prix correspond au tarif “référence”
+                  du fournisseur.
+                </p>
+              </div>
+            </div>
           </DialogTitle>
         </DialogHeader>
 

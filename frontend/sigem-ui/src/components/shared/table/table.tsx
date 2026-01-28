@@ -124,7 +124,7 @@ export function TableComponent<TData, TValue>({
   columns,
   toolbar,
   onSubmit,
-  onRowClick,
+  // onRowClick,
   isLoading,
   isEnabled,
   emptyState,
@@ -277,11 +277,11 @@ export function TableComponent<TData, TValue>({
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
-                      onClick={() => onRowClick?.(row.original)}
-                      className={cn(
-                        onRowClick &&
-                          "cursor-pointer hover:bg-muted/30 transition-colors",
-                      )}
+                      // onClick={() => onRowClick?.(row.original)}
+                      // className={cn(
+                      //   onRowClick &&
+                      //     "cursor-pointer hover:bg-muted/30 transition-colors",
+                      // )}
                       data-state={row.getIsSelected() && "selected"}
                     >
                       {row.getVisibleCells().map((cell) => (

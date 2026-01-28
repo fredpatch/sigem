@@ -4,6 +4,7 @@ import { SupplyItemController } from "../controllers/supply-item.controller";
 import { SupplyPlanController } from "../controllers/supply-plan.controller";
 import { authorizedRoles } from "../../../middlewares/authorized-roles";
 import { authenticate } from "../../../middlewares/authenticate";
+import { SupplyDashboardController } from "../controllers/supply-dashboard.controller";
 
 const canWrite = authorizedRoles(
   "MG_COS",
@@ -21,6 +22,7 @@ export default function suppliesRoutes() {
   const items = new SupplyItemController();
   const prices = new SupplierPriceController();
   const plans = new SupplyPlanController();
+  const dashboard = new SupplyDashboardController();
 
   /**
    * ITEMS
@@ -54,6 +56,10 @@ export default function suppliesRoutes() {
   router.post("/plans/:id/status", plans.changeStatus.bind(plans));
   router.post("/plans/:id/auto-price", plans.autoPrice.bind(plans));
   router.post("/plans/:id/cancel", plans.cancel.bind(plans));
+
+  // Dashboard stats
+  router.get("/dashboard", dashboard.getDashboard.bind(dashboard));
+  router.get("/dashboard/side", dashboard.supplySideKpis.bind(dashboard));
 
   return router;
 }

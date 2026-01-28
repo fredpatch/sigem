@@ -36,6 +36,8 @@ export const ModalTypes = {
   VEHICLE_UPDATE_PARKING_CARD: "vehicleUpdateParkingCard",
   VEHICLE_UPDATE_INSURANCE: "vehicleUpdateInsurance",
   VEHICLE_DOCUMENT_MODAL: "vehicleDocumentModal",
+
+  SUPPLY_PLAN: "supplyPlan",
 } as const;
 
 export type ModalType = (typeof ModalTypes)[keyof typeof ModalTypes];

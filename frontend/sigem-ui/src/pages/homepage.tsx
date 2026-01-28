@@ -10,7 +10,7 @@ const HomePage = () => {
     return <GuestHome />;
   }
   return (
-    <div className="mx-auto">
+    <div className="mx-auto w-full px-4 md:px-8 lg:px-16 py-6">
       <MGMonitoringOverview />
     </div>
   );

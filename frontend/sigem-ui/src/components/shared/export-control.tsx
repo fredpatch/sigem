@@ -90,8 +90,10 @@ export function ExportControls({ table, config }: { table: any; config: any }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="tertiary" size="sm">
-              <Columns3 className="h-4 w-4 mr-2" />
-              Colonnes
+              <Columns3
+              // className="h-4 w-4 mr-2"
+              />
+              {/* Colonnes */}
             </Button>
           </DropdownMenuTrigger>
 
@@ -134,8 +136,10 @@ export function ExportControls({ table, config }: { table: any; config: any }) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="default" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exporter
+            <Download
+            // className="h-4 w-4 mr-2"
+            />
+            {/* Exporter */}
           </Button>
         </DropdownMenuTrigger>
 

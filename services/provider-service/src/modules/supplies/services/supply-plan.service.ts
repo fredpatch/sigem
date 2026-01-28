@@ -142,6 +142,7 @@ export class SupplyPlanService {
         quantity: number;
         selectedSupplierId?: string | null;
         selectedUnitPrice?: number | null;
+        publishingSupplierPrices?: boolean;
       }>;
     },
   ) {
@@ -186,6 +187,50 @@ export class SupplyPlanService {
     }
 
     await doc.save();
+
+    // ✅ Auto-feed supplier prices (safe)
+    if (input.lines?.length) {
+      // Option: global flag from UI (recommended)
+      const publish = (input as any).publishSupplierPrices === true;
+
+      for (const l of input.lines) {
+        if (!l.selectedSupplierId) continue;
+        if (l.selectedUnitPrice == null) continue;
+
+        const supplierId = String(l.selectedSupplierId);
+        const itemId = String(l.itemId);
+        const unitPrice = Number(l.selectedUnitPrice);
+
+        // rule A: only create if missing, unless publish==true
+        const exists = await SupplierPriceEntity.findOne({
+          supplierId: new Types.ObjectId(supplierId),
+          itemId: new Types.ObjectId(itemId),
+        }).select("_id unitPrice");
+
+        if (!exists || publish) {
+          await SupplierPriceEntity.findOneAndUpdate(
+            {
+              supplierId: new Types.ObjectId(supplierId),
+              itemId: new Types.ObjectId(itemId),
+            },
+            {
+              $set: {
+                unitPrice,
+                currency: "XAF",
+                source: {
+                  docId: String(doc._id),
+                  note: !exists
+                    ? "Créé depuis plan (prix manuel)"
+                    : "Mis à jour depuis plan (prix manuel)",
+                },
+              },
+            },
+            { upsert: true, new: true },
+          );
+        }
+      }
+    }
+
     return doc;
   }
 

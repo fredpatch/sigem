@@ -4,6 +4,7 @@ import { LocationModal } from "@/modules/locations/_components/form/location-mod
 import { ProductModal } from "@/modules/providers/_components/products/product-modal";
 import { ProviderModal } from "@/modules/providers/_components/provider-modal";
 import { PurchaseModal } from "@/modules/providers/_components/purchases/purchase-modal";
+import { SupplyPlanModal } from "@/modules/supplier/pages/supply-plan.modal";
 import { ResetFormModal } from "@/modules/users/_components/forms/reset-password.modal";
 import { UserFormModal } from "@/modules/users/_components/forms/user-form";
 import { VehicleModal } from "@/modules/vehicules/_components/form/vehicle-modal";
@@ -37,6 +38,7 @@ export function ModalGlobalProvider() {
       <VehicleCompleteOilChangeModal />
       <VehicleDocumentModal />
       <VehicleUpdateMileageModal />
+      <SupplyPlanModal />
     </>
   );
 }

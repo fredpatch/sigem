@@ -160,3 +160,20 @@ export function useChangePlanStatus() {
     },
   });
 }
+
+// DASHBOARD
+export function useSuppliesDashboard(params?: { from?: string; to?: string }) {
+  return useQuery({
+    queryKey: ["supplies-dashboard", params?.from ?? null, params?.to ?? null],
+    queryFn: () => suppliesApi.getDashboard(params),
+    staleTime: 60_000,
+  });
+}
+
+export function useSuppliesSideKpis(days: number = 30) {
+  return useQuery({
+    queryKey: ["supplies-dashboard", "side", days],
+    queryFn: async () => suppliesApi.getSideKpis({ days }),
+    refetchInterval: 60_000, // optional, feels “live”
+  });
+}

@@ -22,6 +22,7 @@ import {
 
 export function buildSupplyPlanColumns(opts: {
   supplierSummary: (p: any) => string;
+  onOpenPlan: (id: string) => void;
 }): ColumnDef<SupplyPlanRow>[] {
   return [
     {
@@ -29,9 +30,16 @@ export function buildSupplyPlanColumns(opts: {
       accessorKey: "reference",
       header: "Référence",
       meta: { filterVariant: "text", label: "Référence" },
-      cell: ({ row }) => (
-        <span className="font-medium">{row.original.reference}</span>
-      ),
+      cell: ({ row }) => {
+        return (
+          <span
+            onClick={() => opts.onOpenPlan(row.original._id)}
+            className="font-medium cursor-pointer hover:underline"
+          >
+            {row.original.reference}
+          </span>
+        );
+      },
     },
     {
       id: "status",
@@ -116,11 +124,11 @@ export function buildSupplyPlanColumns(opts: {
           <div className="flex justify-end gap-2">
             <Button
               size="sm"
-              variant="outline"
+              variant="tertiary"
               onClick={() => autoPrice.mutate(row.original._id)}
               disabled={autoPrice.isPending}
             >
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Sparkles className="h-4 w-4 mr-0 text-yellow-600" />
               Prix auto
             </Button>
 

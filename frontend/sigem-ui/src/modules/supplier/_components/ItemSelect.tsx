@@ -58,7 +58,7 @@ export function ItemSelect({ items, value, onChange, disabled }: Props) {
         <Command>
           <CommandInput placeholder="Rechercher un article..." />
           <CommandEmpty>Aucun article.</CommandEmpty>
-          <CommandGroup>
+          <CommandGroup className="max-h-[300px] overflow-y-auto">
             {items.map((it) => {
               const isSelected = String(it._id) === String(value);
               return (

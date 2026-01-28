@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,6 +8,14 @@ import {
 } from "../hooks/supplies.queries";
 import { ProviderSelect } from "../_components/ProviderSelect";
 import { useSuppliesLookups } from "../hooks/use-supplies-lookups";
+import { SupplierPriceRow } from "../types";
+import {
+  TableComponent,
+  TableToolbarConfig,
+} from "@/components/shared/table/table";
+import { buildSupplierPricesColumns } from "./_tables/supplier-prices.columns";
+import { Save } from "lucide-react";
+import { ItemSelect } from "./ItemSelect";
 
 export default function SupplierPricesTab() {
   const itemsQ = useSupplyItems("");
@@ -40,6 +48,95 @@ export default function SupplierPricesTab() {
     });
   };
 
+  const rows: SupplierPriceRow[] = useMemo(() => {
+    return (prices ?? []).map((p: any) => {
+      const provider = providerMap.get(String(p.supplierId));
+      const item = itemMap.get(String(p.itemId));
+
+      return {
+        id: String(p._id),
+        supplierId: String(p.supplierId),
+        supplierName: provider?.name ?? String(p.supplierId),
+        itemId: String(p.itemId),
+        itemLabel: item?.label ?? String(p.itemId),
+        unitPrice: Number(p.unitPrice ?? 0),
+        updatedAt: p.updatedAt,
+      };
+    });
+  }, [prices, providerMap, itemMap]);
+
+  const supplierLabels = useMemo(() => {
+    const obj: Record<string, string> = {};
+    providerMap.forEach(
+      (p: any, id: string) => (obj[String(id)] = p?.name ?? String(id)),
+    );
+    return obj;
+  }, [providerMap]);
+
+  const itemLabels = useMemo(() => {
+    const obj: Record<string, string> = {};
+    itemMap.forEach(
+      (it: any, id: string) => (obj[String(id)] = it?.label ?? String(id)),
+    );
+    return obj;
+  }, [itemMap]);
+
+  const toolbarConfig: TableToolbarConfig = {
+    tableId: "supplies:supplier-prices",
+    enableGlobalSearch: true,
+    globalSearchPlaceholder: "Rechercher (fournisseur, article...)",
+    enableResetFilters: true,
+    columnFilters: ["unitPrice", "updatedAt"],
+    enableExport: true,
+    export: {
+      formats: ["csv", "xlsx", "pdf"],
+      filename: "prix-fournisseurs",
+      enableColumnPicker: true,
+    },
+    // presets: [
+    //   {
+    //     label: "MAJ 7 jours",
+    //     apply: (table) => {
+    //       table.resetColumnFilters();
+    //       const from = new Date(
+    //         Date.now() - 7 * 24 * 3600 * 1000,
+    //       ).toISOString();
+    //       const to = new Date().toISOString();
+    //       table.getColumn("updatedAt")?.setFilterValue([from, to]);
+    //     },
+    //   },
+    //   {
+    //     label: "MAJ 30 jours",
+    //     apply: (table) => {
+    //       table.resetColumnFilters();
+    //       const from = new Date(
+    //         Date.now() - 30 * 24 * 3600 * 1000,
+    //       ).toISOString();
+    //       const to = new Date().toISOString();
+    //       table.getColumn("updatedAt")?.setFilterValue([from, to]);
+    //     },
+    //   },
+    //   {
+    //     label: "Tout",
+    //     apply: (table) => {
+    //       table.resetColumnFilters();
+    //       table.setGlobalFilter("");
+    //     },
+    //   },
+    // ],
+  };
+
+  const onPickRow = (r: any) => {
+    setSupplierId(r.supplierId);
+    setItemId(r.itemId);
+    setUnitPrice(r.unitPrice);
+  };
+
+  const columns = useMemo(
+    () => buildSupplierPricesColumns({ supplierLabels, itemLabels }),
+    [supplierLabels, itemLabels],
+  );
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-12 gap-2">
@@ -53,18 +150,12 @@ export default function SupplierPricesTab() {
         </div>
 
         <div className="col-span-4">
-          <select
-            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
-            value={itemId}
-            onChange={(e) => setItemId(e.target.value)}
-          >
-            <option value="">Choisir article</option>
-            {items.map((it: any) => (
-              <option key={it._id} value={it._id}>
-                {it.label}
-              </option>
-            ))}
-          </select>
+          <ItemSelect
+            items={items}
+            value={itemId || undefined}
+            onChange={(id) => setItemId(id)}
+            disabled={itemsQ.isLoading}
+          />
         </div>
 
         <div className="col-span-2">
@@ -81,45 +172,24 @@ export default function SupplierPricesTab() {
             onClick={save}
             disabled={upsert.isPending || !supplierId || !itemId}
           >
-            Upsert
+            <Save className="h-4 w-4 mr-2" />
+            Enregistrer
           </Button>
         </div>
       </div>
 
-      <div className="border rounded-md overflow-hidden">
-        <div className="grid grid-cols-12 gap-2 px-3 py-2 text-xs bg-muted/40">
-          <div className="col-span-4 font-medium">Fournisseur</div>
-          <div className="col-span-4 font-medium">Article</div>
-          <div className="col-span-2 font-medium">Prix</div>
-          <div className="col-span-2 font-medium">MAJ</div>
-        </div>
-
-        {prices.map((p: any) => {
-          const provider = providerMap.get(String(p.supplierId));
-          const item = itemMap.get(String(p.itemId));
-
-          return (
-            <div
-              key={p._id}
-              className="grid grid-cols-12 gap-2 px-3 py-2 text-sm border-t"
-            >
-              <div className="col-span-4 truncate">
-                {provider ? provider.name : String(p.supplierId)}
-              </div>
-
-              <div className="col-span-4 truncate">
-                {item ? item.label : String(p.itemId)}
-              </div>
-
-              <div className="col-span-2 font-medium">{p.unitPrice} XAF</div>
-
-              <div className="col-span-2 text-muted-foreground">
-                {p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "-"}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <TableComponent
+        items={rows}
+        columns={columns as any}
+        toolbar={toolbarConfig}
+        isLoading={pricesQ.isLoading}
+        emptyState={
+          <div className="text-sm text-muted-foreground">
+            Aucun prix fournisseur.
+          </div>
+        }
+        onRowClick={onPickRow}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Filter, TableToolbarConfig } from "./table";
 import { Button } from "@/components/ui/button";
 import { ExportControls } from "../export-control";
+import { RefreshCcw } from "lucide-react";
 
 type Props = {
   table: any;
@@ -56,9 +57,10 @@ export function TableToolbar({ table, config }: Props) {
               table.resetGlobalFilter();
             }}
           >
-            Réinitialiser
+            <RefreshCcw />
           </Button>
         )}
+        {/* Réinitialiser */}
 
         {/* Export Dropdown */}
         {config.enableExport && (
