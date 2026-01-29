@@ -46,7 +46,7 @@ export const MGMonitoringOverview = () => {
         </div>
 
         {/* ASSETS */}
-        <TabsContent value="assets" className="pt-4">
+        <TabsContent value="assets" className="py-5">
           <section className="space-y-3">
             <div className="text-center">
               <h2 className="text-lg font-semibold">
@@ -64,7 +64,7 @@ export const MGMonitoringOverview = () => {
         </TabsContent>
 
         {/* VEHICLES */}
-        <TabsContent value="vehicles" className="pt-4">
+        <TabsContent value="vehicles" className="py-5">
           <section className="space-y-3">
             <div className="text-center">
               <h2 className="text-lg font-semibold">Parc automobile</h2>
@@ -81,7 +81,7 @@ export const MGMonitoringOverview = () => {
         </TabsContent>
 
         {/* SUPPLIES */}
-        <TabsContent value="supplies" className="pt-4">
+        <TabsContent value="supplies" className="py-5">
           <section className="space-y-3">
             <div className="text-center">
               <h2 className="text-lg font-semibold">Fournitures</h2>
@@ -90,7 +90,7 @@ export const MGMonitoringOverview = () => {
               </p>
             </div>
 
-            <div className="rounded-xl border bg-card/60 backdrop-blur-sm p-4 lg:p-5 shadow-xl">
+            <div className="rounded-xl border bg-card/60 backdrop-blur-sm p-4 lg:p-5 shadow-xl py-4">
               <SupplyKPIDashboard />
               {/* ou ton composant actuel: <KpiSupplierDashboard /> */}
             </div>

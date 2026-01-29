@@ -19,7 +19,9 @@ async function main() {
   // Mongo
   await connectToMongo();
 
-  await ensureKafkaTopics(process.env.KAFKA_BROKERS!.split(",").map(b => b.trim()));
+  await ensureKafkaTopics(
+    process.env.KAFKA_BROKERS!.split(",").map((b) => b.trim()),
+  );
 
   // Kafka Consumer
   const brokers = (process.env.KAFKA_BROKERS || "localhost:9092").split(",");
@@ -67,7 +69,21 @@ async function main() {
     // users - auth
     // "auth.user.created",
     // "auth.user.updated",
-    "auth.otp.requested"
+    "auth.otp.requested",
+
+    "supply.plan.created",
+    "supply.plan.updated",
+    "supply.plan.status.changed",
+    "supply.plan.completed",
+    "supply.plan.deleted",
+
+    "supply.item.created",
+    "supply.item.updated",
+    "supply.item.deactivated",
+    "supply.item.activated",
+
+    "supply.price.updated",
+    "supply.price.deleted",
   ];
 
   await startConsumer({

@@ -48,7 +48,8 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "tsc -b --clean && rimraf dist"
+    "clean": "tsc -b --clean && rimraf dist",
+    "dev": "tsc -b --watch"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10"

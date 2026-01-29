@@ -62,7 +62,7 @@ export default function PlanDrawer({
   onOpenChange: (v: boolean) => void;
 }) {
   const qc = useQueryClient();
-  const itemsQ = useSupplyItems("");
+  const itemsQ = useSupplyItems({ active: true });
   const updatePlan = useUpdateSupplyPlan();
   const autoPrice = useAutoPricePlan();
   const changeStatus = useChangePlanStatus();

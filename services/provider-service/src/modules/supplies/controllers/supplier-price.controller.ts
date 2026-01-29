@@ -1,4 +1,6 @@
+import { emitSupplyEvent } from "../../../core/events/supply.event";
 import { catchError } from "../../../utils/catch-error";
+import { getActor } from "../../../utils/get.matricule";
 import { getPagination } from "../_utils";
 import { upsertSupplierPriceDTO } from "../schema/supplies.dto";
 import { SupplierPriceService } from "../services/supplier-price.service";
@@ -30,6 +32,32 @@ export class SupplierPriceController {
   upsert = catchError(async (req, res) => {
     const parsed = upsertSupplierPriceDTO.parse(req.body);
     const data = await service.upsert(parsed as any);
+
+    const { id, matriculation, role, username } = getActor(req);
+
+    // Notification
+    await emitSupplyEvent("supply.price.updated", {
+      userId: id,
+      recipients: [], // broadcast rôle MG
+      severity: "success",
+      title: "Prix fournisseur mis à jour",
+      message: `Le prix fournisseur a été mis à jour à ${data.unitPrice}.`,
+      resourceType: "SupplyPrice",
+      resourceId: data._id.toString(),
+      dept: "MGX",
+      actor: {
+        userId: id,
+        role: role,
+        name: username,
+        matriculation: matriculation,
+      },
+      data: {
+        priceId: data._id,
+        itemId: data.itemId,
+        unitPrice: data.unitPrice,
+      },
+    });
+
     return res.status(201).json({ ok: true, data });
   });
 
@@ -41,6 +69,19 @@ export class SupplierPriceController {
     const data = await service.update(req.params.id, {
       unitPrice,
       source: req.body.source,
+    });
+
+    await emitSupplyEvent("supply.price.updated", {
+      severity: "info",
+      title: "Prix mis à jour",
+      message: `Prix mis à jour pour l'article "${data.itemId}".`,
+      resourceType: "SupplyPrice",
+      resourceId: data._id.toString(),
+      data: {
+        itemId: data.itemId,
+        oldPrice: unitPrice,
+        newPrice: data.unitPrice,
+      },
     });
 
     return res.json({ ok: true, data });

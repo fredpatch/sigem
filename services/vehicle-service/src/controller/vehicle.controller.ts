@@ -20,12 +20,7 @@ import {
 } from "src/services/vehicle.service";
 import { catchError } from "src/utils/catch-error";
 import { getMatriculationFromReq } from "src/utils/get.matricule";
-import {
-  getDoneKm,
-  getDueKm,
-  getIntervalKm,
-  normalizeStatus,
-} from "src/utils/helpers";
+import { normalizeStatus } from "src/utils/helpers";
 import { VehicleTaskType } from "src/types/vehicle-task-template.type";
 import { VehicleTaskStatus } from "src/types/vehicle-task.types";
 import { VehicleTaskTemplateEntity } from "src/models/vehicle-task-template.model";
@@ -347,7 +342,7 @@ export class VehicleDocumentController {
       return res
         .status(500)
         .json(
-          response(null, null, "Error creating vehicle document", false, 500)
+          response(null, null, "Error creating vehicle document", false, 500),
         );
     }
 
@@ -368,7 +363,7 @@ export class VehicleDocumentController {
     return res
       .status(201)
       .json(
-        response(doc, null, "Vehicle document created successfully", true, 201)
+        response(doc, null, "Vehicle document created successfully", true, 201),
       );
   });
 

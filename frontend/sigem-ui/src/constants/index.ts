@@ -1,8 +1,8 @@
 import {
   // Archive,
-  ClipboardList,
-  Files,
-  KeySquare,
+  // ClipboardList,
+  // Files,
+  // KeySquare,
   LayoutDashboard,
 } from "lucide-react";
 
@@ -32,6 +32,19 @@ export const SOCKET_EVENTS = {
   STOCK_LOW: "stock.low",
   STOCK_CRITICAL: "stock.critical",
   STOCK_REPLENISHED: "stock.replenished",
+
+  // Supply related events
+  SUPPLY_ITEM_CREATED: "supply.item.created",
+  SUPPLY_ITEM_UPDATED: "supply.item.updated",
+  SUPPLY_ITEM_DEACTIVATED: "supply.item.deactivated",
+
+  SUPPLY_PRICE_UPDATED: "supply.price.updated",
+  SUPPLY_PRICE_DELETED: "supply.price.deleted",
+
+  SUPPLY_PLAN_COMPLETED: "supply.plan.completed",
+  SUPPLY_PLAN_DELETED: "supply.plan.deleted",
+  SUPPLY_PLAN_CREATED: "supply.plan.created",
+  SUPPLY_PLAN_STATUS_CHANGED: "supply.plan.status.changed",
 };
 
 export const NOTIFICATIONS = "notifications";

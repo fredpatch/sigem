@@ -3,10 +3,10 @@ import { useSupplyItems } from "./supplies.queries";
 import { useProvidersList } from "@/modules/providers/hooks/use-providers";
 
 export function useSuppliesLookups() {
-  const itemsQ = useSupplyItems("");
+  const itemsQ = useSupplyItems({ active: true });
   const providersQ = useProvidersList({
     page: 1,
-    limit: 100,
+    limit: 200,
     search: "",
     isActive: true,
   } as any);

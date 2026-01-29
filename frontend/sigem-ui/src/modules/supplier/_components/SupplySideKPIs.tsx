@@ -35,7 +35,7 @@ export function SupplySideKPIs({
   }));
 
   return (
-    <div className="space-y-4 lg:sticky lg:top-4">
+    <div className="space-y-4 lg:sticky lg:top-4 py-5">
       {/* Urgences */}
       <div className="rounded-xl border bg-card/60 backdrop-blur-sm p-4 shadow-xl">
         <div className="text-sm font-semibold mb-3">Urgences</div>

@@ -15,10 +15,9 @@ export type AssetEventBase = {
   resourceId?: string;
 };
 
-
 export async function emitAssetEvent(
   topic: string,
-  payload: AssetEventBase & Record<string, any>
+  payload: AssetEventBase & Record<string, any>,
 ) {
   await getEventBus().emit(topic, {
     ...payload,

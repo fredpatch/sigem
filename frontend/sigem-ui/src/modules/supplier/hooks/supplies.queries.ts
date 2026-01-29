@@ -8,10 +8,10 @@ export const suppliesKeys = {
 };
 
 // ITEMS
-export function useSupplyItems(search?: string) {
+export function useSupplyItems(params?: { search?: string; active?: boolean }) {
   return useQuery({
-    queryKey: [...suppliesKeys.items, search],
-    queryFn: () => suppliesApi.listItems({ search }),
+    queryKey: [...suppliesKeys.items, params],
+    queryFn: () => suppliesApi.listItems(params),
   });
 }
 
@@ -51,7 +51,10 @@ export function useEnableSupplyItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => suppliesApi.enableItem(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: suppliesKeys.items }),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: suppliesKeys.items });
+      qc.invalidateQueries({ queryKey: [...suppliesKeys.items, id] });
+    },
   });
 }
 

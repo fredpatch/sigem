@@ -2,7 +2,7 @@ import { Severity } from "@sigem/shared";
 import { Request, Response, NextFunction } from "express";
 
 export function mapSeverityToNotificationType(
-  s?: Severity
+  s?: Severity,
 ): "success" | "error" | "info" | "warning" {
   switch (s) {
     case "success":
@@ -16,7 +16,6 @@ export function mapSeverityToNotificationType(
       return "info";
   }
 }
-
 
 export interface ActorInfo {
   id?: string;
@@ -50,11 +49,7 @@ export type Scope = "user" | "role" | "all";
 function isMissing(field: string) {
   // "global" = pas de ciblage explicite
   return {
-    $or: [
-      { [field]: { $exists: false } },
-      { [field]: null },
-      { [field]: "" },
-    ],
+    $or: [{ [field]: { $exists: false } }, { [field]: null }, { [field]: "" }],
   };
 }
 
@@ -71,10 +66,10 @@ export function buildScopeFilter(params: {
   // ✅ Clause "global" robuste (match absent OU null OU empty)
   const globalClause = includeGlobal
     ? [
-      {
-        $and: [isMissing("userId"), isMissing("role")],
-      },
-    ]
+        {
+          $and: [isMissing("userId"), isMissing("role")],
+        },
+      ]
     : [];
 
   // if (scope === "all") {
@@ -92,7 +87,7 @@ export function buildScopeFilter(params: {
         ...base,
         $or: [
           { userId: { $exists: true, $nin: [null, ""] } },
-          { role: { $exists: true, $nin: [null, ""] } }
+          { role: { $exists: true, $nin: [null, ""] } },
         ],
       };
     }
@@ -104,20 +99,16 @@ export function buildScopeFilter(params: {
     return { ...base, $or: [{ role }, ...globalClause] };
   }
 
-
   // scope=user
   if (!userId) return { ...base, _id: null }; // aucun résultat si pas de userId
   return { ...base, $or: [{ userId }, ...globalClause] };
 }
 
-
-
 export const catchError =
   (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
-    (req: Request, res: Response, next: NextFunction) => {
-      Promise.resolve(fn(req, res, next)).catch(next);
-    };
-
+  (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
 
 export function parseBool(v: any): boolean | undefined {
   if (v === undefined) return undefined;
@@ -136,16 +127,21 @@ export function parseIntSafe(v: any, def: number) {
 export function toDTO(doc: any) {
   const p = doc.payload ?? {};
 
-  const relatedResource =
-    p.taskId
-      ? { resourceType: p.resourceType ?? "VehicleTask", resourceId: p.taskId }
-      : p.documentId
-        ? { resourceType: p.resourceType ?? "VehicleDocument", resourceId: p.documentId }
-        : p.vehicleId
-          ? { resourceType: p.resourceType ?? "Vehicle", resourceId: p.vehicleId }
-          : p.assetId || p.resourceId
-            ? { resourceType: p.resourceType ?? "Asset", resourceId: p.assetId ?? p.resourceId }
-            : undefined;
+  const relatedResource = p.taskId
+    ? { resourceType: p.resourceType ?? "VehicleTask", resourceId: p.taskId }
+    : p.documentId
+      ? {
+          resourceType: p.resourceType ?? "VehicleDocument",
+          resourceId: p.documentId,
+        }
+      : p.vehicleId
+        ? { resourceType: p.resourceType ?? "Vehicle", resourceId: p.vehicleId }
+        : p.assetId || p.resourceId
+          ? {
+              resourceType: p.resourceType ?? "Asset",
+              resourceId: p.assetId ?? p.resourceId,
+            }
+          : undefined;
 
   return {
     id: doc._id.toString(),
@@ -162,17 +158,27 @@ export function toDTO(doc: any) {
 }
 
 export const KNOWN_TOPICS = new Set([
-  "asset.created", "ASSET_CREATED",
-  "asset.updated", "ASSET_UPDATED",
-  "asset.deleted", "ASSET_DELETED",
-  "asset.restored", "ASSET_RESTORED",
-  "asset.location.changed", "ASSET_LOCATION_CHANGED",
-  "asset.status.changed", "ASSET_STATUS_CHANGED",
-  "asset.quantity.changed", "ASSET_QUANTITY_CHANGED",
-  "asset.transfer", "ASSET_TRANSFER",
+  "asset.created",
+  "ASSET_CREATED",
+  "asset.updated",
+  "ASSET_UPDATED",
+  "asset.deleted",
+  "ASSET_DELETED",
+  "asset.restored",
+  "ASSET_RESTORED",
+  "asset.location.changed",
+  "ASSET_LOCATION_CHANGED",
+  "asset.status.changed",
+  "ASSET_STATUS_CHANGED",
+  "asset.quantity.changed",
+  "ASSET_QUANTITY_CHANGED",
+  "asset.transfer",
+  "ASSET_TRANSFER",
 
-  "stock.low", "STOCK_LOW",
-  "stock.critical", "STOCK_CRITICAL",
+  "stock.low",
+  "STOCK_LOW",
+  "stock.critical",
+  "STOCK_CRITICAL",
 
   // ✅ Vehicle monitoring
   "vehicle.task.due_soon",
@@ -204,12 +210,26 @@ export const KNOWN_TOPICS = new Set([
   "vehicle.task_template.deactivated",
 
   "auth.otp.requested",
+
+  "supply.plan.created",
+  "supply.plan.updated",
+  "supply.plan.status.changed",
+  "supply.plan.completed",
+  "supply.plan.deleted",
+
+  "supply.item.created",
+  "supply.item.updated",
+  "supply.item.deactivated",
+  "supply.item.activated",
+
+  "supply.price.updated",
+  "supply.price.deleted",
 ]);
 
 export const IMPORTANT = new Set(["warning", "error"]); // (success/info ignorés si inconnus)
 
 export type VehicleNotifyPayload = {
-  type: string;              // ex: "vehicle.task.overdue"
+  type: string; // ex: "vehicle.task.overdue"
   severity?: "info" | "warning" | "critical" | "error" | "success";
 
   // ciblage (tu utilises déjà userId/role/recipients)
@@ -222,22 +242,23 @@ export type VehicleNotifyPayload = {
   resourceId?: string;
 
   vehicleId?: string;
-  vehiclePlate?: string;     // ex: "GA-123-AA"
-  vehicleLabel?: string;     // ex: "Toyota Hilux"
+  vehiclePlate?: string; // ex: "GA-123-AA"
+  vehicleLabel?: string; // ex: "Toyota Hilux"
 
   taskId?: string;
-  taskLabel?: string;        // ex: "Vidange"
+  taskLabel?: string; // ex: "Vidange"
   dueAt?: string | Date;
   dueMileage?: number;
 
   documentId?: string;
-  documentType?: string;     // ex: "INSURANCE"
+  documentType?: string; // ex: "INSURANCE"
   expiresAt?: string | Date;
   remainingDays?: number;
 };
 
 export function fmtVehicle(anyEvt: any) {
-  const plate = anyEvt.vehiclePlate ?? anyEvt.plateNumber ?? anyEvt.vehicleId ?? "—";
+  const plate =
+    anyEvt.vehiclePlate ?? anyEvt.plateNumber ?? anyEvt.vehicleId ?? "-";
   const brand = anyEvt.vehicleBrand ?? "";
   const model = anyEvt.vehicleModel ?? "";
   const car = [brand, model].filter(Boolean).join(" ");
@@ -248,13 +269,16 @@ export function fmtDue(anyEvt: any) {
   // BY_DATE → afficher date
   if (anyEvt.dueAt) {
     const d = new Date(anyEvt.dueAt);
-    if (!isNaN(d.getTime())) return `Échéance : ${d.toLocaleDateString("fr-FR")}`;
+    if (!isNaN(d.getTime()))
+      return `Échéance : ${d.toLocaleDateString("fr-FR")}`;
   }
   // BY_MILEAGE → afficher km
   if (typeof anyEvt.dueMileage === "number") {
-    const cur = typeof anyEvt.currentMileage === "number" ? anyEvt.currentMileage : null;
+    const cur =
+      typeof anyEvt.currentMileage === "number" ? anyEvt.currentMileage : null;
     const left = cur !== null ? anyEvt.dueMileage - cur : null;
-    if (left !== null) return `Échéance : ${anyEvt.dueMileage} km (reste ~${left} km)`;
+    if (left !== null)
+      return `Échéance : ${anyEvt.dueMileage} km (reste ~${left} km)`;
     return `Échéance : ${anyEvt.dueMileage} km`;
   }
   return "";

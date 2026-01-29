@@ -44,7 +44,7 @@ export const CreateProviderSchema = z.object({
 
   notes: z.string().trim().max(2000).optional(),
   tags: stringArray(z.string().trim().min(1)).transform((t) =>
-    t.map((x) => x.toLowerCase())
+    t.map((x) => x.toLowerCase()),
   ),
 
   dept: z.string().trim().optional(),
@@ -54,7 +54,7 @@ export const CreateProviderSchema = z.object({
 
 export const UpdateProviderSchema = CreateProviderSchema.partial().refine(
   (obj) => Object.keys(obj).length > 0,
-  { message: "Aucun champ à mettre à jour" }
+  { message: "Aucun champ à mettre à jour" },
 );
 
 export const ProviderIdParamSchema = z.object({
@@ -87,7 +87,7 @@ export const ListProvidersQuerySchema = z.object({
     .string()
     .optional()
     .transform((v) => (v ? Number(v) : 20))
-    .refine((n) => Number.isFinite(n) && n >= 1 && n <= 100, "limit invalide"),
+    .refine((n) => Number.isFinite(n) && n >= 1 && n <= 300, "limit invalide"),
 
   sort: z.enum(["name", "createdAt", "updatedAt"]).optional().default("name"),
 
