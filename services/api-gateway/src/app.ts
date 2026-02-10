@@ -8,6 +8,7 @@ import { referenceProxyRouter } from "./routes/references.proxy.router";
 import { providerProxyRouter } from "./routes/providers.proxy.router";
 import { productProxyRouter } from "./routes/products.proxy.router";
 import { supplierProxyRouter } from "./routes/supplier.proxy.router";
+import { stocksProxyRouter } from "./routes/stocks.proxy.router";
 
 export const API_VERSION = "v1";
 
@@ -20,6 +21,7 @@ const getApp = async () => {
   // routes
   // Proxy routes
   app.use("/", productProxyRouter);
+  app.use("/", stocksProxyRouter);
   app.use("/", providerProxyRouter);
   app.use("/", supplierProxyRouter);
   app.use("/", notificationProxyRouter);

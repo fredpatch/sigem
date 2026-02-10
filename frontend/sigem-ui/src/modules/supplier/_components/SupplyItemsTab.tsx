@@ -11,7 +11,7 @@ import { Plus } from "lucide-react";
 
 export default function SupplyItemsTab() {
   const [label, setLabel] = useState("");
-  const itemsQ = useSupplyItems();
+  const itemsQ = useSupplyItems({ active: true, limit: 200 });
   const create = useCreateSupplyItem();
 
   const items =

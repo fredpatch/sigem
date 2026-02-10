@@ -70,7 +70,7 @@ export class ProviderService {
       const provider = await ProviderModel.findByIdAndUpdate(
         id,
         { isActive: false },
-        { new: true, session }
+        { new: true, session },
       );
 
       await session.commitTransaction();
@@ -91,7 +91,7 @@ export class ProviderService {
       const provider = await ProviderModel.findByIdAndUpdate(
         id,
         { isActive: true },
-        { new: true, session }
+        { new: true, session },
       );
       await session.commitTransaction();
       session.endSession();
@@ -144,16 +144,16 @@ export class ProviderService {
 
     const [items, total] = await Promise.all([
       ProviderModel.find(filter)
-        .sort({ [sort]: sortOrder })
+        .sort({ [safeSort]: sortOrder })
         .skip(skip)
-        .limit(limit),
+        .limit(safeLimit),
       ProviderModel.countDocuments(filter),
     ]);
 
     return response(
       { items, page, limit, total, pages: Math.ceil(total / limit) },
       null,
-      "Providers fetched successfully"
+      "Providers fetched successfully",
     );
   }
 
@@ -247,7 +247,7 @@ export class ProviderService {
           : null,
       },
       null,
-      "Provider stats fetched successfully"
+      "Provider stats fetched successfully",
     );
   }
 
@@ -380,7 +380,7 @@ export class ProviderService {
         limit,
       },
       null,
-      "Provider catalog fetched successfully"
+      "Provider catalog fetched successfully",
     );
   }
 }

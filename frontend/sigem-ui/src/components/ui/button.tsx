@@ -22,6 +22,15 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+
+        // Custom variants for supply plan status
+        quote: "bg-orange-300 text-orange-800 shadow-xs hover:bg-orange-300/70",
+        valide:
+          "border-transparent bg-green-200 text-green-900 hover:bg-green-300/80",
+        active:
+          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/70",
+        pending:
+          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/70",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -34,7 +43,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 function Button({

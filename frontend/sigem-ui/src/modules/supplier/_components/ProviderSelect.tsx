@@ -82,7 +82,7 @@ export function ProviderSelect({
         <Command>
           <CommandInput placeholder="Rechercher un fournisseur..." />
           <CommandEmpty>Aucun résultat.</CommandEmpty>
-          <CommandGroup>
+          <CommandGroup className="max-h-[300px] overflow-y-auto">
             <CommandItem
               onSelect={() => {
                 onChange(null);

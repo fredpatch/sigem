@@ -2,11 +2,16 @@ import { api } from "@/lib/axios";
 
 export const suppliesApi = {
   // ITEMS
-  listItems: async (params?: { search?: string; active?: boolean }) => {
+  listItems: async (params?: {
+    search?: string;
+    active?: boolean;
+    limit?: number;
+  }) => {
     const q = new URLSearchParams();
     if (params?.search) q.set("search", params.search);
     if (typeof params?.active === "boolean")
       q.set("active", String(params.active));
+    if (typeof params?.limit === "number") q.set("limit", String(params.limit));
 
     const res = await api.get(`/supplies/items?${q.toString()}`);
     return res.data;
@@ -38,10 +43,15 @@ export const suppliesApi = {
   },
 
   // PRICES
-  listPrices: async (params?: { supplierId?: string; itemId?: string }) => {
+  listPrices: async (params?: {
+    supplierId?: string;
+    itemId?: string;
+    limit?: number;
+  }) => {
     const q = new URLSearchParams();
     if (params?.supplierId) q.set("supplierId", params.supplierId);
     if (params?.itemId) q.set("itemId", params.itemId);
+    if (typeof params?.limit === "number") q.set("limit", String(params.limit));
 
     const res = await api.get(`/supplies/prices?${q.toString()}`);
     return res.data;

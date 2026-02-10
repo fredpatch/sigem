@@ -1,8 +1,8 @@
 import { Request } from "express";
 
-export function getPagination(req: Request) {
+export function getPagination(req: any) {
   const page = Math.max(1, Number(req.query.page ?? 1));
-  const limit = Math.min(200, Math.max(1, Number(req.query.limit ?? 20)));
+  const limit = Math.min(200, Math.max(1, Number(req.query.limit ?? 200)));
   return { page, limit };
 }
 

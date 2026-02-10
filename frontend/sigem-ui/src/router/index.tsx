@@ -42,6 +42,9 @@ import { PurchaseRequestsLayout } from "@/pages/purchase-requests-layout";
 import { PurchaseDetailPage } from "@/modules/providers/_components/purchases/Purchase-details";
 import { SuppliesPage } from "@/modules/supplier/pages/supplies.page";
 import { SupplierManagementLayoutPage } from "@/pages/supplier-management-layout.page";
+import { ProviderImportPage } from "@/modules/providers/pages/provider-import.page";
+import { StocksManagementLayoutPage } from "@/pages/stocks-management-layout.page";
+import { StocksManagementPage } from "@/modules/stocks/pages/stocks.page";
 
 const router = createBrowserRouter([
   { path: "/", element: <RootRedirect /> },
@@ -209,6 +212,22 @@ const router = createBrowserRouter([
             ),
           },
         ],
+      },
+      {
+        path: "/providers/import/preview",
+        element: (
+          <RouteGuard
+            allowedRoles={[
+              "SUPER_ADMIN",
+              "ADMIN",
+              "MG_COS",
+              "MG_AGT",
+              "MG_COB",
+            ]}
+          >
+            <ProviderImportPage />
+          </RouteGuard>
+        ),
       },
       {
         path: "/products",
@@ -381,14 +400,13 @@ const router = createBrowserRouter([
               "GUEST",
             ]}
           >
-            {/* <StocksPage /> */}
-            <>Stocks Layout</>
+            <StocksManagementLayoutPage />
           </RouteGuard>
         ),
         children: [
           {
             index: true,
-            element: <>Stocks Page</>,
+            element: <StocksManagementPage />,
           },
         ],
       },

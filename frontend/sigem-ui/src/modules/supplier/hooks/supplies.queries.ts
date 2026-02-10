@@ -8,7 +8,11 @@ export const suppliesKeys = {
 };
 
 // ITEMS
-export function useSupplyItems(params?: { search?: string; active?: boolean }) {
+export function useSupplyItems(params?: {
+  search?: string;
+  active?: boolean;
+  limit?: number;
+}) {
   return useQuery({
     queryKey: [...suppliesKeys.items, params],
     queryFn: () => suppliesApi.listItems(params),
@@ -59,10 +63,14 @@ export function useEnableSupplyItem() {
 }
 
 // PRICES
-export function useSupplierPrices(supplierId?: string, itemId?: string) {
+export function useSupplierPrices(
+  supplierId?: string,
+  itemId?: string,
+  limit?: number,
+) {
   return useQuery({
-    queryKey: [...suppliesKeys.prices, supplierId, itemId],
-    queryFn: () => suppliesApi.listPrices({ supplierId, itemId }),
+    queryKey: [...suppliesKeys.prices, supplierId, itemId, limit],
+    queryFn: () => suppliesApi.listPrices({ supplierId, itemId, limit }),
   });
 }
 

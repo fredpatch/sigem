@@ -31,7 +31,7 @@ const ProviderSchema = new Schema<ProviderDoc>(
     type: {
       type: String,
       enum: ["FOURNISSEUR", "PRESTATAIRE"],
-      default: "PRESTATAIRE",
+      default: "FOURNISSEUR",
     },
 
     // Multi contacts comme dans l’Excel
@@ -49,7 +49,7 @@ const ProviderSchema = new Schema<ProviderDoc>(
     // On remplit ça via pre-save ci-dessous
     searchText: { type: String, default: "", index: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

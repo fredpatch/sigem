@@ -54,7 +54,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { TableToolbar } from "./table-toolbar";
 import { DateRange } from "react-day-picker";
 import { DateRangePickerControlled } from "../date-range";
-import { cn } from "@/lib/utils";
 import { loadTableState, saveTableState } from "@/utils/table-persist";
 import { Skeleton } from "@/components/ui/skeleton";
 // import { useDebouncedValue } from "@/modules/users/_components/use-debounced";
@@ -72,6 +71,16 @@ declare module "@tanstack/react-table" {
   }
 }
 
+export type TableToolbarAction = {
+  key: string;
+  label: string;
+  onClick: () => void;
+  icon?: React.ReactNode;
+  variant?: "default" | "secondary" | "outline" | "destructive" | "ghost";
+  size?: "sm" | "default" | "lg" | "icon";
+  disabled?: boolean;
+};
+
 export interface TableToolbarConfig {
   tableId?: string;
 
@@ -82,6 +91,8 @@ export interface TableToolbarConfig {
 
   /** clés des colonnes à afficher comme filtres */
   columnFilters?: string[];
+
+  actions?: TableToolbarAction[];
 
   /** presets métier (chips) */
   presets?: {
@@ -417,7 +428,7 @@ export function Filter({ column }: { column: Column<any, unknown> }) {
   if (filterVariant === "select") {
     return (
       <div className="space-y-2">
-        <Label htmlFor={`${id}-select`}>{columnHeader}</Label>
+        {/* <Label htmlFor={`${id}-select`}>{columnHeader}</Label> */}
         <Select
           value={columnFilterValue?.toString() ?? "all"}
           onValueChange={(value) => {

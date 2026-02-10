@@ -6,6 +6,7 @@ import { productRouter } from "./routes/products.route";
 import { purchaseRouter } from "./routes/purchases.route";
 import { purchaseRequestRouter } from "./routes/purchase-request.route";
 import suppliesRoutes from "./modules/supplies/routes/supplies.route";
+import stockRoutes from "./modules/ledger/routes/stock.routes";
 
 export const API_VERSION = "v1";
 
@@ -21,6 +22,7 @@ const application = async () => {
   app.use(`/${API_VERSION}`, productRouter);
   app.use(`/${API_VERSION}`, providerRouter);
   app.use(`/${API_VERSION}/supplies`, suppliesRoutes());
+  app.use(`/${API_VERSION}/stocks`, stockRoutes());
 
   // 404
   app.use((_req, res) =>

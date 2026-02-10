@@ -27,6 +27,8 @@ type ModalName =
   | "vehicleUpdateInsurance"
   | "vehicleDocumentModal"
   | "supplyPlan"
+  | "stockMovementForm"
+  | "stockMinLevelForm"
   | null;
 
 interface ModalState {

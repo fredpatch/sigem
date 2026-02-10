@@ -86,7 +86,7 @@ export const ListProvidersQuerySchema = z.object({
   limit: z
     .string()
     .optional()
-    .transform((v) => (v ? Number(v) : 20))
+    .transform((v) => (v ? Number(v) : 100))
     .refine((n) => Number.isFinite(n) && n >= 1 && n <= 300, "limit invalide"),
 
   sort: z.enum(["name", "createdAt", "updatedAt"]).optional().default("name"),

@@ -31,14 +31,15 @@ export const SUPPLY_STATUS_VARIANT: Record<
   | "valide"
   | "active"
   | "pending"
+  | "quote"
 > = {
   DRAFT: "outline",
   SCHEDULED: "secondary",
-  WAITING_QUOTE: "secondary",
-  WAITING_INVOICE: "secondary",
-  ORDERED: "default",
+  WAITING_QUOTE: "quote",
+  WAITING_INVOICE: "valide",
+  ORDERED: "active",
   DELIVERED: "default",
-  COMPLETED: "default",
+  COMPLETED: "secondary",
   CANCELLED: "destructive",
 };
 

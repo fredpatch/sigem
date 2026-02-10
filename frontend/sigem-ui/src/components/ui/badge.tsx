@@ -21,6 +21,10 @@ const badgeVariants = cva(
         pending:
           "border-transparent bg-orange-200 text-orange-800 hover:bg-orange-300/80",
         outline: "text-foreground",
+
+        // Custom variants for supply plan status
+        quote:
+          "bg-orange-300 text-orange-800 shadow-xs border-transparent hover:bg-orange-300/70",
       },
     },
     defaultVariants: {

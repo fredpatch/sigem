@@ -156,7 +156,7 @@ export default function PlanDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-6xl p-0 gap-0 overflow-hidden">
+      <DialogContent className="w-[62vw] max-w-lg p-0 gap-0 overflow-hidden">
         {/* Header with gradient */}
         <DialogHeader className="px-6 pt-6 pb-4 bg-linear-to-br from-background to-muted/20 border-b">
           <DialogTitle className="flex items-center justify-between">
@@ -256,7 +256,7 @@ export default function PlanDrawer({
                   transition={{ delay: 0.1 + idx * 0.05 }}
                 >
                   <Button
-                    variant={st === "CANCELLED" ? "destructive" : "outline"}
+                    variant={SUPPLY_STATUS_VARIANT[st]}
                     onClick={() =>
                       changeStatus.mutate({ id: plan._id, to: st })
                     }

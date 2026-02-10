@@ -66,6 +66,21 @@ export function TableToolbar({ table, config }: Props) {
         {config.enableExport && (
           <ExportControls table={table} config={config} />
         )}
+
+        {/* Importer */}
+        {config.actions?.map((a) => (
+          <Button
+            key={a.key}
+            variant={a.variant ?? "default"}
+            size={a.size ?? "sm"}
+            onClick={a.onClick}
+            disabled={a.disabled}
+            className="gap-2"
+          >
+            {a.icon}
+            {a.label}
+          </Button>
+        ))}
       </div>
     </div>
   );

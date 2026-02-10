@@ -1,10 +1,15 @@
+import { PageSplitLayout } from "@/components/shared/layouts/page-split-layout";
+import { StockSidebar } from "@/modules/stocks/_components/stock-sidebar";
 import { Outlet } from "react-router-dom";
 
 export const StocksManagementLayoutPage = () => {
   return (
-    <div className="mx-auto p-4">
-      Stocks Management Layout Page
+    <PageSplitLayout
+      title="Gestion des stocks"
+      subtitle="Suivi et gestion des stocks"
+      sidebarContent={<StockSidebar />}
+    >
       <Outlet />
-    </div>
+    </PageSplitLayout>
   );
 };

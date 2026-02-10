@@ -38,6 +38,8 @@ export const ModalTypes = {
   VEHICLE_DOCUMENT_MODAL: "vehicleDocumentModal",
 
   SUPPLY_PLAN: "supplyPlan",
+  STOCK_MOVEMENT_FORM: "stockMovementForm",
+  STOCK_MIN_LEVEL_FORM: "stockMinLevelForm",
 } as const;
 
 export type ModalType = (typeof ModalTypes)[keyof typeof ModalTypes];

@@ -30,7 +30,7 @@ export function ProviderKpiSidebar({
     );
   }
 
-  console.log("ProviderKpiSidebar data:", data, "error:", error);
+  // console.log("ProviderKpiSidebar data:", data, "error:", error);
 
   if (error || !data) {
     return (

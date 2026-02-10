@@ -75,3 +75,82 @@ export function toQueryParams(q: ProvidersListQuery) {
     limit: q.limit?.toString(),
   };
 }
+// ProviderImportWizard
+
+// UploadAndMappingStep
+
+// PreviewTableStep
+
+// CommitResultStep
+
+// ProviderMatchPopover (affiche les matches top 3)
+
+// ActionSelector (Create/Update/Skip)
+
+// ImportSummaryBar (total/valid/warnings)
+
+export type PreviewRow = {
+  index: number;
+  raw: Record<string, any>;
+  normalized: {
+    name?: string;
+    designation?: string;
+    type?: ProviderType;
+    phones?: string[];
+    emails?: string[];
+    tags?: string[];
+    isActive?: boolean;
+  };
+  errors: string[];
+  warnings: string[];
+};
+
+export type MatchItem = {
+  id: string;
+  name: string;
+  designation: string;
+  score: number;
+  confidence: "high" | "medium" | "low";
+};
+
+export type PreviewMatches = Array<{
+  rowIndex: number;
+  matches: MatchItem[];
+}>;
+
+export type ImportPreviewResponse = {
+  ok: boolean;
+  meta: { headers: string[]; total: number; valid: number; invalid: number };
+  rows: PreviewRow[];
+  matches: PreviewMatches;
+};
+
+export type CommitMode = "create" | "update" | "skip";
+
+export type CommitRow = {
+  rowIndex: number;
+  mode: CommitMode;
+  targetId?: string; // requis si update / optionnel si skip
+  data?: any; // requis si create/update
+};
+
+export type ImportCommitPayload = { rows: CommitRow[] };
+
+export type ImportCommitResponse = {
+  ok: boolean;
+  summary: { create: number; update: number; skip: number; errors: number };
+  bulk: null | {
+    insertedCount: number;
+    matchedCount: number;
+    modifiedCount: number;
+    upsertedCount: number;
+  };
+  results: Array<{
+    rowIndex: number;
+    mode: CommitMode;
+    ok: boolean;
+    id?: string;
+    error?: string;
+  }>;
+  inserted?: string[]; // si tu l’exposes côté API
+};

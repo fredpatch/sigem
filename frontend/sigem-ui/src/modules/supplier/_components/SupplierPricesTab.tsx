@@ -18,8 +18,8 @@ import { Save } from "lucide-react";
 import { ItemSelect } from "./ItemSelect";
 
 export default function SupplierPricesTab() {
-  const itemsQ = useSupplyItems({ active: true });
-  const pricesQ = useSupplierPrices();
+  const itemsQ = useSupplyItems({ active: true, limit: 200 });
+  const pricesQ = useSupplierPrices(undefined, undefined, 200);
   const upsert = useUpsertSupplierPrice();
   const { itemMap, providerMap } = useSuppliesLookups();
 

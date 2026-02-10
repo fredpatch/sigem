@@ -178,7 +178,9 @@ export const SuppliesPage = () => {
       <Card className="p-3">
         <Tabs defaultValue="plans" className="w-full">
           <TabsList className="flex flex-wrap">
-            <TabsTrigger value="plans">Prévisionnel</TabsTrigger>
+            <TabsTrigger value="plans">
+              Approvisionnement prévisionnel
+            </TabsTrigger>
             <TabsTrigger value="items">Articles</TabsTrigger>
             <TabsTrigger value="prices">Prix fournisseurs</TabsTrigger>
           </TabsList>
