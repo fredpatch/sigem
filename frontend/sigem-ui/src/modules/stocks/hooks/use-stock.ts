@@ -10,6 +10,50 @@ import {
   setStockMinLevel,
 } from "../api/stock.api";
 
+export const stockKeys = {
+  all: ["stock"] as const,
+  list: (args: {
+    locationId: string;
+    search?: string;
+    belowMin?: boolean;
+    limit?: number;
+  }) =>
+    [
+      "stock",
+      "list",
+      args.locationId,
+      args.search ?? "",
+      args.belowMin ?? false,
+      args.limit ?? 50,
+    ] as const,
+
+  movementsAll: ["stock-movements"] as const,
+  movements: (args: {
+    locationId?: string;
+    supplyItemId?: string;
+    type?: "IN" | "OUT" | "ADJUST";
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) =>
+    [
+      "stock-movements",
+      args.locationId ?? "",
+      args.supplyItemId ?? "",
+      args.type ?? "",
+      args.search ?? "",
+      args.page ?? 1,
+      args.limit ?? 25,
+    ] as const,
+
+  kpis: (locationId?: string) => ["stock-kpis", locationId ?? ""] as const,
+
+  locations: ["stock-locations"] as const,
+
+  supplierPriceLookup: (supplierId?: string, itemId?: string) =>
+    ["supplier-price-lookup", supplierId ?? "", itemId ?? ""] as const,
+};
+
 export function useInitStockLocation() {
   return useMutation({
     mutationFn: initDefaultLocation,
@@ -18,7 +62,7 @@ export function useInitStockLocation() {
 
 export function useStockLocations() {
   return useQuery({
-    queryKey: ["stock-locations"],
+    queryKey: stockKeys.locations,
     queryFn: getStockLocations,
   });
 }
@@ -30,7 +74,7 @@ export function useStockList(params: {
   limit?: number;
 }) {
   return useQuery({
-    queryKey: ["stock", params],
+    queryKey: stockKeys.list(params),
     queryFn: () => getStock(params),
     enabled: !!params.locationId,
   });
@@ -45,7 +89,7 @@ export function useStockMovements(params: {
   limit?: number;
 }) {
   return useQuery({
-    queryKey: ["stock-movements", params],
+    queryKey: stockKeys.movements(params),
     queryFn: () => getStockMovements(params),
   });
 }
@@ -58,7 +102,7 @@ export function useLookupSupplierPrice(params?: {
   const enabled = params?.enabled === true;
 
   return useQuery({
-    queryKey: ["supplier-price-lookup", params?.supplierId, params?.itemId],
+    queryKey: stockKeys.supplierPriceLookup(params?.supplierId, params?.itemId),
     queryFn: () =>
       lookupSupplierPrice({
         supplierId: params!.supplierId!,
@@ -73,9 +117,11 @@ export function useCreateStockMovement() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createStockMovement,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["stock"] });
-      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+    onSuccess: (_data, vars: any) => {
+      // safest: invalidate everything stock-related that depends on movement
+      qc.invalidateQueries({ queryKey: stockKeys.all });
+      qc.invalidateQueries({ queryKey: stockKeys.movementsAll });
+      qc.invalidateQueries({ queryKey: stockKeys.kpis(vars?.locationId) });
     },
   });
 }
@@ -85,10 +131,10 @@ export function useSetStockMinLevel() {
 
   return useMutation({
     mutationFn: setStockMinLevel,
-    onSuccess: () => {
+    onSuccess: (_data, vars: any) => {
       // refresh stock list + kpis
-      qc.invalidateQueries({ queryKey: ["stock"] });
-      qc.invalidateQueries({ queryKey: ["stock-kpis"] });
+      qc.invalidateQueries({ queryKey: stockKeys.all });
+      qc.invalidateQueries({ queryKey: stockKeys.kpis(vars?.locationId) });
     },
   });
 }

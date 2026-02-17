@@ -43,7 +43,14 @@ const StockMovementSchema = new Schema(
 
 // filtres fréquents
 StockMovementSchema.index({ supplyItemId: 1, createdAt: -1 });
-StockMovementSchema.index({ locationId: 1, createdAt: -1 });
+// StockMovementSchema.index({ locationId: 1, createdAt: -1 });
+StockMovementSchema.index({ locationId: 1, createdAt: -1, type: 1 });
+StockMovementSchema.index({
+  locationId: 1,
+  supplyItemId: 1,
+  type: 1,
+  createdAt: -1,
+});
 StockMovementSchema.index({ type: 1, createdAt: -1 });
 
 // recherche texte MG-friendly

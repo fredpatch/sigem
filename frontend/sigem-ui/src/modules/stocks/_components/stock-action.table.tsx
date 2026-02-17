@@ -3,7 +3,7 @@ import { useModalStore } from "@/stores/modal-store";
 import { ModalTypes } from "@/types/modal.types";
 import { Row } from "@tanstack/react-table";
 import { useStockContextStore } from "../store/use-stock-context.store";
-import { Minus, Plus, SlidersHorizontal } from "lucide-react";
+import { FileCog, Minus, Plus, SlidersHorizontal } from "lucide-react";
 
 interface Props {
   row: Row<any>;
@@ -51,7 +51,8 @@ export const StockActionCell = ({ row }: Props) => {
         },
         {
           label: "Ajuster stock",
-          variant: "outline",
+          variant: "default",
+          className: "bg-orange-200 text-orange-700 hover:bg-orange-100",
           onClick: () =>
             openStockModal("ADJUST", row.original.supplyItemId._id),
           icon: <SlidersHorizontal className="size-4" />,
@@ -60,7 +61,7 @@ export const StockActionCell = ({ row }: Props) => {
           label: "Ajuster seuil",
           variant: "tertiary",
           onClick: () => openMinLevelModal(row.original),
-          icon: <SlidersHorizontal className="size-4" />,
+          icon: <FileCog className="size-4" />,
         },
       ]}
     />

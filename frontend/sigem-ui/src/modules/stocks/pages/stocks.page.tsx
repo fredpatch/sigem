@@ -4,7 +4,12 @@ import {
   useStockLocations,
   useStockMovements,
 } from "../hooks/use-stock";
-import { Loader2 } from "lucide-react";
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Loader2,
+  RefreshCw,
+} from "lucide-react";
 import {
   TableComponent,
   TableToolbarConfig,
@@ -13,10 +18,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { movementColumns } from "../_components/movement.columns";
 import { stockColumns } from "../_components/stock.columns";
 import { useStockContextStore } from "../store/use-stock-context.store";
+import { ModalTypes } from "@/types/modal.types";
+import { useModalStore } from "@/stores/modal-store";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export const StocksManagementPage = () => {
   const [locationId, setLocationId] = useState<string>("");
   const { setLocationId: setLocationIdStore } = useStockContextStore();
+  const { openModal } = useModalStore();
 
   const stockLocationsQ = useStockLocations();
 
@@ -34,6 +44,10 @@ export const StocksManagementPage = () => {
   const stockQ = useStockList({ locationId });
   const movQ = useStockMovements({ locationId, page: 1, limit: 25 });
 
+  const open = (mode: "IN" | "OUT" | "ADJUST") => {
+    if (!locationId) return;
+    openModal(ModalTypes.STOCK_MOVEMENT_FORM, { mode, locationId });
+  };
   //   console.log("stockQ", stockQ.data);
   //   console.log("movQ", movQ.data);
 
@@ -51,14 +65,19 @@ export const StocksManagementPage = () => {
 
       presets: [
         {
+          variant: "destructive",
           label: "Sous seuil",
           apply: (table) => {
-            // filtre client-side: onHand <= minLevel
-            // easiest: set global filter empty and filter via column filter "onHand range"
-            // here we set a custom filter using columnFilters state? (simple: use global filter not good)
-            // We'll do it with a preset that sorts and highlights later.
-            // For now: sort by onHand asc
+            table.setColumnFilters([{ id: "belowMin", value: true }]);
             table.setSorting([{ id: "onHand", desc: false }]);
+          },
+        },
+        {
+          variant: "outline",
+          label: "Tous",
+          apply: (table) => {
+            table.resetColumnFilters();
+            table.resetGlobalFilter();
           },
         },
       ],
@@ -76,6 +95,7 @@ export const StocksManagementPage = () => {
       export: { filename: "mouvements-stock.csv" },
       presets: [
         {
+          variant: "secondary",
           label: "Entrées",
           apply: (table) =>
             table.setColumnFilters([{ id: "type", value: "IN" }]),
@@ -84,13 +104,13 @@ export const StocksManagementPage = () => {
           label: "Sorties",
           apply: (table) =>
             table.setColumnFilters([{ id: "type", value: "OUT" }]),
-          variant: "outline",
+          variant: "destructive",
         },
         {
           label: "Ajustements",
           apply: (table) =>
             table.setColumnFilters([{ id: "type", value: "ADJUST" }]),
-          variant: "secondary",
+          variant: "default",
         },
       ],
     }),
@@ -109,10 +129,45 @@ export const StocksManagementPage = () => {
   return (
     <div className="mx-auto p-4">
       <Tabs defaultValue="stock">
-        <TabsList>
-          <TabsTrigger value="stock">Stock</TabsTrigger>
-          <TabsTrigger value="movements">Mouvements</TabsTrigger>
-        </TabsList>
+        <div className="flex gap-2">
+          <TabsList>
+            <>
+              <TabsTrigger value="stock">Stock</TabsTrigger>
+              <TabsTrigger value="movements">Mouvements</TabsTrigger>
+            </>
+          </TabsList>
+          <div className="flex gap-3">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={() => open("IN")}
+                className="ml-2 w-full justify-start gap-2 h-8.5 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+              >
+                <ArrowDownToLine className="h-4 w-4" />
+                <span>Entrée</span>
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={() => open("OUT")}
+                className="w-full justify-start gap-2 h-8.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600"
+              >
+                <ArrowUpFromLine className="h-4 w-4" />
+                <span>Sortie</span>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                variant="quote"
+                onClick={() => open("ADJUST")}
+                className="w-full justify-start gap-2 h-8.5 border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-blue-900 dark:hover:bg-blue-950"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span>Ajustement inventaire</span>
+              </Button>
+            </motion.div>
+          </div>
+        </div>
 
         <TabsContent value="stock">
           <TableComponent

@@ -138,7 +138,7 @@ export function Guidelines({
   helpLabel = "Aide",
   helpHint = "Besoin de détails ? Consultez le centre d’aide.",
 }: Props) {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const styles = variantStyles[variant];
   const navigate = useNavigate();
 
@@ -150,14 +150,14 @@ export function Guidelines({
         "rounded-xl border p-4",
         styles.wrap,
         compact && "p-3",
-        className
+        className,
       )}
     >
       <div className={cn("flex items-start gap-3", compact && "gap-2")}>
         <div
           className={cn(
             "mt-0.5 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium",
-            styles.badge
+            styles.badge,
           )}
         >
           <VariantIcon variant={variant} />
@@ -170,7 +170,7 @@ export function Guidelines({
               <h3
                 className={cn(
                   "text-sm font-semibold leading-5",
-                  compact && "text-[13px]"
+                  compact && "text-[13px]",
                 )}
               >
                 {title}
@@ -180,7 +180,7 @@ export function Guidelines({
                 <p
                   className={cn(
                     "mt-1 text-sm text-muted-foreground",
-                    compact && "text-[13px]"
+                    compact && "text-[13px]",
                   )}
                 >
                   {description}
@@ -224,7 +224,7 @@ export function Guidelines({
                           <div
                             className={cn(
                               "text-sm text-foreground/90",
-                              compact && "text-[13px]"
+                              compact && "text-[13px]",
                             )}
                           >
                             {item.text}

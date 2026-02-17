@@ -10,7 +10,6 @@ import {
   BarChart3,
   Calendar,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -18,9 +17,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 import { useStockContextStore } from "../store/use-stock-context.store";
-import { useModalStore } from "@/stores/modal-store";
 import { useStockKpis } from "../hooks/use-kpi";
-import { ModalTypes } from "@/types/modal.types";
 
 function MovementIcon({ type }: { type: "IN" | "OUT" | "ADJUST" }) {
   if (type === "IN")
@@ -59,7 +56,6 @@ function MovementBadge({ type }: { type: "IN" | "OUT" | "ADJUST" }) {
 
 export const StockSidebar = () => {
   const { locationId } = useStockContextStore();
-  const { openModal } = useModalStore();
 
   const kpisQ = useStockKpis(locationId);
   const data = kpisQ.data?.data;
@@ -68,9 +64,24 @@ export const StockSidebar = () => {
 
   const below = data?.belowMinCount ?? 0;
 
-  const open = (mode: "IN" | "OUT" | "ADJUST") => {
-    if (!locationId) return;
-    openModal(ModalTypes.STOCK_MOVEMENT_FORM, { mode, locationId });
+  const breakdown = data?.movementBreakdown30d ?? {
+    inQty: 0,
+    outQty: 0,
+    adjustCount: 0,
+  };
+
+  const month = data?.monthSummary ?? {
+    month: "",
+    inQty: 0,
+    outQty: 0,
+    net: 0,
+    movementsCount: 0,
+  };
+
+  const stockValue = data?.stockValue ?? {
+    totalValueXaf: 0,
+    itemsValued: 0,
+    itemsMissingCost: 0,
   };
 
   const containerVariants = {
@@ -96,7 +107,7 @@ export const StockSidebar = () => {
       className="space-y-4"
     >
       {/* Quick actions */}
-      <motion.div variants={itemVariants}>
+      {/* <motion.div variants={itemVariants}>
         <Card className="p-4 space-y-3">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -140,7 +151,18 @@ export const StockSidebar = () => {
             </motion.div>
           </div>
         </Card>
-      </motion.div>
+      </motion.div> */}
+
+      {/* Value */}
+      {/* <motion.div variants={itemVariants}>
+        <KpiTile
+          txtClassName="text-lg font-semibold"
+          icon={Package}
+          label="Valeur de stock"
+          value={formatPrice(stockValue.totalValueXaf ?? 0)}
+          delay={0.2}
+        />
+      </motion.div> */}
 
       {/* KPI Tiles */}
       <motion.div variants={itemVariants}>
@@ -282,6 +304,79 @@ export const StockSidebar = () => {
           </AnimatePresence>
         </Card>
       </motion.div>
+
+      {/* Movement intelligence */}
+      <motion.div className="pb-6" variants={itemVariants}>
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            Flux & résumé
+          </div>
+
+          <div className="-mt-2">
+            <MiniInOutBar
+              inQty={breakdown.inQty ?? 0}
+              outQty={breakdown.outQty ?? 0}
+              adjustCount={breakdown.adjustCount ?? 0}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: 1 * 0.05 }}
+                whileHover={{ scale: 1.02, x: 4 }}
+                className="rounded-lg border hover:shadow-sm bg-card p-3 transition-shadow"
+              >
+                <div className="text-xs text-muted-foreground">Mois</div>
+                <div className="mt-1 text-sm font-semibold tabular-nums">
+                  {month.month ?? "-"}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {month.movementsCount ?? 0} mouvements
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: 1 * 0.05 }}
+                whileHover={{ scale: 1.02, x: 4 }}
+                className={cn(
+                  "rounded-lg border bg-card p-3 hover:shadow-sm transition-shadow",
+                  (month.net ?? 0) < 0 &&
+                    "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400",
+                  (month.net ?? 0) > 0 &&
+                    "border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400",
+                )}
+              >
+                <div className="text-xs text-muted-foreground">Net</div>
+                <div className="mt-1 text-sm font-semibold tabular-nums">
+                  {(month.net ?? 0) > 0 ? `+${month.net}` : month.net}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  IN {month.inQty ?? 0} • OUT {month.outQty ?? 0}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Optional: show missing cost count */}
+          {(stockValue.itemsMissingCost ?? 0) > 0 && (
+            <div className="text-xs text-muted-foreground">
+              Valeur estimée partielle :{" "}
+              <span className="font-medium tabular-nums">
+                {stockValue.itemsMissingCost}
+              </span>{" "}
+              article(s) sans prix.
+            </div>
+          )}
+        </Card>
+      </motion.div>
     </motion.div>
   );
 };
@@ -291,6 +386,7 @@ const KpiTile = ({
   label,
   value,
   className,
+  txtClassName,
   delay = 0,
   pulse = false,
 }: {
@@ -298,6 +394,7 @@ const KpiTile = ({
   label: string;
   value: any;
   className?: string;
+  txtClassName?: string;
   delay?: number;
   pulse?: boolean;
 }) => (
@@ -331,16 +428,78 @@ const KpiTile = ({
         </span>
         <Icon className="h-3.5 w-3.5 text-muted-foreground/50" />
       </div>
-      <div className="text-2xl font-bold tabular-nums">{value}</div>
+      <div className={cn("text-2xl font-bold tabular-nums", txtClassName)}>
+        {value}
+      </div>
     </div>
   </motion.div>
 );
+
+function MiniInOutBar({
+  inQty,
+  outQty,
+  adjustCount,
+}: {
+  inQty: number;
+  outQty: number;
+  adjustCount: number;
+}) {
+  const safeIn = Number.isFinite(inQty) ? inQty : 0;
+  const safeOut = Number.isFinite(outQty) ? outQty : 0;
+
+  const total = Math.max(1, safeIn + safeOut); // avoid div/0
+  const inPct = Math.round((safeIn / total) * 100);
+  const outPct = 100 - inPct;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>30 derniers jours</span>
+        <span className="tabular-nums">
+          IN {safeIn} • OUT {safeOut} • AJ {adjustCount ?? 0}
+        </span>
+      </div>
+
+      <div className="h-3 w-full overflow-hidden rounded-full border bg-muted/40">
+        <div className="flex h-full w-full">
+          <div
+            className="h-full bg-green-500/70"
+            style={{ width: `${inPct}%` }}
+            title={`Entrées: ${safeIn} (${inPct}%)`}
+          />
+          <div
+            className="h-full bg-red-500/70"
+            style={{ width: `${outPct}%` }}
+            title={`Sorties: ${safeOut} (${outPct}%)`}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2 w-2 rounded-full bg-green-500/70" />
+          Entrées {inPct}%
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2 w-2 rounded-full bg-red-500/70" />
+          Sorties {outPct}%
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function formatPrice(value: number) {
   return value.toLocaleString("fr-FR", {
     style: "currency",
     currency: "XAF",
     minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
+
+export function formatCompactNumber(value: number) {
+  return value.toLocaleString("fr-FR", {
     maximumFractionDigits: 0,
   });
 }

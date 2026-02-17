@@ -37,7 +37,7 @@ export function TableToolbar({ table, config }: Props) {
         {config.presets?.map((p) => (
           <Button
             key={p.label}
-            variant="secondary"
+            variant={p.variant ?? "default"}
             size="sm"
             onClick={() => p.apply(table)}
           >

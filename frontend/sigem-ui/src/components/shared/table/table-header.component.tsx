@@ -67,6 +67,9 @@ const DraggableTableHeader = ({ header }: { header: Header<any, unknown> }) => {
     zIndex: isDragging ? 1 : 0,
   };
 
+  const canSort = header.column.getCanSort();
+  const canResize = header.column.getCanResize();
+
   return (
     <TableHead
       ref={setNodeRef}
@@ -82,6 +85,7 @@ const DraggableTableHeader = ({ header }: { header: Header<any, unknown> }) => {
       }
     >
       <div className="flex items-center justify-start gap-0.5">
+        {/* Drag handle and column title */}
         <Button
           size="icon"
           variant="ghost"
@@ -97,26 +101,30 @@ const DraggableTableHeader = ({ header }: { header: Header<any, unknown> }) => {
             aria-hidden="true"
           />
         </Button>
+
+        {/* Title */}
         <span className="grow truncate">
           {header.isPlaceholder
             ? null
             : flexRender(header.column.columnDef.header, header.getContext())}
         </span>
+
+        {/* Sorting indicators */}
         <Button
           size="icon"
           variant="ghost"
           className="group -mr-1 size-7 shadow-none"
-          onClick={header.column.getToggleSortingHandler()}
+          onClick={
+            canSort ? header.column.getToggleSortingHandler() : undefined
+          }
           onKeyDown={(e) => {
             // Enhanced keyboard handling for sorting
-            if (
-              header.column.getCanSort() &&
-              (e.key === "Enter" || e.key === " ")
-            ) {
+            if (canSort && (e.key === "Enter" || e.key === " ")) {
               e.preventDefault();
               header.column.getToggleSortingHandler()?.(e);
             }
           }}
+          aria-label={canSort ? "Sort" : "Not sortable"}
         >
           {{
             asc: (
@@ -145,6 +153,30 @@ const DraggableTableHeader = ({ header }: { header: Header<any, unknown> }) => {
           )}
         </Button>
       </div>
+
+      {/* ✅ RESIZER HANDLE */}
+      {canResize && (
+        <div
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            header.getResizeHandler()(e);
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            header.getResizeHandler()(e);
+          }}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            // optional: reset size to default
+            header.column.resetSize?.();
+          }}
+          className={[
+            "absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none touch-none",
+            "hover:bg-muted/60",
+            header.column.getIsResizing() ? "bg-muted/80" : "",
+          ].join(" ")}
+        />
+      )}
     </TableHead>
   );
 };

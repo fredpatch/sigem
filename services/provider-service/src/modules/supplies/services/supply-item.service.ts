@@ -19,7 +19,7 @@ export class SupplyItemService {
     const skip = (page - 1) * limit;
 
     const filter: any = {};
-    if (typeof input.active === "boolean") filter.active = input.active;
+    // if (typeof input.active === "boolean") filter.active = input.active;
 
     if (input.search?.trim()) {
       const q = normalizeLabel(input.search);

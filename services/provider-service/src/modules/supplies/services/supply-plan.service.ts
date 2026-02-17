@@ -7,9 +7,23 @@ import {
   SupplyPlanStatus,
 } from "../models/supplier-plan.model";
 import { httpError } from "./supply-item.service";
+import { StockLocationModel } from "../../ledger/models/stock-location.model";
+import { StockService } from "../../ledger/services/stock.service";
+import { toObjectId } from "../../ledger/controller/stock.controller";
+import { StockMovementModel } from "../../ledger/models/stock-movement.model";
 
 function pad(n: number, size = 4) {
   return String(n).padStart(size, "0");
+}
+
+async function getDefaultStockLocationId() {
+  const loc = await StockLocationModel.findOne().sort({ createdAt: 1 }).lean();
+  if (!loc)
+    throw httpError(
+      "Aucun magasin défini. Initialisez une location stock.",
+      400,
+    );
+  return loc._id as Types.ObjectId;
 }
 
 async function generateReference() {
@@ -26,6 +40,54 @@ async function generateReference() {
 }
 
 export class SupplyPlanService {
+  private async autoInStockFromPlan(params: {
+    planId: Types.ObjectId;
+    locationId: Types.ObjectId;
+    byUserId: string;
+  }) {
+    const doc = await SupplyPlanEntity.findById(params.planId).lean();
+    if (!doc) throw httpError("Supply plan not found", 404);
+
+    const stockService = new StockService();
+
+    // convert byUserId to ObjectId if possible
+    const createdBy = toObjectId(params.byUserId, "_id")
+      ? toObjectId(params.byUserId, "_id")
+      : undefined;
+
+    for (const l of doc.lines || []) {
+      // ✅ idempotence: avoid double IN if status toggled or request retried
+      const exists = await StockMovementModel.exists({
+        type: "IN",
+        refType: "SUPPLY_PLAN",
+        refId: doc._id,
+        supplyItemId: l.itemId,
+        locationId: params.locationId,
+      });
+
+      if (exists) continue;
+
+      await stockService.createStockMovement(
+        {
+          type: "IN",
+          locationId: params.locationId,
+          supplyItemId: l.itemId,
+          qty: Number(l.quantity ?? 0),
+
+          providerId: l.selectedSupplierId ?? undefined,
+          unitCost: l.selectedUnitPrice ?? undefined,
+
+          refType: "SUPPLY_PLAN",
+          refId: doc._id,
+          reason: `Réception auto depuis le bon ${doc.reference} (Livré)`,
+          createdBy,
+          // orgId: undefined (tu as décidé de ne pas l’utiliser pour l’instant)
+        } as any,
+        { blockNegative: true },
+      );
+    }
+  }
+
   async list(input: {
     status?: SupplyPlanStatus;
     q?: string; // reference contains
@@ -248,6 +310,9 @@ export class SupplyPlanService {
 
     assertTransition(from, to);
 
+    // trigger auto-IN only when entering DELIVERED
+    const shoutAutoIn = from !== "DELIVERED" && to === "DELIVERED";
+
     doc.status = to;
     doc.history = [
       ...(doc.history || []),
@@ -261,6 +326,18 @@ export class SupplyPlanService {
     ] as any;
 
     await doc.save();
+
+    if (shoutAutoIn) {
+      const locationId = await getDefaultStockLocationId();
+      await this.autoInStockFromPlan({
+        planId: doc._id,
+        locationId,
+        byUserId: input.byUserId,
+      });
+
+      // Notification of stock update is handled in StockService.createStockMovement, which emits "stock.movement.created" events.
+    }
+
     return doc;
   }
 

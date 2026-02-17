@@ -96,6 +96,7 @@ export interface TableToolbarConfig {
 
   /** presets métier (chips) */
   presets?: {
+    variant?: "default" | "secondary" | "outline" | "destructive" | "ghost";
     label: string;
     apply: (table: any) => void;
   }[];
@@ -144,6 +145,14 @@ export function TableComponent<TData, TValue>({
 }: TableProps<TData, TValue>) {
   const tableId = toolbar?.tableId;
 
+  const [columnVisibility, setColumnVisibility] = useState(() => {
+    const base: Record<string, boolean> = {};
+
+    // hide helper columns by default
+    base["belowMin"] = false;
+    return base;
+  });
+
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   // const debouncedGlobalFilter = useDebouncedValue(globalFilter, 200);
@@ -180,6 +189,7 @@ export function TableComponent<TData, TValue>({
     data: items,
     columns,
     columnResizeMode: "onChange",
+    enableColumnResizing: true,
     onColumnOrderChange: setColumnOrder,
 
     state: {
@@ -187,7 +197,9 @@ export function TableComponent<TData, TValue>({
       columnOrder,
       columnFilters,
       globalFilter,
+      columnVisibility,
     },
+    onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: "includesString",
     onColumnFiltersChange: setColumnFilters,
@@ -257,7 +269,7 @@ export function TableComponent<TData, TValue>({
         onDragEnd={handleDragEnd}
         sensors={sensors}
       >
-        <Table>
+        <Table className="w-full table-fixed">
           <TableHeaderComponent columnOrder={columnOrder} table={table} />
 
           <SortableContext

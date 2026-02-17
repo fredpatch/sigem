@@ -37,3 +37,56 @@ export type StockMovementModalData = {
   locationId: string;
   supplyItemId?: string; // si déclenché depuis une ligne
 };
+
+export type StockKpisResponse = {
+  success: boolean;
+  data: {
+    totalItems: number;
+    totalQuantity: number;
+    belowMinCount: number;
+
+    lastMovementAt: string | null;
+    lastMovements: Array<{
+      id: string;
+      type: "IN" | "OUT" | "ADJUST";
+      delta: number;
+      stockBefore: number;
+      stockAfter: number;
+      unitCost: number | null;
+      reason: string | null;
+      createdAt: string;
+      supplyItem: { id: string; label: string; unit?: string } | null;
+      provider: { id: string; name: string | null } | null;
+    }>;
+
+    // ✅ NEW
+    movementBreakdown30d: {
+      inQty: number;
+      outQty: number;
+      adjustCount: number;
+    };
+
+    monthSummary: {
+      month: string; // "YYYY-MM"
+      inQty: number;
+      outQty: number;
+      net: number;
+      movementsCount: number;
+    };
+
+    stockValue: {
+      totalValueXaf: number;
+      itemsValued: number;
+      itemsMissingCost: number;
+    };
+
+    belowMinTop: Array<{
+      stockItemId: string;
+      supplyItemId: string | null;
+      label: string;
+      unit: string | null;
+      onHand: number;
+      minLevel: number;
+    }>;
+  };
+};

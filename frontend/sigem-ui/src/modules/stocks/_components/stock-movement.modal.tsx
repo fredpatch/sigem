@@ -47,9 +47,11 @@ import { cn } from "@/lib/utils";
 import {
   useCreateStockMovement,
   useLookupSupplierPrice,
+  useStockMovements,
 } from "../hooks/use-stock";
 import { useProvidersList } from "@/modules/providers/hooks/use-providers";
 import { useSupplyItems } from "@/modules/supplier/hooks/supplies.queries";
+import { Guidelines } from "@/common/guidelines";
 
 export type StockMovementMode = "IN" | "OUT" | "ADJUST";
 
@@ -131,14 +133,40 @@ export const StockMovementModal = ({
     enabled: mode === "IN" && !!providerId && !!itemId,
   });
 
+  const lastInQ = useStockMovements({
+    locationId,
+    supplyItemId: watchedItemId,
+    type: "IN",
+    page: 1,
+    limit: 1,
+  });
+
+  // console.log("lastInQ", lastInQ.data?.items?.[0]);
+  const lastProvider = lastInQ.data?.items?.[0]?.providerId;
+
+  useEffect(() => {
+    if (mode !== "IN") return;
+    if (!watchedItemId) return;
+
+    // if the last IN movement has a provider, preselect it
+    if (lastProvider && !form.getValues("providerId")) {
+      form.setValue("providerId", lastProvider._id);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastInQ.data, mode, watchedItemId]);
+
   useEffect(() => {
     if (mode !== "IN") return;
     if (!lookupQ.data) return;
+
     if ("found" in lookupQ.data && lookupQ.data.found) {
       form.setValue("unitCost", lookupQ.data.unitPrice);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookupQ.data, mode]);
+
+  // !form.getValues("providerId");
 
   const {
     title,
@@ -264,6 +292,51 @@ export const StockMovementModal = ({
               {title}
             </DialogTitle>
           </motion.div>
+
+          {/* Tips contextuels */}
+          <div className="mt-2">
+            {mode === "IN" && (
+              <Guidelines
+                compact
+                variant="tips"
+                title="Entrée : bonnes pratiques"
+                items={[
+                  "Choisis un fournisseur si possible (meilleure traçabilité).",
+                  "Le prix unitaire peut être auto-rempli depuis la grille fournisseur.",
+                  "Si aucun prix n’existe, tu peux le saisir manuellement (optionnel).",
+                ]}
+                showHelpLink={false}
+              />
+            )}
+
+            {mode === "OUT" && (
+              <Guidelines
+                compact
+                variant="warning"
+                title="Sortie : attention"
+                items={[
+                  "Une sortie diminue le stock (delta négatif).",
+                  "Si le stock est insuffisant, l’API bloque l’opération.",
+                  "Ajoute un motif (service, urgence, projet) pour faciliter l’audit.",
+                ]}
+                showHelpLink={false}
+              />
+            )}
+
+            {mode === "ADJUST" && (
+              <Guidelines
+                compact
+                variant="info"
+                title="Ajustement inventaire"
+                items={[
+                  "Tu saisis la quantité comptée (réalité).",
+                  "Le système calcule delta = compté - stock actuel.",
+                  "À utiliser après comptage (mensuel, trimestriel, contrôle).",
+                ]}
+                showHelpLink={false}
+              />
+            )}
+          </div>
         </DialogHeader>
 
         <motion.form
@@ -343,7 +416,7 @@ export const StockMovementModal = ({
                 </PopoverContent>
               </Popover>
               <p className="text-xs text-muted-foreground flex items-start gap-1.5">
-                <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
                 <span>
                   Astuce : tu peux aussi ouvrir l'action depuis une ligne de la
                   table.
@@ -360,7 +433,7 @@ export const StockMovementModal = ({
               transition={{ delay: 0.3 }}
               className="flex items-center gap-3 bg-muted/50 rounded-lg p-3.5 border"
             >
-              <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shrink-0">
                 <Package className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">
@@ -463,7 +536,7 @@ export const StockMovementModal = ({
                       exit={{ opacity: 0, y: -5 }}
                       className="flex items-start gap-2 text-xs bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 rounded-md p-2.5 text-orange-700 dark:text-orange-400"
                     >
-                      <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                      <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                       <p>
                         Aucun prix trouvé pour ce fournisseur. Vous pouvez
                         saisir un prix manuellement.
@@ -485,6 +558,11 @@ export const StockMovementModal = ({
                         <span>Recherche du prix fournisseur…</span>
                       </motion.div>
                     )}
+                  {lastInQ.data?.items?.[0]?.providerId && (
+                    <div className="text-xs text-orange-700 dark:text-orange-400 flex items-start gap-1.5">
+                      Fournisseur pré-rempli depuis la dernière réception.
+                    </div>
+                  )}
                 </AnimatePresence>
               </div>
 

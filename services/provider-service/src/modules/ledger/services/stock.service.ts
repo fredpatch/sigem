@@ -68,6 +68,35 @@ export class StockService {
     return undefined;
   }
 
+  async resolveLastProviderId(params: {
+    locationId: Types.ObjectId;
+    supplyItemId: Types.ObjectId;
+  }) {
+    const last = await StockMovementModel.findOne({
+      locationId: params.locationId,
+      supplyItemId: params.supplyItemId,
+      providerId: { $exists: true, $ne: null },
+    })
+      .sort({ createdAt: -1 })
+      .select({ providerId: 1 })
+      .lean();
+
+    return last?.providerId ?? undefined;
+  }
+
+  async buildStockMatch(input: {
+    orgId?: any;
+    locationId: any;
+    supplyItemId: any;
+  }) {
+    const match: any = {
+      locationId: input.locationId,
+      supplyItemId: input.supplyItemId,
+    };
+    if (input.orgId) match.orgId = input.orgId;
+    return match;
+  }
+
   async createStockMovement(
     input: CreateStockMovementInput,
     opts?: { blockNegative?: boolean },
@@ -121,13 +150,15 @@ export class StockService {
 
     try {
       const result = await session.withTransaction(async () => {
+        const match = await this.buildStockMatch({
+          // orgId: input.orgId,
+          locationId: input.locationId,
+          supplyItemId: input.supplyItemId,
+        });
+
         // 3) récupérer StockItem (upsert)
         const stockItem = await StockItemModel.findOneAndUpdate(
-          {
-            orgId: input.orgId ?? undefined,
-            locationId: input.locationId,
-            supplyItemId: input.supplyItemId,
-          },
+          match,
           {
             $setOnInsert: {
               orgId: input.orgId ?? undefined,
@@ -140,7 +171,11 @@ export class StockService {
           { new: true, upsert: true, session },
         );
 
+        // console.log("Stock item before movement:", stockItem);
+
         const stockBefore = Number(stock_attachNumber(stockItem.onHand));
+
+        // console.log("Stock before movement:", stockBefore);
 
         // 4) ADJUST delta = counted - before
         if (input.type === "ADJUST") {
@@ -152,6 +187,8 @@ export class StockService {
 
         const stockAfter = stockBefore + delta;
 
+        // console.log("Stock after movement:", stockAfter);
+
         // 5) règle stock négatif
         if (blockNegative && stockAfter < 0) {
           throw badRequest(
@@ -162,6 +199,19 @@ export class StockService {
         // 6) update stock item
         stockItem.onHand = stockAfter;
         await stockItem.save({ session });
+
+        let providerIdToSave = input.providerId as any | undefined;
+
+        // ✅ auto-attach providerId for OUT/ADJUST if missing
+        if (
+          (input.type === "OUT" || input.type === "ADJUST") &&
+          !providerIdToSave
+        ) {
+          providerIdToSave = await this.resolveLastProviderId({
+            locationId: input.locationId,
+            supplyItemId: input.supplyItemId,
+          });
+        }
 
         // 7) create movement
         const movement = await StockMovementModel.create(
@@ -176,7 +226,7 @@ export class StockService {
 
               // ✅ save unit cost only for IN (resolved)
               unitCost: input.type === "IN" ? resolvedUnitCost : undefined,
-              providerId: input.providerId,
+              providerId: providerIdToSave,
               refType: input.refType,
               refId: input.refId,
               reason: input.reason,

@@ -5,6 +5,7 @@ import { SupplyPlanController } from "../controllers/supply-plan.controller";
 import { authorizedRoles } from "../../../middlewares/authorized-roles";
 import { authenticate } from "../../../middlewares/authenticate";
 import { SupplyDashboardController } from "../controllers/supply-dashboard.controller";
+import { audit } from "../../../middlewares/audit";
 
 const canWrite = authorizedRoles(
   "MG_COS",
@@ -29,10 +30,26 @@ export default function suppliesRoutes() {
    */
   router.get("/items", items.list.bind(items));
   router.get("/items/:id", items.getById.bind(items));
-  router.post("/items", items.create.bind(items));
-  router.patch("/items/:id", items.update.bind(items));
-  router.patch("/items/:id/disable", items.disable.bind(items));
-  router.patch("/items/:id/enable", items.enable.bind(items));
+  router.post(
+    "/items",
+    audit("create", "supply_item"),
+    items.create.bind(items),
+  );
+  router.patch(
+    "/items/:id",
+    audit("update", "supply_item"),
+    items.update.bind(items),
+  );
+  router.patch(
+    "/items/:id/disable",
+    audit("update", "supply_item"),
+    items.disable.bind(items),
+  );
+  router.patch(
+    "/items/:id/enable",
+    audit("update", "supply_item"),
+    items.enable.bind(items),
+  );
 
   /**
    * SUPPLIER PRICES
@@ -40,22 +57,58 @@ export default function suppliesRoutes() {
    */
   router.get("/prices", prices.list.bind(prices));
   router.get("/prices/:id", prices.getById.bind(prices));
-  router.post("/prices/upsert", prices.upsert.bind(prices));
-  router.patch("/prices/:id", prices.update.bind(prices));
-  router.delete("/prices/:id", prices.remove.bind(prices));
+  router.post(
+    "/prices/upsert",
+    audit("upsert", "supplier_price"),
+    prices.upsert.bind(prices),
+  );
+  router.patch(
+    "/prices/:id",
+    audit("update", "supplier_price"),
+    prices.update.bind(prices),
+  );
+  router.delete(
+    "/prices/:id",
+    audit("delete", "supplier_price"),
+    prices.remove.bind(prices),
+  );
 
   /**
    * SUPPLY PLANS
    */
   router.get("/plans", plans.list.bind(plans));
-  router.get("/plans/:id", plans.getById.bind(plans));
-  router.post("/plans", plans.create.bind(plans));
-  router.patch("/plans/:id", plans.update.bind(plans));
+  router.get(
+    "/plans/:id",
+    audit("read", "supply_plan"),
+    plans.getById.bind(plans),
+  );
+  router.post(
+    "/plans",
+    audit("create", "supply_plan"),
+    plans.create.bind(plans),
+  );
+  router.patch(
+    "/plans/:id",
+    audit("update", "supply_plan"),
+    plans.update.bind(plans),
+  );
 
   // Actions
-  router.post("/plans/:id/status", plans.changeStatus.bind(plans));
-  router.post("/plans/:id/auto-price", plans.autoPrice.bind(plans));
-  router.post("/plans/:id/cancel", plans.cancel.bind(plans));
+  router.post(
+    "/plans/:id/status",
+    audit("update", "supply_plan"),
+    plans.changeStatus.bind(plans),
+  );
+  router.post(
+    "/plans/:id/auto-price",
+    audit("update", "supply_plan"),
+    plans.autoPrice.bind(plans),
+  );
+  router.post(
+    "/plans/:id/cancel",
+    audit("update", "supply_plan"),
+    plans.cancel.bind(plans),
+  );
 
   // Dashboard stats
   router.get("/dashboard", dashboard.getDashboard.bind(dashboard));

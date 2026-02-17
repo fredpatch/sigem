@@ -1,5 +1,9 @@
 import { api } from "@/lib/axios";
-import { StockItemDto, StockMovementDto } from "../types/types";
+import {
+  StockItemDto,
+  StockKpisResponse,
+  StockMovementDto,
+} from "../types/types";
 
 export async function initDefaultLocation() {
   const { data } = await api.post("/stocks/locations/init");
@@ -71,16 +75,7 @@ export async function lookupSupplierPrice(params: {
 
 export async function getStockKpis(locationId: string) {
   const { data } = await api.get("/stocks/kpis", { params: { locationId } });
-  return data as {
-    success: boolean;
-    data: {
-      totalItems: number;
-      totalQuantity: number;
-      belowMinCount: number;
-      lastMovementAt: string | null;
-      lastMovements: any | null;
-    };
-  };
+  return data as StockKpisResponse;
 }
 
 export async function setStockMinLevel(input: {

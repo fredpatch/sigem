@@ -132,7 +132,7 @@ export class SupplyItemController {
     // Notification
     await emitSupplyEvent("supply.item.activated", {
       userId: id,
-      recipients: [], // broadcast rôle MG
+      // recipients: [], // broadcast rôle MG
       severity: "success",
       title: "Article réactivé",
       message: `Un article a été réactivé${data.label ? ` : "${data.label}"` : ""}${data._id ? ` (#${data._id})` : ""}.`,

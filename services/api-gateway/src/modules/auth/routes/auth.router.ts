@@ -3,6 +3,7 @@ import { authenticate } from "../../../middlewares/authenticate";
 import { authorizedRoles } from "../../../middlewares/authorized-roles";
 import { authController } from "../controllers/auth.controller";
 import { require2FA } from "src/middlewares/require2FA";
+import { audit } from "src/middlewares/audit";
 
 const authRouter = Router();
 
@@ -17,26 +18,31 @@ authRouter.post(
   "/mg/activate",
   authenticate,
   authorizedRoles("SUPER_ADMIN", "ADMIN", "MG_COS"),
-  authController.activateUserHandler
+  authController.activateUserHandler,
 );
 authRouter.post(
   "/mg/deactivate",
   authenticate,
   authorizedRoles("SUPER_ADMIN", "ADMIN", "MG_COS"),
-  authController.deactivateUserHandler
+  authController.deactivateUserHandler,
 );
 authRouter.patch(
   "/mg/role",
   authenticate,
   authorizedRoles("SUPER_ADMIN", "ADMIN", "MG_COS"),
-  authController.updateUserRoleHandler
+  authController.updateUserRoleHandler,
 );
 
 // First login set password route
 authRouter.post("/set-password", authController.firstLoginSetPasswordHandler);
 
 /* Protected routes */
-authRouter.get("/me", authenticate, authController.getMeHandler);
+authRouter.get(
+  "/me",
+  authenticate,
+  audit("authenticate", "auth"),
+  authController.getMeHandler,
+);
 
 /* 2FA routes */
 authRouter.post("/request-otp", authController.requestOtpHandler);

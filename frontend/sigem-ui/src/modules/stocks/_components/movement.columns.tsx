@@ -3,6 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { formatPrice } from "./stock-sidebar";
 
 type MovementRow = {
   _id: string;
@@ -39,6 +40,9 @@ export const movementColumns: ColumnDef<MovementRow>[] = [
     id: "type",
     header: "Type",
     accessorKey: "type",
+    size: 100,
+    minSize: 120,
+    maxSize: 140,
     meta: {
       filterVariant: "select",
       label: "Type",
@@ -48,13 +52,15 @@ export const movementColumns: ColumnDef<MovementRow>[] = [
     cell: ({ row }) => {
       const t = row.original.type;
       return (
-        <Badge
-          variant={
-            t === "IN" ? "default" : t === "OUT" ? "secondary" : "outline"
-          }
-        >
-          {movementTypeLabel(t)}
-        </Badge>
+        <div className="flex items-center justify-center">
+          <Badge
+            variant={
+              t === "IN" ? "secondary" : t === "OUT" ? "destructive" : "quote"
+            }
+          >
+            {movementTypeLabel(t)}
+          </Badge>
+        </div>
       );
     },
   },
@@ -78,6 +84,9 @@ export const movementColumns: ColumnDef<MovementRow>[] = [
     id: "delta",
     header: "Delta",
     accessorKey: "delta",
+    size: 60,
+    minSize: 90,
+    maxSize: 100,
     meta: { filterVariant: "range", label: "Delta" },
     cell: ({ row }) => (
       <div className="min-w-[70px] flex justify-center font-semibold">
@@ -88,6 +97,9 @@ export const movementColumns: ColumnDef<MovementRow>[] = [
   {
     id: "beforeAfter",
     header: "Avant → Après",
+    size: 140,
+    minSize: 140,
+    maxSize: 160,
     accessorFn: (r) => `${r.stockBefore} -> ${r.stockAfter}`,
     meta: { label: "Avant/Après" },
     cell: ({ row }) => (
@@ -100,6 +112,9 @@ export const movementColumns: ColumnDef<MovementRow>[] = [
   {
     id: "supplier",
     header: "Fournisseur",
+    size: 140,
+    minSize: 140,
+    maxSize: 160,
     accessorFn: (r) => r.providerId?.name ?? r.providerId?.label ?? "",
     meta: { filterVariant: "text", label: "Fournisseur" },
     cell: ({ row }) => (
@@ -112,20 +127,32 @@ export const movementColumns: ColumnDef<MovementRow>[] = [
     id: "unitCost",
     header: "PU",
     accessorKey: "unitCost",
+    size: 90,
+    minSize: 90,
+    maxSize: 100,
     meta: { filterVariant: "range", label: "Prix unitaire" },
-    cell: ({ row }) => (
-      <div className="min-w-[90px] flex justify-center">
-        {row.original.unitCost ?? "-"}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const v = row.original.unitCost ?? 0;
+
+      return (
+        <div className="min-w-[90px] flex justify-center">
+          {formatPrice(v) ?? "-"}
+        </div>
+      );
+    },
   },
   {
     id: "reason",
     header: "Motif",
     accessorKey: "reason",
+    size: 250,
+    minSize: 200,
+    maxSize: 350,
     meta: { filterVariant: "text", label: "Motif" },
     cell: ({ row }) => (
-      <div className="min-w-[200px]">{row.original.reason ?? "-"}</div>
+      <div className="whitespace-pre-wrap wrap-break-words max-w-xs">
+        {row.original.reason ?? "-"}
+      </div>
     ),
   },
 ];

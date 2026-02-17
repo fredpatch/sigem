@@ -169,13 +169,11 @@ export class StockController {
     });
 
     if (!doc) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message:
-            "Stock item not found for the specified location and supply item",
-        });
+      return res.status(404).json({
+        success: false,
+        message:
+          "Stock item not found for the specified location and supply item",
+      });
     }
 
     res.json({ success: true, data: doc });
