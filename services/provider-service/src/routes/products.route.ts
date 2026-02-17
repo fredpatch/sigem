@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authorizedRoles } from "../middlewares/authorized-roles";
 import { authenticate } from "../middlewares/authenticate";
 import { productController } from "../controllers/products.controller";
+import { audit } from "../middlewares/audit";
 
 export const productRouter = Router();
 
@@ -10,7 +11,7 @@ const canWrite = authorizedRoles(
   "MG_COB",
   "MG_AGT",
   "SUPER_ADMIN",
-  "ADMIN"
+  "ADMIN",
 );
 
 const canRead = authorizedRoles(
@@ -18,7 +19,7 @@ const canRead = authorizedRoles(
   "MG_COB",
   "MG_AGT",
   "SUPER_ADMIN",
-  "ADMIN"
+  "ADMIN",
 );
 
 /**
@@ -28,7 +29,7 @@ productRouter.get(
   "/products/:productId/price-compare",
   authenticate,
   canRead,
-  productController.compare
+  productController.compare,
 );
 
 productRouter.get("/products", authenticate, canRead, productController.list);
@@ -37,7 +38,7 @@ productRouter.get(
   "/products/:id",
   authenticate,
   canRead,
-  productController.getOne
+  productController.getOne,
 );
 
 /**
@@ -46,15 +47,17 @@ productRouter.get(
 productRouter.post(
   "/products",
   authenticate,
+  audit("create", "product"),
   canWrite,
-  productController.create
+  productController.create,
 );
 
 productRouter.patch(
   "/products/:id",
   authenticate,
+  audit("update", "product"),
   canWrite,
-  productController.update
+  productController.update,
 );
 
 // productRouter.delete(

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authorizedRoles } from "../middlewares/authorized-roles";
 import { authenticate } from "../middlewares/authenticate";
 import { purchasesController } from "../controllers/purchases.controller";
+import { audit } from "../middlewares/audit";
 
 export const purchaseRouter = Router();
 
@@ -10,7 +11,7 @@ const canWrite = authorizedRoles(
   "MG_COB",
   "MG_AGT",
   "SUPER_ADMIN",
-  "ADMIN"
+  "ADMIN",
 );
 
 const canRead = authorizedRoles(
@@ -18,7 +19,7 @@ const canRead = authorizedRoles(
   "MG_COB",
   "MG_AGT",
   "SUPER_ADMIN",
-  "ADMIN"
+  "ADMIN",
 );
 
 /**
@@ -28,14 +29,14 @@ purchaseRouter.get(
   "/purchases",
   authenticate,
   canRead,
-  purchasesController.list
+  purchasesController.list,
 );
 
 purchaseRouter.get(
   "/purchases/:id",
   authenticate,
   canRead,
-  purchasesController.getOne
+  purchasesController.getOne,
 );
 
 /**
@@ -44,29 +45,33 @@ purchaseRouter.get(
 purchaseRouter.post(
   "/purchases",
   authenticate,
+  audit("create", "purchase"),
   canWrite,
-  purchasesController.create
+  purchasesController.create,
 );
 
 purchaseRouter.post(
   "/purchases/:id/confirm",
   authenticate,
+  audit("confirm", "purchase"),
   canWrite,
-  purchasesController.confirm
+  purchasesController.confirm,
 );
 
 purchaseRouter.patch(
   "/purchases/:id",
   authenticate,
+  audit("update", "purchase"),
   canWrite,
-  purchasesController.update
+  purchasesController.update,
 );
 
 purchaseRouter.delete(
   "/purchases/:id/cancel",
   authenticate,
+  audit("cancel", "purchase"),
   canWrite,
-  purchasesController.cancel // soft delete
+  purchasesController.cancel, // soft delete
 );
 
 // productRouter.post(

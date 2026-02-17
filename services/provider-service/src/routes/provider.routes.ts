@@ -3,6 +3,7 @@ import { authorizedRoles } from "../middlewares/authorized-roles";
 import { providerController } from "../controllers/provider.controller";
 import { authenticate } from "../middlewares/authenticate";
 import multer from "multer";
+import { audit } from "../middlewares/audit";
 
 export const providerRouter = Router();
 const upload = multer({
@@ -67,6 +68,7 @@ providerRouter.get(
 providerRouter.post(
   "/providers",
   authenticate,
+  audit("create", "provider"),
   canWrite,
   providerController.create,
 );
@@ -74,6 +76,7 @@ providerRouter.post(
 providerRouter.patch(
   "/providers/:id",
   authenticate,
+  audit("update", "provider"),
   canWrite,
   providerController.update,
 );
@@ -81,6 +84,7 @@ providerRouter.patch(
 providerRouter.delete(
   "/providers/:id",
   authenticate,
+  audit("delete", "provider"),
   canWrite,
   providerController.disable, // soft delete
 );
@@ -88,6 +92,7 @@ providerRouter.delete(
 providerRouter.post(
   "/providers/:id/activate",
   authenticate,
+  audit("update", "provider"),
   canWrite,
   providerController.activate,
 );
@@ -96,6 +101,7 @@ providerRouter.post(
 providerRouter.post(
   "/providers/import/preview",
   authenticate,
+  audit("import_preview", "provider"),
   canWrite,
   upload.single("file"),
   providerController.importPreview,
@@ -105,6 +111,7 @@ providerRouter.post(
 providerRouter.post(
   "/providers/import/inspect",
   authenticate,
+  audit("import_inspect", "provider"),
   canWrite,
   upload.single("file"),
   providerController.importInspect,
@@ -114,6 +121,7 @@ providerRouter.post(
 providerRouter.post(
   "/providers/import/commit",
   authenticate,
+  audit("import_commit", "provider"),
   canWrite,
   providerController.importCommit,
 );

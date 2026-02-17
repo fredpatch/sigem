@@ -6,6 +6,7 @@ import {
   VehicleTaskTemplateController,
   VehicleTaskController,
 } from "src/controller/vehicle-task.controller";
+import { audit } from "src/middlewares/audit";
 
 const vehicleTaskRouter = Router();
 const vehicleTaskTemplateRouter = Router();
@@ -20,7 +21,7 @@ const canRead = authorizedRoles(
   "MG_COB",
   "MG_AGT",
   "SUPER_ADMIN",
-  "ADMIN"
+  "ADMIN",
 );
 
 // --- TASK TEMPLATES ---
@@ -29,29 +30,31 @@ const canRead = authorizedRoles(
 vehicleTaskTemplateRouter.post(
   "/task-templates",
   authenticate,
+  audit("create_vehicle_task_template", "task_template"),
   canWrite,
-  templateController.create
+  templateController.create,
 );
 
 vehicleTaskTemplateRouter.get(
   "/task-templates",
   authenticate,
   canRead,
-  templateController.list
+  templateController.list,
 );
 
 vehicleTaskTemplateRouter.get(
   "/task-templates/:id",
   authenticate,
   canRead,
-  templateController.getById
+  templateController.getById,
 );
 
 vehicleTaskTemplateRouter.patch(
   "/task-templates/:id",
   authenticate,
+  audit("update_vehicle_task_template", "task_template"),
   canWrite,
-  templateController.update
+  templateController.update,
 );
 
 // --- TASKS ---
@@ -83,22 +86,30 @@ vehicleTaskRouter.get("/", authenticate, canRead, taskController.list);
 vehicleTaskRouter.get("/:id", authenticate, canRead, taskController.getById);
 
 // PATCH /v1/vehicle-tasks/:id
-vehicleTaskRouter.patch("/:id", authenticate, canWrite, taskController.update);
+vehicleTaskRouter.patch(
+  "/:id",
+  authenticate,
+  audit("update_vehicle_task", "task"),
+  canWrite,
+  taskController.update,
+);
 
 // POST /v1/vehicle-tasks/:id/complete
 vehicleTaskRouter.post(
   "/:id/complete",
   authenticate,
+  audit("complete_vehicle_task", "task"),
   canWrite,
-  taskController.complete
+  taskController.complete,
 );
 
 // POST /v1/vehicle-tasks/:id/complete/mileage
 vehicleTaskRouter.post(
   "/:id/complete/mileage",
   authenticate,
+  audit("complete_vehicle_task_with_mileage", "task"),
   canWrite,
-  taskController.completeMileage
+  taskController.completeMileage,
 );
 
 export { vehicleTaskRouter, vehicleTaskTemplateRouter };

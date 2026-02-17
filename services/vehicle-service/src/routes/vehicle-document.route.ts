@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { VehicleDocumentController } from "src/controller/vehicle.controller";
+import { audit } from "src/middlewares/audit";
 import { authenticate } from "src/middlewares/authenticate";
 import { authorizedRoles } from "src/middlewares/authorized-roles";
 
@@ -12,7 +13,7 @@ const canRead = authorizedRoles(
   "MG_COB",
   "MG_AGT",
   "SUPER_ADMIN",
-  "ADMIN"
+  "ADMIN",
 );
 
 // --- Vehicle documents ---
@@ -21,15 +22,16 @@ const canRead = authorizedRoles(
 vehicleDocumentRouter.post(
   "/:vehicleId/documents",
   authenticate,
-  canRead,
-  document.create
+  audit("create_vehicle_document", "document"),
+  canWrite,
+  document.create,
 );
 
 vehicleDocumentRouter.get(
   "/:vehicleId/documents",
   authenticate,
   canRead,
-  document.listByVehicle
+  document.listByVehicle,
 );
 
 vehicleDocumentRouter.get("/", authenticate, canRead, document.list);
@@ -42,21 +44,23 @@ vehicleDocumentRouter.get(
   "/documents/:id",
   authenticate,
   canRead,
-  document.getById
+  document.getById,
 );
 
 vehicleDocumentRouter.patch(
   "/documents/:id",
   authenticate,
+  audit("update_vehicle_document", "document"),
   canWrite,
-  document.update
+  document.update,
 );
 
 vehicleDocumentRouter.delete(
   "/documents/:id",
   authenticate,
+  audit("delete_vehicle_document", "document"),
   canWrite,
-  document.delete
+  document.delete,
 );
 
 export default vehicleDocumentRouter;

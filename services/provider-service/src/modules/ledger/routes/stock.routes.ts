@@ -4,6 +4,7 @@ import { authorizedRoles } from "../../../middlewares/authorized-roles";
 import { StockController } from "../controller/stock.controller";
 import { StockLocationController } from "../controller/stock-location.controller";
 import { SupplierPriceController } from "../controller/supplier-price.controller";
+import { audit } from "../../../middlewares/audit";
 
 const canWrite = authorizedRoles(
   "MG_COS",
@@ -24,13 +25,21 @@ export default function stockRoutes() {
 
   router.get("/", stocks.listStocks.bind(stocks));
   router.get("/movements", stocks.listMovements.bind(stocks));
-  router.post("/movements", stocks.createMovement.bind(stocks));
+  router.post(
+    "/movements",
+    audit("create", "stock_movement"),
+    stocks.createMovement.bind(stocks),
+  );
 
   /**
    * Stock location init
    */
   router.get("/locations", location.getStockLocations.bind(location));
-  router.post("/locations/init", location.initStockLocations.bind(location));
+  router.post(
+    "/locations/init",
+    audit("create", "stock_location"),
+    location.initStockLocations.bind(location),
+  );
 
   /**
    * Supplier Price Lookup (for unit cost resolution in stock movements)
@@ -48,7 +57,11 @@ export default function stockRoutes() {
   /**
    * Seuil/Alerte
    */
-  router.patch("/min-level", stocks.setLevel.bind(stocks));
+  router.patch(
+    "/min-level",
+    audit("update", "stock_level"),
+    stocks.setLevel.bind(stocks),
+  );
 
   return router;
 }

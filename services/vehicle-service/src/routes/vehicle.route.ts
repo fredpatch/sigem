@@ -3,6 +3,7 @@ import { Router } from "express";
 import { MgController } from "src/controller/vehicle-mg.controller";
 import { VehicleTaskController } from "src/controller/vehicle-task.controller";
 import { VehicleController } from "src/controller/vehicle.controller";
+import { audit } from "src/middlewares/audit";
 import {
   authenticate,
   authorizeVehicleOwnerByMatricule,
@@ -20,7 +21,7 @@ const canRead = authorizedRoles(
   "MG_AGT",
   "SUPER_ADMIN",
   "ADMIN",
-  "GUEST"
+  "GUEST",
 );
 
 const mgController = new MgController();
@@ -29,7 +30,7 @@ const mgController = new MgController();
 vehicleRouter.post(
   "/:vehicleId/mg/oil-change/complete",
   authenticate,
-  mgController.completeOilChangeTask
+  mgController.completeOilChangeTask,
 );
 
 vehicleRouter.post("/mg/create", authenticate, mgController.createMgVehicle);
@@ -40,33 +41,47 @@ vehicleRouter.post("/mg/create", authenticate, mgController.createMgVehicle);
 vehicleRouter.get("/mg-table", authenticate, vehicleController.getMgTable);
 vehicleRouter.get("/my", authenticate, vehicleController.listMyVehicles);
 
-vehicleRouter.post("/", authenticate, canWrite, vehicleController.create);
+vehicleRouter.post(
+  "/",
+  authenticate,
+  audit("create_vehicle", "vehicle"),
+  canWrite,
+  vehicleController.create,
+);
 
 vehicleRouter.get("/", authenticate, canRead, vehicleController.list);
 
 vehicleRouter.get("/:id", authenticate, canRead, vehicleController.listById);
 
-vehicleRouter.patch("/:id", authenticate, canWrite, vehicleController.update);
+vehicleRouter.patch(
+  "/:id",
+  authenticate,
+  audit("update_vehicle", "vehicle"),
+  canWrite,
+  vehicleController.update,
+);
 
 vehicleRouter.get(
   "/:id/oil-change-info",
   authenticate,
   authorizeVehicleOwnerByMatricule,
-  vehicleController.oilChangeInfo
+  vehicleController.oilChangeInfo,
 );
 
 vehicleRouter.patch(
   "/:id/mileage",
   authenticate,
   authorizeVehicleOwnerByMatricule,
-  vehicleController.updateMileage
+  audit("update_vehicle_mileage", "vehicle"),
+  vehicleController.updateMileage,
 );
 
 vehicleRouter.delete(
   "/:id",
   authenticate,
+  audit("delete_vehicle", "vehicle"),
   canWrite,
-  vehicleController.softDelete
+  vehicleController.softDelete,
 );
 
 // Création d'une tâche pour un véhicule
@@ -75,8 +90,9 @@ vehicleRouter.delete(
 vehicleRouter.post(
   "/:vehicleId/tasks",
   authenticate,
+  audit("create_vehicle_task", "task"),
   canWrite,
-  vehicleTaskController.createForVehicle
+  vehicleTaskController.createForVehicle,
 );
 // Liste des tâches pour un véhicule donné
 // GET /v1/vehicles/:vehicleId/tasks
@@ -84,7 +100,7 @@ vehicleRouter.get(
   "/:vehicleId/tasks",
   authenticate,
   canRead,
-  vehicleTaskController.listByVehicle
+  vehicleTaskController.listByVehicle,
 );
 
 export default vehicleRouter;
