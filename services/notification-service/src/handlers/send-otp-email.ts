@@ -1,5 +1,5 @@
 import { sendEmail } from "../services/mail.service";
-import { buildOtpEmailTemplate } from "../templates/otp-email.template";
+import { buildOtpEmailTemplate } from "@sigem/shared/templates";
 
 export async function sendOtpEmail(params: {
     to: string;

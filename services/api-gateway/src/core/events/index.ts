@@ -1,6 +1,13 @@
-import { setEventBus, getEventBus as _get, IEventBus } from "./event.bus";
-import { NoOpEventBus } from "./providers/no-op-event.bus";
-import { KafkaEventBus } from "./providers/kafka-event.bus";
+import {
+  IEventBus,
+  KafkaEventBus,
+  NoOpEventBus,
+  setEventBus,
+  getEventBus as _get,
+} from "@sigem/shared";
+// import { setEventBus, getEventBus as _get, IEventBus } from "./event.bus";
+// import { NoOpEventBus } from "./providers/no-op-event.bus";
+// import { KafkaEventBus } from "./providers/kafka-event.bus";
 
 export async function initEvents(opts?: { eager?: boolean }) {
   const driver = (process.env.EVENTS_DRIVER || "noop").toLowerCase();
@@ -9,7 +16,7 @@ export async function initEvents(opts?: { eager?: boolean }) {
   if (driver === "kafka") {
     console.log(
       "[events] driver=kafka brokers=%s",
-      process.env.KAFKA_BROKERS || "localhost:9092"
+      process.env.KAFKA_BROKERS || "localhost:9092",
     );
     bus = new KafkaEventBus();
   } else {
@@ -28,7 +35,7 @@ export async function initEvents(opts?: { eager?: boolean }) {
       // pas bloquant au boot : on log et on laissera le premier emit() retenter
       console.error(
         "⚠️ [Kafka] Eager connect failed, will retry on first emit():",
-        e
+        e,
       );
     }
   }

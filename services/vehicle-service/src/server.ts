@@ -23,13 +23,13 @@ const startServer = async () => {
   // Tasks monitoring
   initSchedulers();
 
-  await runVehicleTaskScheduler();
-  await runVehicleDocumentScheduler();
+  // await runVehicleTaskScheduler();
+  // await runVehicleDocumentScheduler();
 
   server.listen(env.PORT, "0.0.0.0", async () => {
     console.log(`🚀 ${env.SERVICE_NAME} running on ${env.PORT}`);
     console.log(
-      `🟢 Health check: http://localhost:${env.PORT}/${API_VERSION}/health`
+      `🟢 Health check: http://localhost:${env.PORT}/${API_VERSION}/health`,
     );
   });
 };

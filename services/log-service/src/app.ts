@@ -1,6 +1,6 @@
 import express, { Application } from "express";
 import { router as rootRouter } from "./routes/index.route";
-import middlewaresInit from "./middlewares";
+import middlewaresInit from "@sigem/shared/middleware";
 
 export const API_VERSION = "v1";
 

@@ -6,9 +6,9 @@ node_modules/
 .env
 .env.*
 
-frontend/sigem-ui/.env
-frontend/sigem-ui/.env.*
-frontend/sigem-ui/node_modules/
+apps/web/.env
+apps/web/.env.*
+apps/web/node_modules/
 
 services/api-gateway/.env
 services/inventory-services/.env.*

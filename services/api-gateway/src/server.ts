@@ -2,7 +2,7 @@
 import "reflect-metadata";
 import getApp, { API_VERSION } from "./app";
 import { MariaDataSource } from "./config/maria.datasource";
-import connectToMongo from "./config/mongo";
+import { connectToMongo } from "@sigem/shared/config";
 import { initEvents } from "./core/events";
 
 const PORT = Number(process.env.PORT || 4000);

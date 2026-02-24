@@ -1,6 +1,5 @@
-import { KAFKA_TOPICS } from "@sigem/shared";
+import { KAFKA_TOPICS, emitAuditEvent } from "@sigem/shared";
 import { NextFunction, Request, Response } from "express";
-import { getEventBus } from "../core/events";
 
 const parseResource = (r?: string) => {
   if (!r) return { resourceType: undefined, resourceId: undefined };
@@ -8,24 +7,35 @@ const parseResource = (r?: string) => {
   return { resourceType, resourceId };
 };
 
+const AUDIT_IGNORE_PATHS = (process.env.AUDIT_LOG_IGNORE_PATHS ?? "")
+  .split(",")
+  .map((p) => p.trim())
+  .filter(Boolean);
+
+const shouldSkipAudit = (req: Request) =>
+  AUDIT_IGNORE_PATHS.some((p) => req.originalUrl.includes(p));
+
 export function audit(action: string, resource: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     res.on("finish", async () => {
       try {
-        if (res.statusCode < 400) {
-          const { resourceType, resourceId } = parseResource(resource);
-          const user = (req as any).user;
-          const severity =
-            res.statusCode >= 500
-              ? "error"
-              : res.statusCode >= 400
-                ? "warning"
-                : "success";
+        if (shouldSkipAudit(req)) return;
 
-          // userId: (req as any).user?.id,
-          // username: (req as any).user?.username,
+        const { resourceType, resourceId } = parseResource(resource);
+        const user = (req as any).user;
+        const severity =
+          res.statusCode >= 500
+            ? "error"
+            : res.statusCode >= 400
+              ? "warning"
+              : "success";
 
-          await getEventBus().emit(KAFKA_TOPICS.LOG_ACTION, {
+        // userId: (req as any).user?.id,
+        // username: (req as any).user?.username,
+
+        await emitAuditEvent(
+          KAFKA_TOPICS.LOG_ACTION,
+          {
             // === canonical cover
             version: 1,
             type: "audit.action",
@@ -47,8 +57,9 @@ export function audit(action: string, resource: string) {
               ip: req.ip,
               userAgent: req.headers["user-agent"],
             },
-          });
-        }
+          },
+          { includeType: false },
+        );
       } catch (e) {
         // No throw in a "finish" listener
         console.error("[audit] emit failed:", e);

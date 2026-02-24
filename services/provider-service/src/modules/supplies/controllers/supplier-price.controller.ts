@@ -89,6 +89,23 @@ export class SupplierPriceController {
 
   remove = catchError(async (req, res) => {
     const data = await service.remove(req.params.id);
+    const { id, matriculation, role, username } = getActor(req);
+
+    await emitSupplyEvent("supply.price.deleted", {
+      severity: "warning",
+      title: "Prix fournisseur supprimé",
+      message: `Le prix fournisseur pour l'article "${data.itemId}" a été supprimé.`,
+      resourceType: "SupplyPrice",
+      resourceId: data._id.toString(),
+      dept: "MGX",
+      actor: {
+        userId: id,
+        role: role,
+        name: username,
+        matriculation: matriculation,
+      },
+    });
+
     return res.json({ ok: true, data });
   });
 }

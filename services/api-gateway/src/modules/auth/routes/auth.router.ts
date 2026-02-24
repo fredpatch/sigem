@@ -17,18 +17,21 @@ authRouter.post("/logout", authController.logoutHandler);
 authRouter.post(
   "/mg/activate",
   authenticate,
+  audit("activate_user", "auth"),
   authorizedRoles("SUPER_ADMIN", "ADMIN", "MG_COS"),
   authController.activateUserHandler,
 );
 authRouter.post(
   "/mg/deactivate",
   authenticate,
+  audit("deactivate_user", "auth"),
   authorizedRoles("SUPER_ADMIN", "ADMIN", "MG_COS"),
   authController.deactivateUserHandler,
 );
 authRouter.patch(
   "/mg/role",
   authenticate,
+  audit("update_user_role", "auth"),
   authorizedRoles("SUPER_ADMIN", "ADMIN", "MG_COS"),
   authController.updateUserRoleHandler,
 );
@@ -40,7 +43,7 @@ authRouter.post("/set-password", authController.firstLoginSetPasswordHandler);
 authRouter.get(
   "/me",
   authenticate,
-  audit("authenticate", "auth"),
+  audit("verify_user", "auth"),
   authController.getMeHandler,
 );
 

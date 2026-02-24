@@ -1,17 +1,16 @@
 // notify.handler.ts
 import { NotificationEventPayload } from "@sigem/shared";
-import { Notification } from "../models/notification.model";
 import {
   fmtDate,
   fmtDocType,
   fmtDue,
   fmtMileage,
   fmtVehicle,
-  IMPORTANT,
-  KNOWN_TOPICS,
-  mapSeverityToNotificationType,
-} from "../utils/utils";
+} from "@sigem/shared/utils/formatters";
+import { mapSeverityToNotificationType } from "@sigem/shared/http";
+import { Notification } from "../models/notification.model";
 import { sendOtpEmail } from "./send-otp-email";
+import { IMPORTANT, KNOWN_TOPICS } from "../utils/constants";
 
 type SocketIO = any;
 

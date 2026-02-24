@@ -1,11 +1,10 @@
 import "dotenv/config";
 import { KAFKA_TOPICS } from "@sigem/shared/constants";
+import { connectToMongo } from "@sigem/shared/config";
+import { ensureKafkaTopics, startConsumer } from "@sigem/shared/kafka";
 import initApp, { API_VERSION } from "./app";
-import { startConsumer } from "./common/consumer";
-import connectToMongo from "./config/mongo";
 import { createSocketServer } from "./ws/socket";
 import { handleIncomingEvent } from "./handlers/notify.handler";
-import { ensureKafkaTopics } from "./ws/ensure-topics";
 
 const PORT = Number(process.env.PORT ?? 4001);
 
@@ -19,12 +18,13 @@ async function main() {
   // Mongo
   await connectToMongo();
 
-  await ensureKafkaTopics(
-    process.env.KAFKA_BROKERS!.split(",").map((b) => b.trim()),
-  );
+  // Kafka setup
+  const brokers = (process.env.KAFKA_BROKERS || "localhost:9092")
+    .split(",")
+    .map((b) => b.trim());
 
-  // Kafka Consumer
-  const brokers = (process.env.KAFKA_BROKERS || "localhost:9092").split(",");
+  await ensureKafkaTopics({ brokers });
+
   const topics = [
     KAFKA_TOPICS.NOTIFY_EVENT,
     KAFKA_TOPICS.ASSET_CREATED,
@@ -91,10 +91,13 @@ async function main() {
     groupId: process.env.KAFKA_GROUP_ID || "sigem-notification-g",
     brokers,
     topics,
-    handler: async (evt, meta) => {
+    startupLog: true,
+    verifyOnConnect: true,
+    connectWarnMs: 10000,
+    handler: async (payload, meta) => {
       // Dev purpose || debugging
-      // console.log(`🟣 [notif-service] received on ${meta.topic}:`, evt);
-      await handleIncomingEvent(io, evt, meta.eventType ?? meta.topic);
+      // console.log(`🟣 [notif-service] received on ${meta.topic}:`, payload);
+      await handleIncomingEvent(io, payload, meta.eventType ?? meta.topic);
     },
   });
 

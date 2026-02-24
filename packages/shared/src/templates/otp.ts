@@ -1,23 +1,21 @@
-import { escapeHtml } from "./email.template";
+import { escapeHtml } from "./email";
 
-type OtpEmailParams = {
-    code: string;
-    expiresInMinutes: number;
-    userName?: string;
-    appName?: string;
+export type OtpEmailParams = {
+  code: string;
+  expiresInMinutes: number;
+  userName?: string;
+  appName?: string;
 };
 
+/**
+ * Build OTP email template
+ */
 export function buildOtpEmailTemplate(params: OtpEmailParams) {
-    const {
-        code,
-        expiresInMinutes,
-        userName,
-        appName = "SIGEM",
-    } = params;
+  const { code, expiresInMinutes, userName, appName = "SIGEM" } = params;
 
-    return {
-        subject: `Votre code de sécurité ${appName}`,
-        html: `
+  return {
+    subject: `Votre code de sécurité ${appName}`,
+    html: `
 <div style="font-family: Arial, Helvetica, sans-serif; background:#f6f7f9; padding:24px">
   <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:8px;padding:24px">
     
@@ -59,7 +57,7 @@ export function buildOtpEmailTemplate(params: OtpEmailParams) {
     <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
 
     <p style="font-size:12px;color:#666">
-      Si vous n’êtes pas à l’origine de cette demande, ignorez cet email.
+      Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.
     </p>
 
   </div>
@@ -69,7 +67,7 @@ export function buildOtpEmailTemplate(params: OtpEmailParams) {
   </p>
 </div>
 `,
-        text: `
+    text: `
 ${appName} - Code de sécurité
 
 Votre code de vérification : ${code}
@@ -77,8 +75,7 @@ Votre code de vérification : ${code}
 Ce code est valable pendant ${expiresInMinutes} minutes.
 
 Ne partagez jamais ce code avec qui que ce soit.
-Si vous n’êtes pas à l’origine de cette demande, ignorez ce message.
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.
 `,
-    };
+  };
 }
-

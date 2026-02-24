@@ -146,6 +146,7 @@ export class SupplyPlanController {
 
     // Notification
     await emitSupplyEvent("supply.plan.status.changed", {
+      log: false,
       userId: id,
       recipients: [], // broadcast rôle MG
       severity: "success",

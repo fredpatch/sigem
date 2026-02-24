@@ -31,6 +31,30 @@
       "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.js"
     },
+    "./utils/formatters": {
+      "types": "./dist/utils/formatters/index.d.ts",
+      "import": "./dist/utils/formatters/index.js"
+    },
+    "./utils/scope": {
+      "types": "./dist/utils/scope/index.d.ts",
+      "import": "./dist/utils/scope/index.js"
+    },
+    "./templates": {
+      "types": "./dist/templates/index.d.ts",
+      "import": "./dist/templates/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "import": "./dist/http/index.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js"
+    },
     "./auth": {
       "types": "./dist/auth/index.d.ts",
       "import": "./dist/auth/index.js"
@@ -38,11 +62,26 @@
     "./auth/jwt": {
       "types": "./dist/auth/jwt.d.ts",
       "import": "./dist/auth/jwt.js"
+    },
+    "./events": {
+      "types": "./dist/events/index.d.ts",
+      "import": "./dist/events/index.js"
+    },
+    "./kafka": {
+      "types": "./dist/kafka/index.d.ts",
+      "import": "./dist/kafka/index.js"
     }
   },
   "sideEffects": false,
   "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "kafkajs": "^2.2.4",
+    "mongoose": "^8.19.2",
+    "morgan": "^1.10.1",
     "pino": "^9.4.0",
     "zod": "^3.23.8"
   },
@@ -52,6 +91,10 @@
     "dev": "tsc -b --watch"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.10"
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10"
   }
 }

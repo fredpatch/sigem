@@ -1,5 +1,5 @@
 import express, { Application } from "express";
-import middlewaresInit from "./middlewares";
+import middlewaresInit from "@sigem/shared/middleware";
 import { inventoryProxyRouter } from "./routes/inventory.proxy.router";
 import { router } from "./routes";
 import { vehicleProxyRouter } from "./routes/vehicles.proxy.router";
@@ -12,11 +12,23 @@ import { stocksProxyRouter } from "./routes/stocks.proxy.router";
 
 export const API_VERSION = "v1";
 
+const ALLOWED_ORIGINS = [
+  "http://localhost:5173",
+  // production origins here
+];
+
 const getApp = async () => {
   const app: Application = express();
 
   // middlewares init
-  middlewaresInit(app);
+  middlewaresInit(app, {
+    disablePoweredBy: true,
+    cors: {
+      allowlist: ALLOWED_ORIGINS,
+      allowNoOrigin: true,
+      credentials: true,
+    },
+  });
 
   // routes
   // Proxy routes
