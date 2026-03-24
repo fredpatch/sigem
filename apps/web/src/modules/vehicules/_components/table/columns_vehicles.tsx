@@ -5,7 +5,7 @@ import { fr } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { CarFront, Gauge, User2, Building2 } from "lucide-react";
 
-import { Checkbox } from "@/components/ui/checkbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 import TitleComponent from "@/components/shared/table/title.component";
 import { BadgeWithToolTip } from "@/components/shared/badge-tooltip";
 
@@ -75,34 +75,34 @@ function getStatusConfig(status: Vehicle["status"]): {
 
 export const vehicleColumns: ColumnDef<Vehicle>[] = [
   // --- SELECT COLUMN ---
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      </div>
-    ),
-    size: 50,
-    enableSorting: false,
-  },
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <div className="flex items-center justify-center">
+  //       <Checkbox
+  //         checked={
+  //           table.getIsAllPageRowsSelected() ||
+  //           (table.getIsSomePageRowsSelected() && "indeterminate")
+  //         }
+  //         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+  //         aria-label="Select all"
+  //         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+  //       />
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="flex items-center justify-center">
+  //       <Checkbox
+  //         checked={row.getIsSelected()}
+  //         onCheckedChange={(value) => row.toggleSelected(!!value)}
+  //         aria-label="Select row"
+  //         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+  //       />
+  //     </div>
+  //   ),
+  //   size: 50,
+  //   enableSorting: false,
+  // },
 
   // --- VÉHICULE (carte complète : marque/modèle + plaque) ---
   {

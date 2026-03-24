@@ -11,7 +11,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 
-import { Checkbox } from "@/components/ui/checkbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 import TitleComponent from "@/components/shared/table/title.component";
 import { BadgeWithToolTip } from "@/components/shared/badge-tooltip";
 import {
@@ -21,40 +21,40 @@ import {
   VehicleTaskType,
 } from "../../types/types";
 import { fr } from "date-fns/locale";
-import { VehicleTaskActionCell } from "@/components/shared/table/action.component";
+// import { VehicleTaskActionCell } from "@/components/shared/table/action.component";
 
 const MotionDiv = motion.div;
 
 export const vehicleTasksColumns: ColumnDef<VehicleTask>[] = [
   // --- SELECT COLUMN ---
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      </div>
-    ),
-    size: 50,
-    enableSorting: false,
-  },
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <div className="flex items-center justify-center">
+  //       <Checkbox
+  //         checked={
+  //           table.getIsAllPageRowsSelected() ||
+  //           (table.getIsSomePageRowsSelected() && "indeterminate")
+  //         }
+  //         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+  //         aria-label="Select all"
+  //         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+  //       />
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="flex items-center justify-center">
+  //       <Checkbox
+  //         checked={row.getIsSelected()}
+  //         onCheckedChange={(value) => row.toggleSelected(!!value)}
+  //         aria-label="Select row"
+  //         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+  //       />
+  //     </div>
+  //   ),
+  //   size: 50,
+  //   enableSorting: false,
+  // },
 
   // --- VEHICLE (ID ONLY FOR NOW) ---
   {

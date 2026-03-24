@@ -12,7 +12,7 @@ export const StocksManagementLayoutPage = () => {
     >
       <Outlet />
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 pb-4">
         <Guidelines
           variant="info"
           title="Comment fonctionne la gestion des stocks ?"

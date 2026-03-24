@@ -12,7 +12,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useModalStore } from "@/stores/modal-store";
 import { ModalTypes } from "@/types/modal.types";
@@ -72,39 +72,42 @@ function expiryBadgeConfig(days: number | null) {
 
 export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   // SELECT
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-          aria-label="Select all"
-          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(v) => row.toggleSelected(!!v)}
-          aria-label="Select row"
-          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      </div>
-    ),
-    size: 50,
-    enableSorting: false,
-  },
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <div className="flex items-center justify-center">
+  //       <Checkbox
+  //         checked={
+  //           table.getIsAllPageRowsSelected() ||
+  //           (table.getIsSomePageRowsSelected() && "indeterminate")
+  //         }
+  //         onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+  //         aria-label="Select all"
+  //         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+  //       />
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="flex items-center justify-center">
+  //       <Checkbox
+  //         checked={row.getIsSelected()}
+  //         onCheckedChange={(v) => row.toggleSelected(!!v)}
+  //         aria-label="Select row"
+  //         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+  //       />
+  //     </div>
+  //   ),
+  //   size: 50,
+  //   enableSorting: false,
+  // },
 
   // VEHICULE
   {
     id: "plateNumber",
     accessorKey: "plateNumber",
+    size: 220,
+    minSize: 200,
+    maxSize: 260,
     meta: {
       label: "Véhicule",
       exportValue: (v) =>
@@ -161,6 +164,9 @@ export const mgVehicleColumns: ColumnDef<MGMaintenanceRow>[] = [
   {
     id: "assignedToName",
     accessorKey: "assignedToName",
+    size: 220,
+    minSize: 200,
+    maxSize: 380,
     meta: {
       label: "Utilisateur",
       exportValue: (v) =>
