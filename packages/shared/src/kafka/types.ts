@@ -5,9 +5,11 @@
 
 // Audit/Log event
 export interface AuditEventPayload {
+  version?: string;
   eventId?: string;
   type?: string;
   userId?: string;
+  username?: string;
   role?: string;
   dept?: string;
   resourceType?: string;
@@ -17,6 +19,14 @@ export interface AuditEventPayload {
   severity?: "info" | "warning" | "error";
   timestamp?: number | Date;
   data?: Record<string, any>;
+
+  http?: {
+    method?: string;
+    path?: string;
+    status?: number;
+    ip?: string;
+    userAgent?: string;
+  };
 }
 
 // Notification event - flexible to support asset, supply, vehicle events
