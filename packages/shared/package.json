@@ -4,75 +4,12 @@
   "description": "Types, DTO et constantes partagées SIGEM",
   "license": "MIT",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.js"
-    },
-    "./dto": {
-      "types": "./dist/dto/index.d.ts",
-      "import": "./dist/dto/index.js"
-    },
-    "./constants": {
-      "types": "./dist/constants/index.d.ts",
-      "import": "./dist/constants/index.js"
-    },
-    "./schema": {
-      "types": "./dist/schema/index.d.ts",
-      "import": "./dist/schema/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.js"
-    },
-    "./utils/formatters": {
-      "types": "./dist/utils/formatters/index.d.ts",
-      "import": "./dist/utils/formatters/index.js"
-    },
-    "./utils/scope": {
-      "types": "./dist/utils/scope/index.d.ts",
-      "import": "./dist/utils/scope/index.js"
-    },
-    "./templates": {
-      "types": "./dist/templates/index.d.ts",
-      "import": "./dist/templates/index.js"
-    },
-    "./config": {
-      "types": "./dist/config/index.d.ts",
-      "import": "./dist/config/index.js"
-    },
-    "./http": {
-      "types": "./dist/http/index.d.ts",
-      "import": "./dist/http/index.js"
-    },
-    "./middleware": {
-      "types": "./dist/middleware/index.d.ts",
-      "import": "./dist/middleware/index.js"
-    },
-    "./auth": {
-      "types": "./dist/auth/index.d.ts",
-      "import": "./dist/auth/index.js"
-    },
-    "./auth/jwt": {
-      "types": "./dist/auth/jwt.d.ts",
-      "import": "./dist/auth/jwt.js"
-    },
-    "./events": {
-      "types": "./dist/events/index.d.ts",
-      "import": "./dist/events/index.js"
-    },
-    "./kafka": {
-      "types": "./dist/kafka/index.d.ts",
-      "import": "./dist/kafka/index.js"
-    }
+    ".": "./src/index.ts"
   },
-  "sideEffects": false,
+  "private": true,
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -86,7 +23,7 @@
     "zod": "^3.23.8"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b tsconfig.json",
     "clean": "tsc -b --clean && rimraf dist",
     "dev": "tsc -b --watch"
   },

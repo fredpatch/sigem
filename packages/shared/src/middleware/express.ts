@@ -61,7 +61,7 @@ const buildCorsOptions = (
   };
 };
 
-const middlewaresInit = (
+export const middlewaresInit = (
   app: Application,
   options: MiddlewareInitOptions = {},
 ) => {
@@ -100,4 +100,3 @@ const middlewaresInit = (
 };
 
 export type { MiddlewareInitOptions };
-export default middlewaresInit;

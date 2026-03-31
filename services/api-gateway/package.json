@@ -6,11 +6,11 @@
   "types": "./dist/server.d.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -b",
+    "build": "tsup --config tsup.config.ts",
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@sigem/shared": "1.0.0",
+    "@sigem/shared": "*",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
