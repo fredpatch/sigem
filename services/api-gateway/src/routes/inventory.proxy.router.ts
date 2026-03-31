@@ -37,7 +37,7 @@ const inventoryProxy = createProxyMiddleware({
         proxyReq.write(bodyData);
       }
     },
-    proxyRes: (proxyRes, req, res) => {
+    proxyRes: (proxyRes, req, _res) => {
       // Ici on peut intercepter la réponse si besoin
       // ✅ on supprime les CORS du service target (souvent '*')
       delete proxyRes.headers["access-control-allow-origin"];
@@ -52,7 +52,7 @@ const inventoryProxy = createProxyMiddleware({
         proxyRes.headers["access-control-allow-credentials"] = "true";
         proxyRes.headers["vary"] = "Origin";
       }
-    }
+    },
   },
 });
 
@@ -61,7 +61,7 @@ router.use(
   `/${API_VERSION}/${service.INVENTORY_SERVICE.asset}`, // ex: "/v1/assets"
   authenticate,
   forwardUserHeaders,
-  inventoryProxy
+  inventoryProxy,
 );
 
 // Categories
@@ -69,7 +69,7 @@ router.use(
   `/${API_VERSION}/${service.INVENTORY_SERVICE.category}`, // ex: "/v1/categories"
   authenticate,
   forwardUserHeaders,
-  inventoryProxy
+  inventoryProxy,
 );
 
 // Locations
@@ -77,7 +77,7 @@ router.use(
   `/${API_VERSION}/${service.INVENTORY_SERVICE.location}`, // ex: "/v1/locations"
   authenticate,
   forwardUserHeaders,
-  inventoryProxy
+  inventoryProxy,
 );
 
 // Reference Values
@@ -85,7 +85,7 @@ router.use(
   `/${API_VERSION}/${service.INVENTORY_SERVICE.reference}`, // ex: "/v1/reference-values"
   authenticate,
   forwardUserHeaders,
-  inventoryProxy
+  inventoryProxy,
 );
 
 export { router as inventoryProxyRouter };

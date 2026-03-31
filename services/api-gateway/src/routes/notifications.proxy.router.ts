@@ -29,7 +29,7 @@ const notificationProxy = createProxyMiddleware({
       }
     },
 
-    proxyRes: (proxyRes, req, res) => {
+    proxyRes: (proxyRes, req, _res) => {
       // Ici on peut intercepter la réponse si besoin
       // ✅ on supprime les CORS du service target (souvent '*')
       delete proxyRes.headers["access-control-allow-origin"];
@@ -44,7 +44,7 @@ const notificationProxy = createProxyMiddleware({
         proxyRes.headers["access-control-allow-credentials"] = "true";
         proxyRes.headers["vary"] = "Origin";
       }
-    }
+    },
   },
 });
 
@@ -53,9 +53,7 @@ router.use(
   `/${API_VERSION}/${service.NOTIFICATION_SERVICE.notifications}`, // ex: "/v1/notifications"
   authenticate,
   forwardUserHeaders,
-  notificationProxy
+  notificationProxy,
 );
-
-
 
 export { router as notificationProxyRouter };

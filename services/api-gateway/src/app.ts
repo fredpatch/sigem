@@ -1,5 +1,5 @@
 import express, { Application } from "express";
-import middlewaresInit from "@sigem/shared/middleware";
+import { middlewaresInit } from "@sigem/shared";
 import { inventoryProxyRouter } from "./routes/inventory.proxy.router";
 import { router } from "./routes";
 import { vehicleProxyRouter } from "./routes/vehicles.proxy.router";

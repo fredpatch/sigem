@@ -2,31 +2,31 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/shared"
+      "path": "packages/shared"
     },
     {
-      "path": "./services/api-gateway"
+      "path": "services/api-gateway"
     },
     {
-      "path": "./services/notification-service"
+      "path": "services/notification-service"
     },
     {
-      "path": "./services/reference-service"
+      "path": "services/reference-service"
     },
     {
-      "path": "./services/provider-service"
+      "path": "services/provider-service"
     },
     {
-      "path": "./services/inventory-service"
+      "path": "services/inventory-service"
     },
     {
-      "path": "./services/log-service"
+      "path": "services/log-service"
     },
     {
-      "path": "./services/vehicle-service"
+      "path": "services/vehicle-service"
     },
     {
-      "path": "./apps/web"
+      "path": "apps/web"
     }
   ]
 }

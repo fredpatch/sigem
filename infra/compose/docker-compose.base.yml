@@ -32,6 +32,7 @@ services:
       - sigem-network
 
   api-gateway:
+    image: ${API_GATEWAY_IMAGE:-sigem/api-gateway:latest}
     build:
       context: ../..
       dockerfile: infra/docker/api-gateway.Dockerfile

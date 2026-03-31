@@ -2,7 +2,6 @@ import { Router } from "express";
 import { authenticate } from "../../../middlewares/authenticate";
 import { authorizedRoles } from "../../../middlewares/authorized-roles";
 import { authController } from "../controllers/auth.controller";
-import { require2FA } from "src/middlewares/require2FA";
 import { audit } from "src/middlewares/audit";
 
 const authRouter = Router();

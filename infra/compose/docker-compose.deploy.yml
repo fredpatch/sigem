@@ -1,0 +1,206 @@
+name: sigem
+
+# Full deployment compose — all services run independently and communicate
+# over the internal "sigem-network" bridge.
+#
+# Required .env at repo root (or beside this file on the server):
+#   MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD, MONGO_DATABASE
+#   JWT_SECRET, JWT_REFRESH_SECRET
+#   KAFKA_BROKERS  (external cluster, e.g. "broker-host:9092")
+#   KAFKA_CLIENT_ID, KAFKA_TOPICS_NOTIFY, KAFKA_TOPICS_LOG
+#   KAFKA_SSL, KAFKA_SASL_ENABLED
+#   MARIADB_HOST, MARIADB_PORT, MARIADB_USER, MARIADB_PASSWORD, MARIADB_DATABASE
+#
+# Image tags are controlled by *_IMAGE env vars; default to local builds.
+
+services:
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: sigem-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - sigem-network
+
+  # ── Backend services ─────────────────────────────────────────────────────────
+  api-gateway:
+    image: ${API_GATEWAY_IMAGE:-sigem/api-gateway:latest}
+    build:
+      context: ../..
+      dockerfile: infra/docker/api-gateway.Dockerfile
+    container_name: sigem-api-gateway
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
+      NOTIF_SERVICE_URL: http://notification-service:4001
+      INVENTORY_SERVICE_URL: http://inventory-service:4002
+      VEHICLE_SERVICE_URL: http://vehicle-service:4003
+      REFERENCE_SERVICE_URL: http://reference-service:4006
+      PROVIDER_SERVICE_URL: http://provider-service:4010
+    expose:
+      - "4000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-network
+
+  inventory-service:
+    image: ${INVENTORY_IMAGE:-sigem/inventory-service:latest}
+    build:
+      context: ../..
+      dockerfile: infra/docker/inventory-service.Dockerfile
+    container_name: sigem-inventory-service
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      PORT: 4002
+      NODE_ENV: production
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
+    expose:
+      - "4002"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-network
+
+  vehicle-service:
+    image: ${VEHICLE_IMAGE:-sigem/vehicle-service:latest}
+    build:
+      context: ../..
+      dockerfile: infra/docker/vehicle-service.Dockerfile
+    container_name: sigem-vehicle-service
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      PORT: 4003
+      NODE_ENV: production
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
+    expose:
+      - "4003"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-network
+
+  notification-service:
+    image: ${NOTIFICATION_IMAGE:-sigem/notification-service:latest}
+    build:
+      context: ../..
+      dockerfile: infra/docker/notification-service.Dockerfile
+    container_name: sigem-notification-service
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      PORT: 4001
+      NODE_ENV: production
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
+    expose:
+      - "4001"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-network
+
+  reference-service:
+    image: ${REFERENCE_IMAGE:-sigem/reference-service:latest}
+    build:
+      context: ../..
+      dockerfile: infra/docker/reference-service.Dockerfile
+    container_name: sigem-reference-service
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      PORT: 4006
+      NODE_ENV: production
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
+    expose:
+      - "4006"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-network
+
+  provider-service:
+    image: ${PROVIDER_IMAGE:-sigem/provider-service:latest}
+    build:
+      context: ../..
+      dockerfile: infra/docker/provider-service.Dockerfile
+    container_name: sigem-provider-service
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      PORT: 4010
+      NODE_ENV: production
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
+    expose:
+      - "4010"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-network
+
+  log-service:
+    image: ${LOG_IMAGE:-sigem/log-service:latest}
+    build:
+      context: ../..
+      dockerfile: infra/docker/log-service.Dockerfile
+    container_name: sigem-log-service
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      NODE_ENV: production
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-network
+
+  # ── Frontend (nginx reverse proxy + static SPA) ───────────────────────────
+  client:
+    image: ${CLIENT_IMAGE:-sigem/client:latest}
+    build:
+      context: ../..
+      dockerfile: infra/docker/client.Dockerfile
+      args:
+        # "/api" → nginx proxies to api-gateway (no CORS, no port exposed to browser)
+        VITE_GATEWAY_URL: /api
+        # nginx host as seen by the browser for socket.io
+        VITE_SOCKET_CONNECTION: ${PUBLIC_URL:-http://localhost}
+    container_name: sigem-client
+    restart: unless-stopped
+    ports:
+      - "${CLIENT_PORT:-80}:80"
+    depends_on:
+      - api-gateway
+      - notification-service
+    networks:
+      - sigem-network
+
+volumes:
+  mongo_data:
+
+networks:
+  sigem-network:
+    driver: bridge

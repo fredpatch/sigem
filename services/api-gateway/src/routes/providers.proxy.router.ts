@@ -29,7 +29,7 @@ const providerProxy = createProxyMiddleware({
       }
     },
 
-    proxyRes: (proxyRes, req, res) => {
+    proxyRes: (proxyRes, req, _res) => {
       // Ici on peut intercepter la réponse si besoin
       // ✅ on supprime les CORS du service target (souvent '*')
       delete proxyRes.headers["access-control-allow-origin"];
@@ -53,7 +53,7 @@ router.use(
   `/${API_VERSION}/${service.PROVIDER_SERVICE.providers}`, // ex: "/v1/providers"
   authenticate,
   forwardUserHeaders,
-  providerProxy
+  providerProxy,
 );
 
 export { router as providerProxyRouter };

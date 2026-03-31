@@ -2,8 +2,8 @@
 import "reflect-metadata";
 import getApp, { API_VERSION } from "./app";
 import { MariaDataSource } from "./config/maria.datasource";
-import { connectToMongo } from "@sigem/shared/config";
 import { initEvents } from "./core/events";
+import { connectToMongo } from "@sigem/shared";
 
 const PORT = Number(process.env.PORT || 4000);
 const startServer = async () => {
@@ -27,7 +27,7 @@ const startServer = async () => {
     server.listen(PORT, "0.0.0.0", async () => {
       console.log(`🚀 API Gateway running on port ${PORT}`);
       console.log(
-        `🟢 Health check: http://localhost:${PORT}/${API_VERSION}/health`
+        `🟢 Health check: http://localhost:${PORT}/${API_VERSION}/health`,
       );
     });
   } catch (error) {

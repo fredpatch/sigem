@@ -2,15 +2,16 @@
   "name": "@sigem/api-gateway",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/server.js",
+  "main": "./dist/server.cjs",
   "types": "./dist/server.d.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -b",
-    "start": "node dist/server.js"
+    "build": "tsup",
+    "start": "node dist/server.cjs"
   },
   "dependencies": {
-    "@sigem/shared": "1.0.0",
+    "@sigem/shared": "*",
+    "bcrypt": "^5.1.1",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

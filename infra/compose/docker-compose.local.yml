@@ -1,0 +1,82 @@
+name: sigem-local
+
+# Local smoke-test stack: MongoDB + api-gateway + client (no Kafka required).
+# Run from repo root:
+#   docker compose -f infra/compose/docker-compose.local.yml up --build
+#
+# Services are on the internal "sigem-local" network.
+# Only the client (port 80) and mongo (port 27017) are exposed to the host.
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: sigem-local-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: localpass
+      MONGO_INITDB_DATABASE: sigem
+    volumes:
+      - mongo_local_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - sigem-local
+
+  api-gateway:
+    image: sigem/api-gateway:local
+    build:
+      context: ../..
+      dockerfile: infra/docker/api-gateway.Dockerfile
+    container_name: sigem-local-gateway
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      # development → connectToMongo sets ssl:false (ssl:!isDev in packages/shared/src/config/mongo.ts)
+      NODE_ENV: development
+      EVENTS_DRIVER: noop
+      MONGO_URL: mongodb://admin:localpass@mongo:27017/sigem?authSource=admin
+      JWT_SECRET: local-jwt-secret-for-testing
+      JWT_REFRESH_SECRET: local-jwt-refresh-secret-for-testing
+      NOTIF_SERVICE_URL: http://notification-service:4001
+      INVENTORY_SERVICE_URL: http://inventory-service:4002
+      VEHICLE_SERVICE_URL: http://vehicle-service:4003
+      REFERENCE_SERVICE_URL: http://reference-service:4006
+      PROVIDER_SERVICE_URL: http://provider-service:4010
+    ports:
+      - "4000:4000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-local
+
+  client:
+    image: sigem/client:local
+    build:
+      context: ../..
+      dockerfile: infra/docker/client.Dockerfile
+      args:
+        VITE_GATEWAY_URL: /api
+        VITE_SOCKET_CONNECTION: http://localhost
+    container_name: sigem-local-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - sigem-local
+
+volumes:
+  mongo_local_data:
+
+networks:
+  sigem-local:
+    driver: bridge

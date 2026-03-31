@@ -6,11 +6,11 @@
   "types": "./dist/server.d.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -b",
+    "build": "tsup",
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@sigem/shared": "1.0.0",
+    "@sigem/shared": "*",
     "express": "^4.21.1"
   },
   "devDependencies": {

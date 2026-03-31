@@ -1,5 +1,5 @@
+import UserModel from "@/modules/auth/models/user.model";
 import { NextFunction } from "express";
-import UserModel from "src/modules/auth/models/user.model";
 
 export const require2FA = async (req: any, res: any, next: NextFunction) => {
   try {

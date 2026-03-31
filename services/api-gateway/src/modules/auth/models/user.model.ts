@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Role, ROLES } from "@sigem/shared";
-import { compareValue, hashValue } from "src/utils/bcrypt";
+import { compareValue, hashValue } from "@/utils/bcrypt";
 
 export const STATUS = {
   PENDING: "PENDING",
@@ -96,7 +96,7 @@ const userSchema = new mongoose.Schema<UserDocument>(
       default: STATUS.PENDING,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 userSchema.index(
@@ -106,7 +106,7 @@ userSchema.index(
     partialFilterExpression: {
       email: { $type: "string" }, // ou { $exists: true, $ne: null }
     },
-  }
+  },
 );
 
 //
