@@ -29,7 +29,7 @@ const supplierProxy = createProxyMiddleware({
       }
     },
 
-    proxyRes: (proxyRes, req, res) => {
+    proxyRes: (proxyRes, req, _res) => {
       // Ici on peut intercepter la réponse si besoin
       // ✅ on supprime les CORS du service target (souvent '*')
       delete proxyRes.headers["access-control-allow-origin"];

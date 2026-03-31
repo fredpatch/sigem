@@ -29,7 +29,7 @@ const providerProxy = createProxyMiddleware({
       }
     },
 
-    proxyRes: (proxyRes, req, res) => {
+    proxyRes: (proxyRes, req, _res) => {
       // Ici on peut intercepter la réponse si besoin
       // ✅ on supprime les CORS du service target (souvent '*')
       delete proxyRes.headers["access-control-allow-origin"];
@@ -53,7 +53,7 @@ router.use(
   `/${API_VERSION}/${service.PROVIDER_SERVICE.products}`, // ex: "/v1/products"
   authenticate,
   forwardUserHeaders,
-  providerProxy
+  providerProxy,
 );
 
 // Purchases
@@ -61,7 +61,7 @@ router.use(
   `/${API_VERSION}/${service.PROVIDER_SERVICE.purchases}`, // ex: "/v1/purchases"
   authenticate,
   forwardUserHeaders,
-  providerProxy
+  providerProxy,
 );
 
 // PurchaseRequests
@@ -69,7 +69,7 @@ router.use(
   `/${API_VERSION}/${service.PROVIDER_SERVICE.purchaseRequests}`, // ex: "/v1/purchase-requests"
   authenticate,
   forwardUserHeaders,
-  providerProxy
+  providerProxy,
 );
 
 export { router as productProxyRouter };

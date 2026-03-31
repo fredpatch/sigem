@@ -1,5 +1,4 @@
 import { catchError } from "src/utils/catch-error";
-import { generateUniqueUsername } from "src/utils/gen-username";
 import {
   loginSchema,
   registerSchema,
@@ -7,7 +6,6 @@ import {
 } from "../schema/auth.dto";
 import { authService } from "../services/auth.service";
 import { clearAuthCookies, setAuthCookies } from "src/utils/cookies";
-import { OK } from "src/constants/http-code";
 import SessionModel from "../models/session.model";
 import { JWtService } from "src/utils/jwt";
 import { getEventBus } from "src/core/events";

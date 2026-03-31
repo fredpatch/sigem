@@ -37,7 +37,7 @@ const vehicleProxy = createProxyMiddleware({
         proxyReq.write(bodyData);
       }
     },
-    proxyRes: (proxyRes, req, res) => {
+    proxyRes: (proxyRes, req, _res) => {
       // Ici on peut intercepter la réponse si besoin
       // ✅ on supprime les CORS du service target (souvent '*')
       delete proxyRes.headers["access-control-allow-origin"];
@@ -52,7 +52,7 @@ const vehicleProxy = createProxyMiddleware({
         proxyRes.headers["access-control-allow-credentials"] = "true";
         proxyRes.headers["vary"] = "Origin";
       }
-    }
+    },
   },
 });
 
@@ -61,7 +61,7 @@ router.use(
   `/${API_VERSION}/${service.VEHICLE_SERVICE.vehicles}`, // ex: "/v1/vehicles"
   authenticate,
   forwardUserHeaders,
-  vehicleProxy
+  vehicleProxy,
 );
 
 // Documents
@@ -69,7 +69,7 @@ router.use(
   `/${API_VERSION}/${service.VEHICLE_SERVICE.documents}`, // ex: "/v1/vehicle-documents"
   authenticate,
   forwardUserHeaders,
-  vehicleProxy
+  vehicleProxy,
 );
 
 // Vehicle task templates
@@ -77,7 +77,7 @@ router.use(
   `/${API_VERSION}/${service.VEHICLE_SERVICE.taskTemplates}`, // ex: "/v1/vehicle-task-templates"
   authenticate,
   forwardUserHeaders,
-  vehicleProxy
+  vehicleProxy,
 );
 
 // Vehicle tasks
@@ -85,7 +85,7 @@ router.use(
   `/${API_VERSION}/${service.VEHICLE_SERVICE.tasks}`, // ex: "/v1/vehicle-tasks"
   authenticate,
   forwardUserHeaders,
-  vehicleProxy
+  vehicleProxy,
 );
 
 export { router as vehicleProxyRouter };

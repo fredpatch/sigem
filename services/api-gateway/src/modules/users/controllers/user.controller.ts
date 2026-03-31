@@ -28,7 +28,7 @@ export class UserController {
     // console.log(`[UserService] Get user by id: ${id}`);
 
     // Call service
-    const response = await UserService.listById(id);
+    const response = await UserService.listById(id as string);
 
     // return response
     return res.status(200).json({
@@ -43,7 +43,7 @@ export class UserController {
     // validate request
     const { matricule } = req.params;
     // Call service
-    const response = await UserService.listByMatricule(matricule);
+    const response = await UserService.listByMatricule(matricule as string);
     // return response
     return res.status(200).json({
       data: response.data,
@@ -57,7 +57,7 @@ export class UserController {
     // validate request
     const { id } = req.params;
     const { data } = req.body;
-    const admin = req.user;
+    // const admin = req.user;
 
     // Call service
     const {
@@ -65,7 +65,7 @@ export class UserController {
       message,
       status,
       success,
-    } = await UserService.update(id, data);
+    } = await UserService.update(id as string, data);
 
     // send notification event
 
@@ -81,7 +81,7 @@ export class UserController {
   static softDelete = catchError(async (req, res) => {
     // validate request
     const { id } = req.params;
-    const admin = req.user;
+    // const admin = req.user;
 
     // Call service
     const {
@@ -89,7 +89,7 @@ export class UserController {
       message,
       success,
       status,
-    } = await UserService.softDelete(id);
+    } = await UserService.softDelete(id as string);
 
     // send notification event
 
@@ -114,10 +114,10 @@ export class UserController {
       success,
       status,
     } = await UserService.resetPassword(
-      id,
+      id as string,
       currentPassword,
       newPassword,
-      confirmPassword
+      confirmPassword,
     );
 
     // send notification event
@@ -141,7 +141,7 @@ export class UserController {
       message,
       success,
       status,
-    } = await UserService.deactivate(id);
+    } = await UserService.deactivate(id as string);
 
     // send notification event
 

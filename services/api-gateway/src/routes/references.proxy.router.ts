@@ -29,7 +29,7 @@ const referenceProxy = createProxyMiddleware({
       }
     },
 
-    proxyRes: (proxyRes, req, res) => {
+    proxyRes: (proxyRes, req, _res) => {
       // Ici on peut intercepter la réponse si besoin
       // ✅ on supprime les CORS du service target (souvent '*')
       delete proxyRes.headers["access-control-allow-origin"];
@@ -44,7 +44,7 @@ const referenceProxy = createProxyMiddleware({
         proxyRes.headers["access-control-allow-credentials"] = "true";
         proxyRes.headers["vary"] = "Origin";
       }
-    }
+    },
   },
 });
 
@@ -53,9 +53,7 @@ router.use(
   `/${API_VERSION}/${service.REFERENCE_SERVICE.references}`, // ex: "/v1/references"
   authenticate,
   forwardUserHeaders,
-  referenceProxy
+  referenceProxy,
 );
-
-
 
 export { router as referenceProxyRouter };
