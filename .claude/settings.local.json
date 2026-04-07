@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r @sigem/shared 'C:/Users/Prime Daily/Documents/MEGA/ASD Confidentials/Projects/sigem/services/' --include=*.ts -l)"
+    ]
+  }
+}

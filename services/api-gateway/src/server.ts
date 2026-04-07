@@ -15,14 +15,23 @@ const startServer = async () => {
     const server = await getApp();
 
     // Mongo
-    await connectToMongo();
+    const fallback = process.env.MONGO_URL_FALLBACK!;
+    if (!fallback) {
+      throw new Error("MONGO_URL_FALLBACK missing");
+    }
+    const uri = process.env.MONGO_URL;
+    if (!uri) {
+      throw new Error("MONGO_URL missing");
+    }
+
+    await connectToMongo({ uri }, fallback);
 
     // Maria connect
-    MariaDataSource.initialize()
-      .then(() => console.log("MariaDB connected"))
-      .catch((err) => {
-        console.error("Error during MariaDB Data Source initialization:", err);
-      });
+    // MariaDataSource.initialize()
+    //   .then(() => console.log("MariaDB connected"))
+    //   .catch((err) => {
+    //     console.error("Error during MariaDB Data Source initialization:", err);
+    //   });
 
     server.listen(PORT, "0.0.0.0", async () => {
       console.log(`🚀 API Gateway running on port ${PORT}`);

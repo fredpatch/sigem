@@ -1,13 +1,22 @@
 import "dotenv/config";
 import initApp, { API_VERSION } from "./app";
 import { startConsumer } from "./common/consumer";
-import { connectToMongo } from "@sigem/shared/config";
+import { connectToMongo } from "@sigem/shared";
 
 const PORT = Number(process.env.PORT ?? 4001);
 
 async function main() {
   // Mongo
-  await connectToMongo();
+  const fallback = process.env.MONGO_URL_FALLBACK!;
+  if (!fallback) {
+    throw new Error("MONGO_URL_FALLBACK missing");
+  }
+  const uri = process.env.MONGO_URL;
+  if (!uri) {
+    throw new Error("MONGO_URL missing");
+  }
+
+  await connectToMongo({ uri }, fallback);
 
   // Kafka Consumer
   startConsumer().catch((err) => {

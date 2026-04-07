@@ -28,6 +28,7 @@ export const router = () => {
         notifications: `/${API_VERSION}/notification`,
         auth: `/${API_VERSION}/auth`,
         inventory: `/${API_VERSION}/inventory`,
+        // crud: `/${API_VERSION}/contacts`,
       },
     });
   });

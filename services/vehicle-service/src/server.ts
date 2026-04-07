@@ -1,6 +1,6 @@
 import getApp, { API_VERSION } from "./app";
 import { env } from "./config/env";
-import connectToMongo from "./config/mongo";
+import { connectToMongo } from "@sigem/shared";
 import { ensureKafkaTopics } from "./core/ensure-topics";
 import { initSchedulers } from "./scheduler";
 import { initEvents } from "./core/events";
@@ -16,7 +16,16 @@ const startServer = async () => {
   const server = await getApp();
 
   // Mongo
-  await connectToMongo();
+  const fallback = process.env.MONGO_URL_FALLBACK!;
+  if (!fallback) {
+    throw new Error("MONGO_URL_FALLBACK missing");
+  }
+  const uri = process.env.MONGO_URL;
+  if (!uri) {
+    throw new Error("MONGO_URL missing");
+  }
+
+  await connectToMongo({ uri }, fallback);
 
   await ensureKafkaTopics(env.KAFKA_BROKERS.split(",").map((b) => b.trim()));
 

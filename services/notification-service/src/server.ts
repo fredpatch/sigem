@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { KAFKA_TOPICS } from "@sigem/shared/constants";
-import { connectToMongo } from "@sigem/shared/config";
-import { ensureKafkaTopics, startConsumer } from "@sigem/shared/kafka";
+import { KAFKA_TOPICS } from "@sigem/shared";
+import { connectToMongo } from "@sigem/shared";
+import { ensureKafkaTopics, startConsumer } from "@sigem/shared";
 import initApp, { API_VERSION } from "./app";
 import { createSocketServer } from "./ws/socket";
 import { handleIncomingEvent } from "./handlers/notify.handler";
@@ -16,7 +16,16 @@ async function main() {
   const { httpServer, io } = createSocketServer(server);
 
   // Mongo
-  await connectToMongo();
+  const fallback = process.env.MONGO_URL_FALLBACK!;
+  if (!fallback) {
+    throw new Error("MONGO_URL_FALLBACK missing");
+  }
+  const uri = process.env.MONGO_URL;
+  if (!uri) {
+    throw new Error("MONGO_URL missing");
+  }
+
+  await connectToMongo({ uri }, fallback);
 
   // Kafka setup
   const brokers = (process.env.KAFKA_BROKERS || "localhost:9092")

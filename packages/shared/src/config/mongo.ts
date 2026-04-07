@@ -1,6 +1,8 @@
 import "dotenv/config";
 import mongoose, { ConnectOptions } from "mongoose";
 
+let isConnected = false;
+
 type MongoConnectOptions = {
   uri?: string;
   isDev?: boolean;
@@ -10,7 +12,23 @@ type MongoConnectOptions = {
 
 const DEFAULT_SIGNALS: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
 
-export const connectToMongo = async (opts: MongoConnectOptions = {}) => {
+function deriveLocalFallbackUri(primaryUri: string): string {
+  try {
+    const url = new URL(primaryUri);
+    const dbName =
+      url.pathname.replace(/^\//, "").split("?")[0] || "sigem_local";
+    return `mongodb://localhost:27017/${dbName}`;
+  } catch {
+    return "mongodb://localhost:27017/sigem_local";
+  }
+}
+
+export const connectToMongo = async (
+  opts: MongoConnectOptions = {},
+  fallbackUri?: string,
+) => {
+  if (isConnected) return;
+
   const isDev = opts.isDev ?? process.env.NODE_ENV === "development";
   const uri = opts.uri ?? process.env.MONGO_URL;
 
@@ -41,16 +59,24 @@ export const connectToMongo = async (opts: MongoConnectOptions = {}) => {
       throw new Error("Database connection could not be established.");
     }
 
-    console.log(
-      `🟢 Connected to database 🗄️ ${String(mongoose.connection.name).toUpperCase()}`,
+    isConnected = true;
+    console.log("[database] Connected to primary MongoDB instance");
+  } catch (primaryError) {
+    const fallback = fallbackUri ?? deriveLocalFallbackUri(uri);
+
+    console.warn(
+      `[database] Attempting to connect to fallback MongoDB instance: ${fallback}`,
     );
-  } catch (error: any) {
-    console.error("Could not connect to database", error?.message);
-    process.exit(1);
+
+    await mongoose.connect(fallback, connectOptions);
+
+    isConnected = true;
+    console.log("[database] Connected to fallback MongoDB instance");
   }
 
   const shutdown = async () => {
     await mongoose.connection.close();
+    isConnected = false;
     console.log("Database connection closed");
   };
 

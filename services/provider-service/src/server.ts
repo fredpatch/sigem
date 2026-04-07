@@ -1,8 +1,8 @@
 import "dotenv/config";
 import application from "./app";
-import connectToMongo from "./config/mongo";
 import { ensureKafkaTopics } from "./core/ensure-topics";
 import { initEvents } from "./core/events";
+import { connectToMongo } from "@sigem/shared";
 
 const PORT = Number(process.env.PORT) || 4010;
 
@@ -17,7 +17,16 @@ async function bootstrap() {
   );
 
   // Mongo
-  await connectToMongo();
+  const fallback = process.env.MONGO_URL_FALLBACK!;
+  if (!fallback) {
+    throw new Error("MONGO_URL_FALLBACK missing");
+  }
+  const uri = process.env.MONGO_URL;
+  if (!uri) {
+    throw new Error("MONGO_URL missing");
+  }
+
+  await connectToMongo({ uri }, fallback);
 
   // Start server
   server.listen(PORT, "0.0.0.0", () => {

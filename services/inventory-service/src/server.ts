@@ -1,7 +1,7 @@
+import { connectToMongo } from "@sigem/shared";
 import getApp, { API_VERSION } from "./app";
 import { env } from "./config/env";
-import { logger } from "./config/logger";
-import connectToMongo from "./config/mongo";
+// import { logger } from "./config/logger";
 import { initEvents } from "./core/events";
 // src/server.ts
 const startServer = async () => {
@@ -12,7 +12,16 @@ const startServer = async () => {
   const server = await getApp();
 
   // Mongo
-  await connectToMongo();
+  const fallback = process.env.MONGO_URL_FALLBACK!;
+  if (!fallback) {
+    throw new Error("MONGO_URL_FALLBACK missing");
+  }
+  const uri = process.env.MONGO_URL;
+  if (!uri) {
+    throw new Error("MONGO_URL missing");
+  }
+
+  await connectToMongo({ uri }, fallback);
 
   server.listen(env.PORT, "0.0.0.0", async () => {
     // logger.info(
@@ -21,7 +30,7 @@ const startServer = async () => {
     // );
     console.log(`🚀 ${env.SERVICE_NAME} running on ${env.PORT}`);
     console.log(
-      `🟢 Health check: http://localhost:${env.PORT}/${API_VERSION}/health`
+      `🟢 Health check: http://localhost:${env.PORT}/${API_VERSION}/health`,
     );
   });
 };
