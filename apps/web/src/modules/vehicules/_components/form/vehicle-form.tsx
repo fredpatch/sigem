@@ -32,7 +32,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
   const status = watch("status") || "ACTIVE";
   const usageType = watch("usageType") || "";
   const energy = watch("energy") || "";
-  // const insuranceProvider = watch("insuranceProvider") || "";
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -40,27 +39,35 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
         variant="tips"
         className="-mt-2"
         compact
-        title="Avant d’enregistrer"
-        items={[
-          "Vérifiez l’immatriculation : elle doit être unique et au bon format.",
-          "Renseignez le kilométrage actuel (utile pour le suivi d’entretien).",
-          "Complétez l’affectation si le véhicule est attribué à un agent.",
-          "Les données administratives facilitent la conformité et les documents du parc.",
-        ]}
+        title={isEdit ? "Avant de modifier le véhicule" : "Avant d'enregistrer le véhicule"}
+        items={
+          isEdit
+            ? [
+                "Ce formulaire sert à mettre à jour les informations principales du véhicule déjà enregistré.",
+                "Vérifiez l'immatriculation, le kilométrage et l'affectation avant validation : les changements sont appliqués immédiatement.",
+                "Pour les opérations courantes, utilisez ensuite le menu déroulant du véhicule : kilométrage, vidange et mise à jour des documents.",
+                "Gardez ce formulaire pour les données de base ; le suivi quotidien se fait depuis la liste du parc et les écrans dédiés.",
+              ]
+            : [
+                "Ce formulaire sert à enregistrer un véhicule : identité, caractéristiques, affectation et premiers documents de conformité.",
+                "Vérifiez l'immatriculation : elle doit être unique et saisie exactement comme sur les pièces du véhicule.",
+                "Renseignez le kilométrage actuel et l'agent affecté si le véhicule est déjà attribué.",
+                "Si vous disposez déjà des documents initiaux, saisissez-les maintenant ; leurs renouvellements se feront ensuite depuis le menu déroulant du véhicule.",
+              ]
+        }
       />
 
-      {/* Header Info */}
       {isEdit && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3 mr-4">
           <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <p className="text-sm text-blue-900">
-            Les modifications seront appliquées immédiatement et pourront
-            impacter les tâches de maintenance associées.
+            Les modifications sont appliquées immédiatement. Pour les mises à
+            jour courantes de documents, kilométrage ou vidange, utilisez
+            ensuite le menu déroulant du véhicule depuis la liste du parc.
           </p>
         </div>
       )}
 
-      {/* Section 1: Vehicle Identity */}
       <Card className="border-l-4 mr-4 border-l-blue-500">
         <CardContent className="pt-0">
           <div className="flex items-center gap-3 mb-6">
@@ -79,7 +86,7 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <FormFieldWrapper
-              label={isEdit ? "Modifier l'Immatriculation" : "Immatriculation"}
+              label={isEdit ? "Modifier l'immatriculation" : "Immatriculation"}
               error={errors.plateNumber?.message}
               tooltip="obligatoire"
             >
@@ -98,10 +105,7 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder="Choisir un statut"
-                    //  value={statusConfig[status]?.label}
-                  />
+                  <SelectValue placeholder="Choisir un statut" />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(statusConfig).map(
@@ -113,19 +117,12 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
                           {config.label}
                         </span>
                       </SelectItem>
-                    )
+                    ),
                   )}
                 </SelectContent>
               </Select>
             </FormFieldWrapper>
 
-            {/* <FormFieldWrapper
-              className="placeholder:text-muted"
-              label="Marque"
-              error={errors.brand?.message}
-            >
-              <Input placeholder="Toyota, Renault..." {...register("brand")} />
-            </FormFieldWrapper> */}
             <ReferenceComboboxField
               control={form.control}
               name="brand"
@@ -135,13 +132,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
               disabled={isPending}
             />
 
-            {/* <FormFieldWrapper
-              className="placeholder:text-muted"
-              label="Modèle"
-              error={errors.model?.message}
-            >
-              <Input placeholder="Yaris, Clio..." {...register("model")} />
-            </FormFieldWrapper> */}
             <ReferenceComboboxField
               control={form.control}
               name="model"
@@ -151,13 +141,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
               disabled={isPending}
             />
 
-            {/* <FormFieldWrapper
-              className="placeholder:text-muted"
-              label="Type (carrosserie)"
-              error={errors.type?.message}
-            >
-              <Input placeholder="Berline, SUV, 4x4..." {...register("type")} />
-            </FormFieldWrapper> */}
             <ReferenceComboboxField
               control={form.control}
               name="type"
@@ -178,19 +161,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
                 {...register("year")}
               />
             </FormFieldWrapper>
-
-            {/* <FormFieldWrapper
-              label="VIN (n° de série)"
-              className="placeholder:text-muted"
-              error={errors.vin?.message}
-              tooltip="optionnel"
-            >
-              <Input
-                placeholder="Numéro de série"
-                className="font-mono text-sm placeholder:text-muted-foreground"
-                {...register("vin")}
-              />
-            </FormFieldWrapper> */}
 
             <FormFieldWrapper
               label="Kilométrage actuel"
@@ -229,7 +199,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {/* Section 2: Technical Specs */}
         <Card className="border-l-4 mr-4 border-l-purple-500">
           <CardContent className="pt-0">
             <div className="flex items-center gap-3 mb-6">
@@ -290,7 +259,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
           </CardContent>
         </Card>
 
-        {/* Section 3: Administrative*/}
         <Card className="border-l-4 mr-4 border-l-amber-500">
           <CardContent className="pt-0">
             <div className="flex items-center gap-3 mb-6">
@@ -306,15 +274,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 space-y-4 gap-4">
-              {/* <FormFieldWrapper
-                label="Propriétaire"
-                error={errors.ownership?.message}
-              >
-                <Input
-                  placeholder="ANAC, Société..."
-                  {...register("ownership")}
-                />
-              </FormFieldWrapper> */}
               <ReferenceComboboxField
                 control={form.control}
                 name="ownership"
@@ -341,7 +300,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
         </Card>
       </div>
 
-      {/* Section 5: Assignment */}
       <Card className="border-l-4 mr-4 border-l-indigo-500">
         <CardContent className="pt-0">
           <div className="flex items-center gap-3 mb-6">
@@ -363,7 +321,7 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
               control={form.control}
               name="assignedToEmployeeMatricule"
               label="Employé (annuaire)"
-              placeholder="Rechercher un agent…"
+              placeholder="Rechercher un agent..."
               disabled={isPending}
               onSelectEmployee={(emp) => {
                 setValue("assignedToName", `${emp.firstName} ${emp.lastName}`, {
@@ -372,7 +330,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
                 setValue("assignedToDirection", emp.direction ?? "", {
                   shouldValidate: true,
                 });
-                // si tu ajoutes ce champ au backend + schema
                 setValue("assignedToFunction", emp.fonction ?? "", {
                   shouldValidate: true,
                 });
@@ -515,7 +472,6 @@ export const VehicleForm = ({ form, isEdit }: Props) => {
         </Card>
       )}
 
-      {/* Notes / observations */}
       <Card className="border-l-4 mr-4 border-l-lime-800">
         <CardContent>
           <FormFieldWrapper

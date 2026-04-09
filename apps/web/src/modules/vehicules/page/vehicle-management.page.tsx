@@ -13,7 +13,6 @@ export const VehicleManagementPage = () => {
 
   return (
     <section className="space-y-4">
-      {/* RIGHT PANEL */}
       {isLoading ? (
         <div className="flex items-center justify-center h-screen gap-2 text-sm text-muted-foreground">
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -31,36 +30,22 @@ export const VehicleManagementPage = () => {
           columns={mgVehicleColumns}
           toolbar={{
             tableId: "mg-vehicles",
-
             enableGlobalSearch: true,
             globalSearchPlaceholder: "Plaque, marque, utilisateur, direction…",
-
             enableResetFilters: true,
-
             columnFilters: [
               "plateNumber",
               "assignedToName",
               "assignedToDirection",
               "createdAt",
             ],
-
             enableExport: true,
             export: {
               enableColumnPicker: true,
               formats: ["csv", "xlsx", "pdf"],
               filename: `Programme de suivi du matériel roulant - ${new Date().toLocaleDateString("fr-FR", { year: "numeric" })}`,
             },
-
-            presets: [
-              // {
-              //   label: "Non affectés",
-              //   apply: (table) => {
-              //     table.setColumnFilters([
-              //       { id: "assignedToName", value: "" },
-              //     ]);
-              //   },
-              // },
-            ],
+            presets: [],
           }}
         />
       )}
@@ -68,48 +53,48 @@ export const VehicleManagementPage = () => {
       <div className="pb-4">
         <Guidelines
           variant="info"
-          title="Gestion du parc automobile — mode d’emploi"
-          description="Gérez les véhicules, suivez les documents (assurance, visite technique, extincteur, parking) et exportez des rapports filtrés."
+          title="Gestion du parc automobile - mode d'emploi"
+          description="Le formulaire central sert à enregistrer un véhicule. Une fois créé, son suivi quotidien se fait depuis le menu déroulant de la ligne et les vues dédiées."
           items={[
             {
               title: "Ajouter un véhicule",
-              text: "Cliquez sur “Ajouter un véhicule” et renseignez l’immatriculation, la marque, le modèle et l’affectation si nécessaire.",
+              text: "Cliquez sur \"Ajouter un véhicule\" pour lancer le formulaire d'enregistrement : identité, caractéristiques, affectation et, si disponible, documents initiaux.",
+            },
+            {
+              title: "Gérer un véhicule existant",
+              text: "Ouvrez le menu déroulant de la ligne pour modifier les informations du véhicule ou lancer une action ciblée sans repasser par tout le formulaire.",
+            },
+            {
+              title: "Mettre à jour le kilométrage",
+              text: "Le kilométrage se met à jour depuis le dropdown du véhicule. Gardez-le fiable pour que les échéances de maintenance restent pertinentes.",
+            },
+            {
+              title: "Mettre à jour les documents",
+              text: "Assurance, visite technique, carte parking et carte extincteur se renouvellent depuis le menu déroulant du véhicule. Les rappels et colonnes de validité s'appuient sur ces dates.",
+            },
+            {
+              title: "Valider les opérations courantes",
+              text: "La validation d'une vidange ou d'une visite technique se fait aussi depuis le dropdown du véhicule, puis le suivi détaillé se poursuit dans les écrans de maintenance.",
             },
             {
               title: "Rechercher rapidement",
-              text: "Utilisez la barre de recherche pour retrouver un véhicule par plaque, marque ou utilisateur.",
+              text: "Utilisez la barre de recherche pour retrouver un véhicule par plaque, marque, utilisateur ou direction.",
             },
             {
               title: "Filtrer pour produire un rapport",
-              text: "Combinez les filtres (ex : utilisateur/direction) et le filtre de période “Date d’ajout” pour sortir un état précis (ex : véhicules ajoutés entre X et Y).",
-            },
-            {
-              title: "Comprendre les statuts de validité",
-              text: "Les colonnes Assurance / Extincteur / Visite technique / Parking affichent une validité (jours restants). Pensez à renouveler avant expiration.",
-            },
-            {
-              title: "Mettre à jour l’entretien",
-              text: "Le kilométrage et les informations Vidange / Checking servent aux alertes de maintenance. Mettez-les à jour régulièrement pour fiabiliser le suivi.",
-            },
-            {
-              title: "Actions par véhicule",
-              text: "Utilisez le menu “Actions” d’une ligne pour ouvrir le détail, ajouter/mettre à jour un document, ou effectuer les opérations d’entretien.",
-            },
-            {
-              title: "Sélection multiple",
-              text: "Cochez des lignes pour préparer une opération groupée ou exporter uniquement une sélection (utile pour un rapport ciblé).",
+              text: "Combinez les filtres et la période d'ajout pour sortir un état ciblé avant export.",
             },
             {
               title: "Export CSV / XLSX / PDF",
-              text: "Le bouton “Exporter” génère un fichier à partir de la vue courante (filtres + tri), de la sélection, ou de l’ensemble des données.",
+              text: "Le bouton \"Exporter\" génère un fichier à partir de la vue courante, de la sélection ou de l'ensemble des données.",
             },
             {
               title: "Choix des colonnes à exporter",
-              text: "Utilisez “Choisir les colonnes” avant l’export pour adapter le rapport (ex : ne garder que Véhicule, Utilisateur, Assurance, Visite tech.).",
+              text: "Utilisez \"Choisir les colonnes\" pour adapter le rapport à votre besoin : suivi du parc, affectation ou conformité documentaire.",
             },
             {
               title: "Bonnes pratiques",
-              text: "Renseignez les dates de délivrance/expiration dès réception d’un document, et ajoutez des notes (observations) pour faciliter le suivi et les contrôles.",
+              text: "Enregistrez proprement le véhicule lors de la création, puis privilégiez les actions du dropdown pour le suivi quotidien afin de garder un parcours simple et cohérent.",
             },
           ]}
         />
