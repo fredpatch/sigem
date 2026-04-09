@@ -944,10 +944,13 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
           <ul className="list-disc space-y-1 pl-5">
             <li>Modifier les informations principales du véhicule.</li>
             <li>Mettre à jour le kilométrage courant.</li>
-            <li>Valider une vidange ou une opération d&apos;entretien rapide.</li>
+            <li>Valider une vidange.</li>
             <li>
-              Mettre à jour un document ciblé comme l&apos;assurance, la visite
-              technique, le parking ou l&apos;extincteur.
+              Valider la visite technique depuis l&apos;action dédiée du menu.
+            </li>
+            <li>
+              Mettre à jour l&apos;assurance, la carte parking ou la carte
+              extincteur.
             </li>
           </ul>
         </section>
@@ -1174,8 +1177,9 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
               les alertes du parc.
             </li>
             <li>
-              Si une action opérationnelle doit être réalisée, poursuivez dans
-              le programme de maintenance pour planifier ou clôturer la tâche.
+              Si un suivi plus global est nécessaire, utilisez ensuite le
+              programme de maintenance pour consulter les échéances et les
+              modèles de suivi.
             </li>
           </ul>
         </section>
@@ -1199,7 +1203,7 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
           <ul className="list-disc space-y-1 pl-5">
             <li>Ouvrez le programme de suivi de maintenance.</li>
             <li>
-              Cliquez sur <strong>Ajouter un modèle de suivi</strong> depuis
+              Cliquez sur <strong>Ajouter une modèle de suivie</strong> depuis
               l&apos;action disponible en haut de la page.
             </li>
             <li>
@@ -1339,21 +1343,28 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
     content: (
       <div className="space-y-4">
         <p className="text-muted-foreground">
-          Terminer une tâche met à jour le suivi du véhicule et prépare la suite
-          du cycle de maintenance. Selon le type d&apos;intervention, cela peut aussi
-          mettre à jour un document lié ou recalculer la prochaine échéance.
+          Aujourd&apos;hui, la page de maintenance sert surtout à consulter les
+          tâches, leurs échéances et les modèles de suivi. Les validations
+          opérationnelles rapides se font directement depuis le véhicule quand
+          l&apos;action existe dans le menu déroulant.
         </p>
 
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">1) Où terminer une tâche</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Depuis la page de maintenance, utilisez l&apos;action disponible sur
-              la ligne de la tâche concernée.
+              Depuis la liste des véhicules, ouvrez le menu déroulant du
+              véhicule concerné.
             </li>
             <li>
-              Pour certains cas ciblés comme la vidange, une action rapide peut
-              aussi être proposée directement depuis le véhicule.
+              Utilisez les actions disponibles comme <strong>Valider une
+              vidange</strong> ou <strong>Valider visite technique</strong>
+              lorsqu&apos;elles correspondent au besoin.
+            </li>
+            <li>
+              Le programme de maintenance reste utile pour suivre les tâches
+              ouvertes, les retards et les modèles, même si la clôture directe
+              n&apos;est pas encore exposée sur la table.
             </li>
           </ul>
         </section>
@@ -1362,8 +1373,8 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
           <h2 className="text-lg font-semibold">2) Bonnes pratiques</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Saisissez le kilométrage et la date de réalisation lorsqu&apos;ils sont
-              demandés.
+              Saisissez le kilométrage et la date de réalisation lorsqu&apos;ils
+              sont demandés.
             </li>
             <li>
               Vérifiez le statut final ainsi que les mises à jour liées au
