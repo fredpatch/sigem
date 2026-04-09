@@ -1,10 +1,9 @@
 import { Types } from "mongoose";
-import { catchError } from "../../../utils/catch-error";
-import { getActor } from "../../../utils/get.matricule";
 import {
   ensureDefaultStockLocation,
   getStockLocations,
 } from "../services/stock-location.service";
+import { catchError, getActor } from "@sigem/shared";
 
 export class StockLocationController {
   initStockLocations = catchError(async (req, res) => {

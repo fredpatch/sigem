@@ -1,7 +1,7 @@
 import "dotenv/config";
 import type { Request, Response, NextFunction } from "express";
 import * as cookie from "cookie";
-import { jwtService } from "@sigem/shared/auth/jwt";
+import { jwtService } from "@sigem/shared";
 import { JwtUserPayload } from "@sigem/shared";
 
 const cfg = {

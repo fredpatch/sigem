@@ -3,4 +3,4 @@
 export {
   startConsumer,
   type ConsumerConfig as SharedConsumerConfig,
-} from "@sigem/shared/kafka";
+} from "@sigem/shared";

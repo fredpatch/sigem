@@ -676,120 +676,57 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
   },
   "vehicules/manage": {
     title: "Gérer les véhicules",
-    updatedAt: "2025-12-22",
+    updatedAt: "2026-04-09",
     content: (
       <div className="space-y-4">
         <p className="text-muted-foreground">
-          Le module Parc automobile permet d’enregistrer et suivre les véhicules
-          de l’organisation. Chaque véhicule est identifié, peut être affecté à
-          un agent, et sert de base au suivi des documents et de la maintenance.
+          Le nouveau parcours est centré sur un principe simple : on enregistre
+          d&apos;abord le véhicule dans le formulaire principal, puis on gère les
+          opérations du quotidien depuis le menu déroulant de la ligne du
+          véhicule.
         </p>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">1) Informations principales</h2>
+          <h2 className="text-lg font-semibold">1) Créer un véhicule</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Chaque véhicule est identifié par son{" "}
-              <strong>immatriculation</strong> (unique).
+              Cliquez sur <strong>Ajouter un véhicule</strong> pour ouvrir le
+              formulaire central de création.
             </li>
             <li>
-              Les champs courants : marque, modèle, type, énergie, année, etc.
+              Ce formulaire regroupe l&apos;identité du véhicule, ses
+              caractéristiques, son affectation et les informations utiles au
+              suivi.
             </li>
             <li>
-              Le <strong>statut</strong> indique si le véhicule est opérationnel
-              ou non.
+              Lors de la création, vous pouvez aussi poser les premières bases
+              du suivi documentaire afin de démarrer avec un dossier propre.
             </li>
           </ul>
         </section>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">2) Création d’un véhicule</h2>
+          <h2 className="text-lg font-semibold">2) Gérer le quotidien</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Cliquez sur <strong>“Ajouter un véhicule”</strong>.
+              Une fois le véhicule créé, la gestion courante se fait surtout
+              depuis le <strong>menu déroulant de la ligne</strong>.
             </li>
             <li>
-              Renseignez au minimum : immatriculation, marque, modèle et statut.
+              Ce menu permet d&apos;accéder rapidement aux actions ciblées : mise à
+              jour des informations, kilométrage, vidange ou documents.
             </li>
             <li>
-              Indiquez le <strong>kilométrage actuel</strong> si disponible
-              (utile pour la maintenance).
-            </li>
-          </ul>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            3) Statuts véhicules (principe)
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Les libellés peuvent varier, mais l’objectif est de refléter l’état
-            réel du véhicule :
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border bg-background p-4">
-              <div className="font-semibold">Actif</div>
-              <div className="text-sm text-muted-foreground">
-                Véhicule disponible et en service.
-              </div>
-            </div>
-            <div className="rounded-xl border bg-background p-4">
-              <div className="font-semibold">En maintenance</div>
-              <div className="text-sm text-muted-foreground">
-                Véhicule temporairement indisponible (entretien / réparation).
-              </div>
-            </div>
-            <div className="rounded-xl border bg-background p-4">
-              <div className="font-semibold">Inactif</div>
-              <div className="text-sm text-muted-foreground">
-                Véhicule non utilisé (parké, attente de décision).
-              </div>
-            </div>
-            <div className="rounded-xl border bg-background p-4">
-              <div className="font-semibold">Retiré</div>
-              <div className="text-sm text-muted-foreground">
-                Véhicule retiré du parc (historique conservé).
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            4) Liens avec documents & maintenance
-          </h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              Les <strong>documents</strong> (assurance, visite technique…) sont
-              enregistrés par véhicule, avec dates d’expiration.
-            </li>
-            <li>
-              Les <strong>tâches</strong> (vidange, entretien…) peuvent être
-              planifiées pour un véhicule et suivies dans le module maintenance.
-            </li>
-            <li>
-              Mettre à jour correctement le véhicule facilite la conformité et
-              le suivi global.
-            </li>
-          </ul>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Bonnes pratiques</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>Vérifiez l’immatriculation avant d’enregistrer (unicité).</li>
-            <li>
-              Mettez à jour le statut dès qu’un véhicule devient indisponible.
-            </li>
-            <li>
-              Renseignez et maintenez le kilométrage (important pour les alertes
-              “par km”).
+              Les écrans dédiés Documents véhicules et Maintenance servent
+              ensuite au suivi global, aux échéances et aux opérations de
+              contrôle.
             </li>
           </ul>
         </section>
       </div>
     ),
   },
+
   "vehicules/assignment": {
     title: "Affectation",
     updatedAt: "2025-12-22",
@@ -981,14 +918,14 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
   },
   "vehicules/actions": {
     title: "Actions rapides (docs / tâches)",
-    updatedAt: "2025-12-22",
+    updatedAt: "2026-04-09",
     content: (
       <div className="space-y-4">
         <p className="text-muted-foreground">
-          Depuis la liste des véhicules, certaines actions permettent d’agir
-          rapidement sur un véhicule sans quitter la page : ajouter un document,
-          planifier une tâche, modifier ou désactiver. Ces actions s’appliquent
-          toujours au véhicule de la ligne sélectionnée.
+          Les actions rapides du module véhicules sont maintenant regroupées
+          dans le <strong>menu déroulant</strong> de chaque ligne. Ce menu est le
+          point d&apos;entrée recommandé pour les mises à jour ciblées après la
+          création initiale.
         </p>
 
         <section className="space-y-2">
@@ -996,228 +933,46 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
           <div className="rounded-lg border bg-muted/30 p-3 text-sm">
             <div className="font-medium">Important</div>
             <div className="text-muted-foreground">
-              Les actions de la colonne “Actions” s’appliquent au{" "}
-              <strong>véhicule de la ligne</strong>. Vérifiez l’immatriculation
-              avant de valider une action.
+              Ouvrez le menu déroulant sur la bonne ligne et vérifiez toujours
+              l&apos;immatriculation avant de confirmer une action.
             </div>
           </div>
         </section>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">2) Ajouter un document</h2>
+          <h2 className="text-lg font-semibold">2) Actions disponibles</h2>
           <ul className="list-disc space-y-1 pl-5">
+            <li>Modifier les informations principales du véhicule.</li>
+            <li>Mettre à jour le kilométrage courant.</li>
+            <li>Valider une vidange ou une opération d&apos;entretien rapide.</li>
             <li>
-              Cette action permet d’enregistrer un document (assurance, visite
-              technique, carte…) lié au véhicule sélectionné.
-            </li>
-            <li>
-              Renseignez la <strong>date d’expiration</strong> pour activer le
-              suivi et les alertes.
-            </li>
-            <li>
-              Les <strong>rappels</strong> (jours avant échéance) servent à
-              anticiper le renouvellement.
+              Mettre à jour un document ciblé comme l&apos;assurance, la visite
+              technique, le parking ou l&apos;extincteur.
             </li>
           </ul>
         </section>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            3) Planifier une tâche (maintenance)
-          </h2>
+          <h2 className="text-lg font-semibold">3) Bon réflexe</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Cette action crée une tâche de maintenance liée au véhicule (ex :
-              vidange, entretien).
+              Utilisez le formulaire principal pour l&apos;enregistrement initial ou
+              les corrections de fond.
             </li>
             <li>
-              Utilisez un <strong>modèle de tâche</strong> pour activer la
-              récurrence automatique.
+              Utilisez le menu déroulant pour les opérations rapides et
+              récurrentes.
             </li>
             <li>
-              Définissez le déclencheur : <strong>date</strong>,{" "}
-              <strong>kilométrage</strong> ou les deux.
-            </li>
-            <li>
-              Une tâche terminée peut générer automatiquement la suivante si
-              elle est récurrente.
-            </li>
-          </ul>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">4) Modifier / Désactiver</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              <strong>Modifier</strong> : met à jour les informations (statut,
-              affectation, données…).
-            </li>
-            <li>
-              <strong>Désactiver</strong> (ou retirer) : retire le véhicule du
-              parc actif tout en conservant l’historique.
-            </li>
-          </ul>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">
-            Checklists rapides (quand vous êtes perdu)
-          </h2>
-
-          {/* 1) Ajouter un véhicule */}
-          <div className="rounded-xl border bg-background p-4">
-            <div className="font-semibold">
-              1) Ajouter un véhicule (checklist)
-            </div>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
-              <li>
-                Ouvrez <strong>Parc automobile</strong> → cliquez sur{" "}
-                <strong>Ajouter un véhicule</strong>.
-              </li>
-              <li>
-                Renseignez l’<strong>immatriculation</strong> (unique), la{" "}
-                <strong>marque</strong> et le <strong>modèle</strong>.
-              </li>
-              <li>
-                Définissez le <strong>statut</strong> (ex : Actif / En
-                maintenance).
-              </li>
-              <li>
-                Renseignez le <strong>kilométrage actuel</strong> si disponible
-                (recommandé).
-              </li>
-              <li>
-                Ajoutez l’<strong>affectation</strong> si le véhicule est
-                attribué (agent/service).
-              </li>
-              <li>
-                Enregistrez. Ensuite, ajoutez les <strong>documents</strong> et
-                planifiez la <strong>maintenance</strong>.
-              </li>
-            </ol>
-          </div>
-
-          {/* 2) Ajouter un document */}
-          <div className="rounded-xl border bg-background p-4">
-            <div className="font-semibold">
-              2) Ajouter un document à un véhicule (checklist)
-            </div>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
-              <li>
-                Dans la liste des véhicules, trouvez le véhicule
-                (immatriculation).
-              </li>
-              <li>
-                Cliquez sur l’action <strong>Document</strong> (icône document)
-                de la ligne.
-              </li>
-              <li>
-                Choisissez le <strong>type de document</strong> (assurance,
-                visite technique…).
-              </li>
-              <li>
-                Renseignez la <strong>date d’expiration</strong> (obligatoire
-                pour le suivi).
-              </li>
-              <li>
-                Ajoutez des <strong>rappels</strong> (ex : 30, 15, 7 jours avant
-                l’échéance).
-              </li>
-              <li>
-                Enregistrez. Le document apparaît dans la page{" "}
-                <strong>Documents véhicules</strong>.
-              </li>
-            </ol>
-          </div>
-
-          {/* 3) Planifier une maintenance */}
-          <div className="rounded-xl border bg-background p-4">
-            <div className="font-semibold">
-              3) Planifier une maintenance (vidange, entretien…) - checklist
-            </div>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
-              <li>
-                Depuis la liste des véhicules, cliquez sur{" "}
-                <strong>Planifier une tâche</strong> (icône clé/outil) sur la
-                ligne du véhicule.
-              </li>
-              <li>
-                Choisissez un <strong>modèle de tâche</strong> si disponible
-                (recommandé pour la récurrence).
-              </li>
-              <li>
-                Définissez l’échéance : <strong>date</strong>,{" "}
-                <strong>kilométrage</strong>, ou les deux.
-              </li>
-              <li>
-                Vérifiez le <strong>kilométrage actuel</strong> du véhicule
-                (important si déclencheur par km).
-              </li>
-              <li>
-                Enregistrez. La tâche apparaît dans{" "}
-                <strong>Suivi des véhicules</strong>.
-              </li>
-              <li>
-                Quand la tâche est réalisée : ouvrez la tâche →{" "}
-                <strong>Terminer</strong> → saisissez le kilométrage réel.
-              </li>
-            </ol>
-          </div>
-
-          {/* 4) Planifier le suivi (monitoring) d’un document */}
-          <div className="rounded-xl border bg-background p-4">
-            <div className="font-semibold">
-              4) Planifier le suivi d’un document (renouvellement) - checklist
-            </div>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
-              <li>
-                Ajoutez le document avec sa <strong>date d’expiration</strong>{" "}
-                (voir checklist #2).
-              </li>
-              <li>
-                Dans <strong>Documents véhicules</strong>, vérifiez son{" "}
-                <strong>statut</strong> (Valide / Bientôt / Expiré).
-              </li>
-              <li>
-                Assurez-vous que des <strong>rappels</strong> sont définis (ex :
-                30, 15, 7 jours).
-              </li>
-              <li>
-                Si vous souhaitez une action de renouvellement : cliquez sur{" "}
-                <strong>Planifier une tâche</strong> depuis le document (ex :
-                “Renouvellement assurance”).
-              </li>
-              <li>
-                Définissez la date limite avant expiration (ex : 7 jours avant).
-              </li>
-              <li>
-                Quand le document est renouvelé : mettez à jour le document
-                (nouvelle date d’expiration) et terminez la tâche.
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Bonnes pratiques</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              Ajoutez les documents dès l’intégration d’un véhicule dans le parc
-              (conformité).
-            </li>
-            <li>
-              Planifiez les tâches récurrentes (vidange) dès que le kilométrage
-              est connu.
-            </li>
-            <li>
-              Mettez à jour le kilométrage lors des interventions pour
-              fiabiliser les alertes.
+              Utilisez les pages Documents véhicules et Maintenance pour une
+              vision d&apos;ensemble du suivi.
             </li>
           </ul>
         </section>
       </div>
     ),
   },
+
   "documents/validity-status": {
     title: "Validité & statuts",
     updatedAt: "2025-12-22",
@@ -1344,414 +1099,119 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
   },
   "documents/reminders": {
     title: "Rappels & alertes",
-    updatedAt: "2025-12-22",
+    updatedAt: "2026-04-09",
     content: (
       <div className="space-y-4">
         <p className="text-muted-foreground">
-          Les rappels permettent d’anticiper l’expiration des documents
-          (assurance, visite technique, etc.). Ils aident à éviter les
-          situations “expiré” en déclenchant des alertes avant l’échéance.
+          Dans le nouveau parcours, l&apos;utilisateur saisit surtout les bonnes
+          dates du document. Le système applique ensuite le schéma de rappels
+          standard prévu pour le suivi des échéances.
         </p>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">1) Comment ça fonctionne ?</h2>
+          <h2 className="text-lg font-semibold">1) Ce qui déclenche les rappels</h2>
           <ul className="list-disc space-y-1 pl-5">
+            <li>La date d&apos;expiration du document reste l&apos;élément principal.</li>
             <li>
-              Un rappel est un{" "}
-              <strong>nombre de jours avant l’expiration</strong>.
+              Le système applique automatiquement les rappels standards pour
+              aider à anticiper les renouvellements.
             </li>
             <li>
-              Exemple : “30 jours” signifie qu’une alerte peut être déclenchée
-              30 jours avant la date d’expiration.
+              Chaque mise à jour du document permet de relancer un suivi propre
+              sur la nouvelle période de validité.
             </li>
-            <li>
-              Les rappels fonctionnent uniquement si la{" "}
-              <strong>date d’expiration</strong> est renseignée.
-            </li>
-          </ul>
-
-          <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-            <div className="font-medium">Exemple</div>
-            <div className="text-muted-foreground">
-              Expiration le 30/06, rappels 30-15-7 : alertes possibles le 31/05,
-              le 15/06 et le 23/06.
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            2) À quoi servent les alertes ?
-          </h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>Informer qu’un document approche de l’échéance.</li>
-            <li>Permettre de planifier le renouvellement à temps.</li>
-            <li>Réduire les risques de non-conformité (documents expirés).</li>
           </ul>
         </section>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            3) Configurer les rappels (bon réglage)
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Les rappels doivent être adaptés au type de document et à vos délais
-            de traitement.
-          </p>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border bg-background p-4">
-              <div className="font-semibold">Réglage standard (recommandé)</div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                <ul className="list-disc space-y-1 pl-5">
-                  <li>30 jours</li>
-                  <li>15 jours</li>
-                  <li>7 jours</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="rounded-xl border bg-background p-4">
-              <div className="font-semibold">Réglage “urgent”</div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                <ul className="list-disc space-y-1 pl-5">
-                  <li>14 jours</li>
-                  <li>7 jours</li>
-                  <li>3 jours</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-            <div className="font-medium">Important</div>
-            <div className="text-muted-foreground">
-              Plus le délai de traitement est long (validation, paiement,
-              rendez-vous), plus les rappels doivent être anticipés.
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">4) Bonnes pratiques</h2>
+          <h2 className="text-lg font-semibold">2) Ce que l&apos;utilisateur doit faire</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Définissez des rappels dès la création du document (ne pas
-              attendre).
+              Renseignez la date de début si elle est utile, la date
+              d&apos;expiration et la référence du document.
             </li>
             <li>
-              Après renouvellement, mettez à jour la{" "}
-              <strong>nouvelle date d’expiration</strong>
-              (sinon les rappels deviennent faux).
+              Utilisez l&apos;action dédiée du menu déroulant pour renouveler un
+              document depuis le véhicule concerné.
             </li>
             <li>
-              Si vous planifiez une tâche de renouvellement, alignez sa date
-              limite avec le dernier rappel (ex : 7 jours avant expiration).
+              Vérifiez ensuite les colonnes de validité et les alertes dans les
+              listes de suivi du parc.
             </li>
           </ul>
         </section>
       </div>
     ),
   },
+
   "documents/from-doc-to-task": {
-    title: "Planifier une tâche depuis un document",
-    updatedAt: "2025-12-22",
+    title: "Passer d&apos;un document à son suivi",
+    updatedAt: "2026-04-09",
     content: (
       <div className="space-y-4">
         <p className="text-muted-foreground">
-          Depuis un document véhicule, vous pouvez planifier une tâche de
-          renouvellement ou de contrôle (ex : renouvellement assurance, visite
-          technique). Cette méthode est idéale pour transformer une échéance
-          “document” en action de suivi concrète.
+          Le nouveau flux part d&apos;abord du véhicule. On met à jour le document
+          depuis la bonne ligne, puis on poursuit le suivi dans les écrans
+          dédiés si une intervention ou un contrôle devient nécessaire.
         </p>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            1) Pourquoi planifier une tâche depuis un document ?
-          </h2>
+          <h2 className="text-lg font-semibold">1) Nouveau point d&apos;entrée</h2>
           <ul className="list-disc space-y-1 pl-5">
+            <li>Repérez le véhicule concerné dans la liste du parc.</li>
+            <li>Ouvrez le menu déroulant sur la ligne correspondante.</li>
             <li>
-              Assurer un suivi actif (une échéance devient une action à
-              réaliser).
-            </li>
-            <li>
-              Éviter d’oublier un renouvellement, surtout quand le délai de
-              traitement est long.
-            </li>
-            <li>
-              Centraliser le suivi dans le module Maintenance (tâches ouvertes /
-              en retard / terminées).
+              Lancez l&apos;action adaptée pour mettre à jour le document visé.
             </li>
           </ul>
         </section>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">2) Comment ça marche</h2>
+          <h2 className="text-lg font-semibold">2) Suite du suivi</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              La tâche est automatiquement liée au <strong>véhicule</strong> du
-              document.
+              Le document mis à jour alimente ensuite le suivi de validité et
+              les alertes du parc.
             </li>
             <li>
-              Vous choisissez un modèle de tâche (recommandé) ou créez une tâche
-              manuelle.
-            </li>
-            <li>
-              Vous définissez une échéance (date) pour réaliser l’action avant
-              l’expiration.
-            </li>
-          </ul>
-
-          <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-            <div className="font-medium">Conseil</div>
-            <div className="text-muted-foreground">
-              Fixez l’échéance de la tâche <strong>avant</strong> l’expiration
-              (ex : 7 ou 15 jours avant).
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            Mise à jour automatique (workflow)
-          </h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              Lorsque vous <strong>terminez une tâche planifiée</strong>,
-              l’application met à jour automatiquement les informations via
-              l’API.
-            </li>
-            <li>
-              Selon le type de tâche, cela peut mettre à jour : la tâche
-              (statut), le véhicule (ex : kilométrage) et le document (ex :
-              nouvelle validité).
-            </li>
-            <li>
-              Par bonne pratique, nous recommandons de vérifier rapidement que
-              les informations critiques ont bien été mises à jour.
-            </li>
-          </ul>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">
-            Checklist rapide (recommandée)
-          </h2>
-
-          <div className="rounded-xl border bg-background p-4">
-            <div className="font-semibold">
-              Planifier un renouvellement depuis un document
-            </div>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
-              <li>
-                Ouvrez <strong>Documents véhicules</strong> et trouvez le
-                document concerné.
-              </li>
-              <li>
-                Vérifiez la <strong>date d’expiration</strong> et le statut
-                (Valide / Bientôt / Expiré).
-              </li>
-              <li>
-                Cliquez sur <strong>Planifier une tâche</strong> depuis la ligne
-                du document.
-              </li>
-              <li>
-                Sélectionnez un <strong>modèle de tâche</strong> (ex :
-                “Renouvellement assurance”) si disponible.
-              </li>
-              <li>
-                Définissez la <strong>date limite</strong> (ex : 7 ou 15 jours
-                avant expiration).
-              </li>
-              <li>
-                Une fois la tâche terminée, le système met à jour
-                automatiquement les informations (tâche, véhicule et document)
-                via l’API.
-              </li>
-              <li>
-                Pour bonne mesure, vérifiez que :
-                <ul className="list-disc pl-5">
-                  <li className="text-red-800">
-                    la nouvelle date d’expiration du document est correcte,
-                  </li>
-                  <li className="text-red-800">
-                    les informations du véhicule (si concernées) sont bien à
-                    jour.
-                  </li>
-                </ul>
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">3) Cas pratique (exemple)</h2>
-          <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-            <div className="font-medium">Assurance</div>
-            <div className="text-muted-foreground">
-              Expire le 30/06 → planifier la tâche “Renouvellement assurance”
-              avec une échéance au 15/06. Après renouvellement, modifier le
-              document : nouvelle expiration (ex : 30/06 de l’année suivante)
-              puis terminer la tâche.
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Bonnes pratiques</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              Ne planifiez pas la tâche “le jour même” de l’expiration :
-              anticipez.
-            </li>
-            <li>
-              Alignez la date limite sur vos rappels (ex : dernier rappel = 7
-              jours).
-            </li>
-            <li>
-              Après renouvellement, mettez à jour le document immédiatement
-              (sinon le statut reste faux).
+              Si une action opérationnelle doit être réalisée, poursuivez dans
+              le programme de maintenance pour planifier ou clôturer la tâche.
             </li>
           </ul>
         </section>
       </div>
     ),
   },
+
   "maintenance/models": {
     title: "Modèles de tâche",
-    updatedAt: "2025-12-22",
+    updatedAt: "2026-04-09",
     content: (
       <div className="space-y-4">
         <p className="text-muted-foreground">
-          Les modèles de tâche permettent d’automatiser le suivi de maintenance.
-          Un modèle définit une règle (ex : “Vidange tous les 5 000 km” ou
-          “Assurance tous les 12 mois”) que l’application peut utiliser pour
-          générer des tâches sur un véhicule.
+          Les modèles de tâche servent à automatiser le suivi récurrent sans
+          alourdir la gestion quotidienne des véhicules. Ils définissent la base
+          du suivi qui sera ensuite appliqué aux opérations de maintenance.
         </p>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            1) Modèle vs tâche : différence
-          </h2>
+          <h2 className="text-lg font-semibold">1) Où créer un modèle</h2>
           <ul className="list-disc space-y-1 pl-5">
+            <li>Ouvrez le programme de suivi de maintenance.</li>
             <li>
-              Un <strong>modèle</strong> = une règle de suivi (réutilisable).
+              Cliquez sur <strong>Ajouter un modèle de suivi</strong> depuis
+              l&apos;action disponible en haut de la page.
             </li>
             <li>
-              Une <strong>tâche</strong> = une action concrète à réaliser (liée
-              à un véhicule).
-            </li>
-            <li>Un modèle peut générer plusieurs tâches au fil du temps.</li>
-          </ul>
-
-          <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-            <div className="font-medium">Exemple</div>
-            <div className="text-muted-foreground">
-              Modèle “Vidange 5 000 km” → crée une tâche “Vidange” pour un
-              véhicule, puis la suivante après clôture.
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">2) Types de déclencheurs</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              <strong>Par date</strong> : échéance selon une périodicité (ex :
-              tous les 12 mois).
-            </li>
-            <li>
-              <strong>Par kilométrage</strong> : seuil à atteindre (ex : tous
-              les 5 000 km).
-            </li>
-            <li>
-              <strong>Date + kilométrage</strong> : double contrôle si
-              nécessaire.
-            </li>
-          </ul>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            3) Champs importants d’un modèle
-          </h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              <strong>Nom / type</strong> : ce que l’on suit (vidange, contrôle,
-              renouvellement…).
-            </li>
-            <li>
-              <strong>Fréquence</strong> : délai (mois) ou intervalle (km).
-            </li>
-            <li>
-              <strong>Préavis</strong> : quand la tâche devient “bientôt due”
-              (ex : 7 jours / 500 km).
-            </li>
-            <li>
-              <strong>Rattachement</strong> (si applicable) : modèle lié à un
-              document (assurance, visite technique…).
-            </li>
-          </ul>
-
-          <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-            <div className="font-medium">Conseil</div>
-            <div className="text-muted-foreground">
-              Utilisez des noms explicites : “Vidange 5 000 km”, “Assurance
-              annuelle”, “Visite technique”.
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Checklist rapide</h2>
-
-          <div className="rounded-xl border bg-background p-4">
-            <div className="font-semibold">
-              Créer un modèle de tâche (checklist)
-            </div>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
-              <li>
-                Ouvrez <strong>Tâches & maintenance</strong> → section des
-                modèles.
-              </li>
-              <li>
-                Cliquez sur <strong>Nouveau modèle</strong>.
-              </li>
-              <li>
-                Choisissez le type : <strong>date</strong>,{" "}
-                <strong>kilométrage</strong> ou les deux.
-              </li>
-              <li>Définissez l’intervalle (ex : 12 mois / 5 000 km).</li>
-              <li>
-                Ajoutez un préavis (ex : 7 jours / 500 km) pour anticiper.
-              </li>
-              <li>
-                Enregistrez : le modèle sera disponible lors de la planification
-                de tâches.
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Bonnes pratiques</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              Créez d’abord les modèles récurrents (vidange, assurance, visite
-              technique).
-            </li>
-            <li>
-              Vérifiez que le kilométrage des véhicules est à jour pour les
-              modèles “par km”.
-            </li>
-            <li>
-              Préférez les modèles aux tâches manuelles pour un suivi régulier.
+              Configurez ensuite le déclencheur, la fréquence et la période de
+              préavis souhaitée.
             </li>
           </ul>
         </section>
       </div>
     ),
   },
+
   "maintenance/triggers": {
     title: "Déclencheurs (date / km)",
     updatedAt: "2025-12-22",
@@ -1875,144 +1335,46 @@ export const HELP_ARTICLES: Record<Key, HelpArticle> = {
   },
   "maintenance/complete-task": {
     title: "Terminer une tâche",
-    updatedAt: "2025-12-22",
+    updatedAt: "2026-04-09",
     content: (
       <div className="space-y-4">
         <p className="text-muted-foreground">
-          Terminer une tâche permet de clôturer une intervention (vidange,
-          entretien, renouvellement, etc.) et de tenir le suivi à jour. Selon le
-          type de tâche, la clôture peut déclencher des mises à jour
-          automatiques et préparer la prochaine échéance.
+          Terminer une tâche met à jour le suivi du véhicule et prépare la suite
+          du cycle de maintenance. Selon le type d&apos;intervention, cela peut aussi
+          mettre à jour un document lié ou recalculer la prochaine échéance.
         </p>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            1) Quand terminer une tâche ?
-          </h2>
+          <h2 className="text-lg font-semibold">1) Où terminer une tâche</h2>
           <ul className="list-disc space-y-1 pl-5">
-            <li>Lorsque l’intervention est effectivement réalisée.</li>
             <li>
-              Après réception d’un document renouvelé (assurance, visite
-              technique…).
+              Depuis la page de maintenance, utilisez l&apos;action disponible sur
+              la ligne de la tâche concernée.
             </li>
             <li>
-              Après mise à jour des informations nécessaires (ex : kilométrage).
+              Pour certains cas ciblés comme la vidange, une action rapide peut
+              aussi être proposée directement depuis le véhicule.
             </li>
           </ul>
         </section>
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold">
-            2) Mise à jour automatique (workflow)
-          </h2>
+          <h2 className="text-lg font-semibold">2) Bonnes pratiques</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Lorsque vous <strong>terminez une tâche planifiée</strong>,
-              l’application met à jour automatiquement les informations via
-              l’API.
+              Saisissez le kilométrage et la date de réalisation lorsqu&apos;ils sont
+              demandés.
             </li>
             <li>
-              Selon la tâche, cela peut mettre à jour :
-              <ul className="list-disc pl-5">
-                <li>la tâche (statut, date de réalisation, notes),</li>
-                <li>le véhicule (ex : kilométrage),</li>
-                <li>le document lié (ex : nouvelle validité / expiration).</li>
-              </ul>
-            </li>
-            <li>
-              Si la tâche est récurrente, une prochaine tâche peut être générée
-              automatiquement selon le modèle.
-            </li>
-          </ul>
-
-          <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-            <div className="font-medium">Bon réflexe</div>
-            <div className="text-muted-foreground">
-              Même si la mise à jour est automatique, nous recommandons de
-              vérifier rapidement que le véhicule et/ou le document ont bien été
-              mis à jour.
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Checklist (étape par étape)</h2>
-
-          <div className="rounded-xl border bg-background p-4">
-            <div className="font-semibold">
-              Terminer une tâche de maintenance
-            </div>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
-              <li>
-                Ouvrez <strong>Programme de suivi de maintenance</strong>.
-              </li>
-              <li>Recherchez la tâche concernée et ouvrez le détail.</li>
-              <li>
-                Renseignez les informations demandées (ex :{" "}
-                <strong>kilométrage</strong>, date de réalisation, commentaire).
-              </li>
-              <li>
-                Cliquez sur <strong>Terminer</strong> /{" "}
-                <strong>Clôturer</strong>.
-              </li>
-              <li>
-                Le système met à jour automatiquement les données via l’API
-                (tâche / véhicule / document si applicable).
-              </li>
-              <li>
-                Vérifiez rapidement :
-                <ul className="list-disc pl-5">
-                  <li>
-                    le kilométrage du véhicule (si la tâche est basée sur km),
-                  </li>
-                  <li>la date d’expiration du document (si renouvellement),</li>
-                  <li>
-                    le statut final (terminée) et la prochaine échéance (si
-                    récurrente).
-                  </li>
-                </ul>
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">3) Erreurs fréquentes</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              Terminer une tâche “par km” sans mettre le kilométrage à jour →
-              alertes faussées.
-            </li>
-            <li>
-              Renouveler un document mais ne pas vérifier la nouvelle date
-              d’expiration → statut incorrect.
-            </li>
-            <li>
-              Utiliser une tâche manuelle alors qu’un modèle existait → suivi
-              moins automatique.
-            </li>
-          </ul>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Bonnes pratiques</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              Ajoutez une note courte (ex : “Vidange + filtre”) pour conserver
-              un historique clair.
-            </li>
-            <li>
-              Gardez le kilométrage fiable : c’est la base des alertes “par km”.
-            </li>
-            <li>
-              Après un renouvellement, vérifiez le document (date + statut) en
-              10 secondes.
+              Vérifiez le statut final ainsi que les mises à jour liées au
+              véhicule ou au document concerné.
             </li>
           </ul>
         </section>
       </div>
     ),
   },
+
   "emplacements/hierarchy": {
     title: "Hiérarchie & codes",
     updatedAt: "2025-12-22",

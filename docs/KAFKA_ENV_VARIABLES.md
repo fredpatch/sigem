@@ -12,10 +12,10 @@ All SIGEM services use a standardized set of environment variables for Kafka con
 
 - **Type**: String (comma-separated list)
 - **Format**: `host1:port1,host2:port2,...`
-- **Default**: `100.84.234.98:9092` (development default, varies by service)
+- **Default**: `100.110.227.69:9092` (development default, varies by service)
 - **Required**: ✅ Yes
 - **Description**: Kafka broker addresses for cluster connection
-- **Example**: `100.84.234.98:9092` or `kafka-1:9092,kafka-2:9092,kafka-3:9092`
+- **Example**: `100.110.227.69:9092` or `kafka-1:9092,kafka-2:9092,kafka-3:9092`
 
 ### Optional Variables
 
@@ -65,7 +65,7 @@ All SIGEM services use a standardized set of environment variables for Kafka con
 ```typescript
 // src/config/env.ts or similar
 export const env = {
-  KAFKA_BROKERS: process.env.KAFKA_BROKERS ?? "100.84.234.98:9092",
+  KAFKA_BROKERS: process.env.KAFKA_BROKERS ?? "100.110.227.69:9092",
   KAFKA_CLIENT_ID: process.env.KAFKA_CLIENT_ID ?? "sigem-service-name",
   KAFKA_GROUP_ID: process.env.KAFKA_GROUP_ID ?? "sigem-service-name-g",
 };
@@ -115,7 +115,7 @@ await startConsumer({
 ### Development Environment (.env)
 
 ```bash
-KAFKA_BROKERS=100.84.234.98:9092
+KAFKA_BROKERS=100.110.227.69:9092
 KAFKA_CLIENT_ID=sigem-notification
 KAFKA_GROUP_ID=sigem-notification-g
 ```

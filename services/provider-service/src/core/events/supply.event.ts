@@ -1,5 +1,5 @@
 // core/events/supply.events.ts
-import { emitEvent, type SupplyEventPayload } from "@sigem/shared";
+import { emitEvent } from "@sigem/shared";
 
 // import { getEventBus } from "./event.bus";
 
@@ -18,7 +18,7 @@ export type SupplyEventType =
 
 export async function emitSupplyEvent(
   type: SupplyEventType,
-  payload: SupplyEventPayload,
+  payload: any,
   log = false,
 ) {
   return emitEvent({

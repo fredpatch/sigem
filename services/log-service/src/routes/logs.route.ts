@@ -1,5 +1,5 @@
+import { listLogs } from "@/controllers/log.controller";
 import { Router } from "express";
-import { listLogs } from "src/controllers/log.controller";
 
 export const routes = Router();
 

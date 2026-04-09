@@ -6,6 +6,11 @@ import { service } from "src/config/services";
 import { forwardUserHeaders } from "src/middlewares/forward-user";
 
 const REFERENCE_PROXY = process.env.REFERENCE_SERVICE_URL;
+
+if (!REFERENCE_PROXY) {
+  throw new Error("REFERENCE_SERVICE_URL is not defined");
+}
+
 const API_VERSION = "v1";
 const router = Router();
 const target = REFERENCE_PROXY;

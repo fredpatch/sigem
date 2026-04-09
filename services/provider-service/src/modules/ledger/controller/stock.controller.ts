@@ -1,5 +1,4 @@
-import { catchError } from "../../../utils/catch-error";
-import { getActor } from "../../../utils/get.matricule";
+import { catchError, getActor } from "@sigem/shared";
 import { StockMovementModel } from "../models/stock-movement.model";
 import { StockKpiService } from "../services/stock-kpi.service";
 import { StockService } from "../services/stock.service";
@@ -38,7 +37,7 @@ export class StockController {
     const limit = toInt(req.query.limit, 50);
 
     // orgId / createdBy from auth context (MG-friendly)
-    const { id } = getActor(req);
+    // const { id } = getActor(req);
 
     const data = await service.listStock({
       //   orgId: new Types.ObjectId(id),
@@ -108,11 +107,6 @@ export class StockController {
 
     // orgId / createdBy from auth context (MG-friendly)
     const { id: orgId } = getActor(req);
-
-    const createdBy =
-      (req as any).user?._id && Types.ObjectId.isValid((req as any).user._id)
-        ? new Types.ObjectId((req as any).user._id)
-        : undefined;
 
     const input = {
       orgId,

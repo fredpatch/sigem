@@ -1,14 +1,14 @@
-POST http://localhost:4000/v1/auth/register
+GET http://localhost:4000/v1/directory/0207
 Content-Type: application/json
 # Cookie: accessToken=user:123:MG_COS
 
-{
-  "email":"admin@anac-gabon.com",
-  "password":"password",
-  "matriculation":"208",
-  "confirmPassword":"password",
-  "role":"ADMIN"
-}
+# {
+#   "email":"admin1@anac-gabon.com",
+#   "password":"password",
+#   "matriculation":"0207",
+#   "confirmPassword":"password",
+#   "role":"ADMIN"
+# }
 
 # GET http://localhost:4000/v1/inventory/categories
 # Content-Type: application/json

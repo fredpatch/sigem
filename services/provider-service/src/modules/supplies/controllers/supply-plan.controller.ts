@@ -1,6 +1,4 @@
-import { emitSupplyEvent } from "../../../core/events/supply.event";
-import { catchError } from "../../../utils/catch-error";
-import { getActor } from "../../../utils/get.matricule";
+import { catchError, getActor } from "@sigem/shared";
 import { getPagination, getUserId } from "../_utils";
 import {
   changeSupplyPlanStatusDTO,
@@ -8,6 +6,7 @@ import {
   updateSupplyPlanDTO,
 } from "../schema/supplies.dto";
 import { SupplyPlanService } from "../services/supply-plan.service";
+import { emitSupplyEvent } from "@/core/events/supply.event";
 
 const service = new SupplyPlanService();
 
@@ -49,7 +48,7 @@ export class SupplyPlanController {
   });
 
   getById = catchError(async (req, res) => {
-    const data = await service.getById(req.params.id);
+    const data = await service.getById(req.params.id as string);
     return res.json({ ok: true, data });
   });
 
@@ -96,7 +95,7 @@ export class SupplyPlanController {
   update = catchError(async (req, res) => {
     const parsed = updateSupplyPlanDTO.parse(req.body);
 
-    const data = await service.update(req.params.id, {
+    const data = await service.update(req.params.id as string, {
       scheduledFor: (parsed.scheduledFor as any) ?? null,
       department: (parsed.department as any) ?? null,
       notes: (parsed.notes as any) ?? null,
@@ -136,7 +135,7 @@ export class SupplyPlanController {
     const byUserId = getUserId(req);
 
     const data = await service.changeStatus({
-      id: req.params.id,
+      id: req.params.id as string,
       to: parsed.to as any,
       byUserId,
       note: parsed.note,
@@ -172,7 +171,7 @@ export class SupplyPlanController {
   });
 
   autoPrice = catchError(async (req, res) => {
-    const data = await service.autoPrice(req.params.id);
+    const data = await service.autoPrice(req.params.id as string);
 
     const { id, matriculation, role, username } = getActor(req);
 
@@ -206,7 +205,7 @@ export class SupplyPlanController {
     const byUserId = getUserId(req);
     const note = req.body?.note?.toString();
 
-    const data = await service.cancel(req.params.id, byUserId, note);
+    const data = await service.cancel(req.params.id as string, byUserId, note);
 
     const { id, matriculation, role, username } = getActor(req);
 

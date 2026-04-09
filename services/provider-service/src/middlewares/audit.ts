@@ -28,7 +28,7 @@ export function audit(action: string, resource: string) {
             ? "error"
             : res.statusCode >= 400
               ? "warning"
-              : "success";
+              : "info";
 
         // userId: (req as any).user?.id,
         // username: (req as any).user?.username,
@@ -37,18 +37,18 @@ export function audit(action: string, resource: string) {
           KAFKA_TOPICS.LOG_ACTION,
           {
             // === canonical cover
-            version: 1,
+            version: "1",
             type: "audit.action",
             action,
             resourceType,
             resourceId,
             userId: user?.id,
             username: user?.username,
-            role: user?.role,
             matriculation: user?.matriculation,
+            role: user?.role,
             dept: "MGX",
             severity,
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(),
 
             // Http context
             http: {

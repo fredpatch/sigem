@@ -7,6 +7,7 @@ export interface ActorInfo {
   id?: string;
   username?: string;
   sessionId?: string;
+  matriculation?: string;
   role?: string;
 }
 
@@ -23,5 +24,8 @@ export function getActor(req: Request): ActorInfo {
     sessionId:
       user.sessionId || (req.headers["x-user-sessionid"] as string | undefined),
     role: user.role || (req.headers["x-user-role"] as string | undefined),
+    matriculation:
+      user.matriculation ||
+      (req.headers["x-user-matriculation"] as string | undefined),
   };
 }

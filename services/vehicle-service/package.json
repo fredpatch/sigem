@@ -1,19 +1,17 @@
 {
   "name": "@sigem/vehicle-service",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "type": "module",
   "main": "./dist/server.js",
   "types": "./dist/server.d.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsup",
+    "build": "tsup --config tsup.config.ts",
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@sigem/shared": "*",
-    "express": "^4.21.1"
+    "@sigem/shared": "*"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3"
   }
 }

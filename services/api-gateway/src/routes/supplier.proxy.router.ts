@@ -6,6 +6,11 @@ import { service } from "src/config/services";
 import { forwardUserHeaders } from "src/middlewares/forward-user";
 
 const SUPPLIER_PROXY = process.env.PROVIDER_SERVICE_URL;
+
+if (!SUPPLIER_PROXY) {
+  throw new Error("INVENTORY_SERVICE_URL is not defined");
+}
+
 const API_VERSION = "v1";
 const router = Router();
 const target = SUPPLIER_PROXY;

@@ -1,5 +1,6 @@
 // utils/import/providers.normalize.ts
-import type { ProviderType } from "../../models/provider.model";
+
+import { ProviderType } from "@/models/provider.model";
 
 export type ProviderImportMapping = Partial<
   Record<

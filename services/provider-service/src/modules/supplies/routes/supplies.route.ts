@@ -2,10 +2,10 @@ import { Router } from "express";
 import { SupplierPriceController } from "../controllers/supplier-price.controller";
 import { SupplyItemController } from "../controllers/supply-item.controller";
 import { SupplyPlanController } from "../controllers/supply-plan.controller";
-import { authorizedRoles } from "../../../middlewares/authorized-roles";
-import { authenticate } from "../../../middlewares/authenticate";
 import { SupplyDashboardController } from "../controllers/supply-dashboard.controller";
-import { audit } from "../../../middlewares/audit";
+import { audit } from "@/middlewares/audit";
+import { authorizedRoles } from "@/middlewares/authorized-roles";
+import { authenticate } from "@/middlewares/authenticate";
 
 const canWrite = authorizedRoles(
   "MG_COS",

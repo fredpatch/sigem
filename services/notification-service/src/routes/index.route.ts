@@ -1,26 +1,9 @@
 import { Router, Request, Response } from "express";
-// import swaggerJSDoc from "swagger-jsdoc";
-// import { swaggerOptions } from "../config/swagger";
-// import swaggerUi from "swagger-ui-express";
 import { routeGroups } from "../config/routes.path";
 import { API_VERSION } from "../app";
 
 export const router = () => {
-  // Swagger configuration
-  // const swaggerSpec = swaggerJSDoc(swaggerOptions);
   const routesHandler = Router();
-
-  // const isProd = process.env.NODE_ENV === "production";
-
-  // API Documentation routes
-  // if (!isProd) {
-  //   routesHandler.use(`/${API_VERSION}/docs`, swaggerUi.serve);
-  //   routesHandler.get(`/${API_VERSION}/docs`, swaggerUi.setup(swaggerSpec));
-  //   routesHandler.get(`/${API_VERSION}/docs.js`, (_, res) => {
-  //     res.setHeader("Content-Type", "application/json");
-  //     res.send(swaggerSpec);
-  //   });
-  // }
 
   // Mount routes
   routeGroups.forEach(({ prefix, router: groupRouter }) => {

@@ -22,7 +22,7 @@ export class SupplierPriceController {
   });
 
   getById = catchError(async (req, res) => {
-    const data = await service.getById(req.params.id);
+    const data = await service.getById(req.params.id as string);
     return res.json({ ok: true, data });
   });
 
@@ -66,7 +66,7 @@ export class SupplierPriceController {
     const unitPrice =
       req.body.unitPrice === undefined ? undefined : Number(req.body.unitPrice);
 
-    const data = await service.update(req.params.id, {
+    const data = await service.update(req.params.id as string, {
       unitPrice,
       source: req.body.source,
     });
@@ -88,7 +88,7 @@ export class SupplierPriceController {
   });
 
   remove = catchError(async (req, res) => {
-    const data = await service.remove(req.params.id);
+    const data = await service.remove(req.params.id as string);
     const { id, matriculation, role, username } = getActor(req);
 
     await emitSupplyEvent("supply.price.deleted", {

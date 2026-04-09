@@ -5,11 +5,14 @@ export {
   fmtDue,
   fmtMileage,
   fmtVehicle,
-} from "@sigem/shared/utils/formatters";
-
-export { buildScopeFilter, type Scope } from "@sigem/shared/utils/scope";
-export { getActor, type ActorInfo } from "@sigem/shared/http";
-export { catchError, parseBool, parseIntSafe } from "@sigem/shared/http";
+  buildScopeFilter,
+  type Scope,
+  getActor,
+  type ActorInfo,
+  catchError,
+  parseBool,
+  parseIntSafe,
+} from "@sigem/shared";
 
 // Service-specific imports
 export { IMPORTANT, KNOWN_TOPICS } from "./constants";

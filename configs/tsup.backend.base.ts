@@ -7,6 +7,8 @@ type CreateBackendTsupConfigOptions = {
   outDir?: string;
 };
 
+const nativeNodeModules = ["bcrypt", "snappy"];
+
 export function createBackendTsupConfig(
   options: CreateBackendTsupConfigOptions,
 ) {
@@ -24,6 +26,9 @@ export function createBackendTsupConfig(
     treeshake: true,
     minify: false,
     noExternal: options.noExternal ?? [],
-    external: options.external ?? [],
+    // Keep native add-ons external so Node resolves their platform-specific
+    // `.node` binaries from `node_modules` at runtime instead of esbuild trying
+    // to bundle them.
+    external: [...new Set([...nativeNodeModules, ...(options.external ?? [])])],
   });
 }

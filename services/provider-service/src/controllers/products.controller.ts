@@ -18,7 +18,9 @@ class ProductController {
   });
 
   getOne = catchError(async (req, res) => {
-    const doc = await this.productService.getProductById(req.params.id);
+    const doc = await this.productService.getProductById(
+      req.params.id as string,
+    );
     if (!doc)
       return res
         .status(404)
@@ -28,7 +30,10 @@ class ProductController {
 
   update = catchError(async (req, res) => {
     const body = validate(updateProductSchema, req.body);
-    const doc = await this.productService.updateProduct(req.params.id, body);
+    const doc = await this.productService.updateProduct(
+      req.params.id as string,
+      body,
+    );
     if (!doc)
       return res
         .status(404)
@@ -46,7 +51,7 @@ class ProductController {
   compare = catchError(async (req, res) => {
     const q = validate(querySchema, req.query);
     const data = await this.productService.compareProductPrices({
-      productId: req.params.productId,
+      productId: req.params.productId as string,
       dateFrom: q.dateFrom,
       dateTo: q.dateTo,
       limit: q.limit,

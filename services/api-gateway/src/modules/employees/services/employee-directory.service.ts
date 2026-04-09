@@ -21,6 +21,7 @@ export class EmployeeDirectoryService {
   private repo = MariaDataSource.getRepository(EmployeeDirectory);
 
   async findByMatricule(matricule: string) {
+    // console.log("Finding employee by matricule:", matricule);
     return this.repo.findOne({
       where: { matricule },
     });
@@ -38,7 +39,7 @@ export class EmployeeDirectoryService {
       OR e.firstName LIKE :q
       OR e.lastName LIKE :q
       `,
-        { q: `%${q}%` }
+        { q: `%${q}%` },
       )
       .limit(limit)
       .getMany();
@@ -56,7 +57,7 @@ export class EmployeeDirectoryService {
       const q = `%${params.q.trim()}%`;
       qb.andWhere(
         `(e.matricule LIKE :q OR e.firstName LIKE :q OR e.lastName LIKE :q)`,
-        { q }
+        { q },
       );
     }
 

@@ -1,4 +1,4 @@
-import { LogEntryModel } from "../models/log-entry.model";
+import { LogEntryModel } from "@/models/log-entry.model";
 
 export async function saveLog(doc: {
   eventId?: string;

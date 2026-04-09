@@ -1,6 +1,6 @@
-import { catchError } from "../../../utils/catch-error";
-import { SupplierPriceEntity } from "../../supplies/models/supplier-price.model";
+import { SupplierPriceEntity } from "@/modules/supplies/models/supplier-price.model";
 import { toObjectId } from "./stock.controller";
+import { catchError } from "@sigem/shared";
 
 export class SupplierPriceController {
   lookupSupplierPrice = catchError(async (req, res) => {

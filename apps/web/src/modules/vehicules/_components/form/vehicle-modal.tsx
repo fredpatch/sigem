@@ -3,12 +3,10 @@ import { useVehicles } from "../../hooks/use-vehicle";
 import { useMemo } from "react";
 import {
   defaultValues,
-  VehicleCreateFormValues,
   vehicleFormSchema,
   VehicleFormValues,
 } from "../../schema/vehicle.schema";
 import {
-  CreateVehicleDTO,
   UpdateVehicleDTO,
   Vehicle,
   VehicleStatus,

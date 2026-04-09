@@ -6,10 +6,10 @@ import {
   fmtDue,
   fmtMileage,
   fmtVehicle,
-} from "@sigem/shared/utils/formatters";
-import { mapSeverityToNotificationType } from "@sigem/shared/http";
+} from "@sigem/shared";
+import { mapSeverityToNotificationType } from "@sigem/shared";
 import { Notification } from "../models/notification.model";
-import { sendOtpEmail } from "./send-otp-email";
+// import { sendOtpEmail } from "./send-otp-email";
 import { IMPORTANT, KNOWN_TOPICS } from "../utils/constants";
 
 type SocketIO = any;

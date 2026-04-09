@@ -1,17 +1,7 @@
-import { defineConfig } from "tsup";
+import { createBackendTsupConfig } from "../../configs/tsup.backend.base";
 
-export default defineConfig({
+export default createBackendTsupConfig({
   entry: ["src/server.ts"],
-  format: ["esm"],
-  platform: "node",
-  target: "node20",
-  outDir: "dist",
-  sourcemap: false,
-  clean: true,
-  splitting: false,
-  bundle: true,
-  dts: false,
-  treeshake: true,
-  minify: false,
+
   noExternal: ["@sigem/shared"],
 });

@@ -10,28 +10,11 @@
     ".": "./src/index.ts"
   },
   "private": true,
-  "dependencies": {
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "kafkajs": "^2.2.4",
-    "mongoose": "^8.19.2",
-    "morgan": "^1.10.1",
-    "pino": "^9.4.0",
-    "zod": "^3.23.8"
-  },
+  "dependencies": {},
   "scripts": {
     "build": "tsc -b tsconfig.json",
     "clean": "tsc -b --clean && rimraf dist",
     "dev": "tsc -b --watch"
   },
-  "devDependencies": {
-    "@types/cookie-parser": "^1.4.9",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/morgan": "^1.9.10"
-  }
+  "devDependencies": {}
 }

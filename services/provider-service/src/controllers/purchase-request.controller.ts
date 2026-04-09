@@ -24,7 +24,7 @@ class PurchaseRequestController {
 
   details = catchError(async (req, res) => {
     const data = await this.purchaseRequestService.getRequestDetail(
-      req.params.id
+      req.params.id as string,
     );
     if (!data) return res.status(404).json({ error: "Not found" });
     res.status(data.status).json(data);
@@ -34,9 +34,9 @@ class PurchaseRequestController {
     const body = validate(transitionSchema, req.body);
     const user = req.user?.id as any;
     const data = await this.purchaseRequestService.transitionRequest(
-      req.params.id,
+      req.params.id as string,
       body.action,
-      user
+      user,
     );
     res.status(data.status).json(data);
   });
@@ -44,8 +44,8 @@ class PurchaseRequestController {
   convertToPurchase = catchError(async (req, res) => {
     const body = req.body ?? {};
     const data = await this.purchaseRequestService.convertRequestToPurchase(
-      req.params.id,
-      body
+      req.params.id as string,
+      body,
     );
     if (!data) return res.status(404).json({ error: "Not found" });
     res.status(data.status).json(data);

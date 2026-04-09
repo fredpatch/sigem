@@ -274,13 +274,13 @@ export const SideNavBar = () => {
 
                         <Separator className="my-3" />
 
-                        <NavBarLink
+                        {/* <NavBarLink
                           to={"/assets"}
                           pathName={"assets"}
                           isCollapsed={isCollapsed}
                           icon={<Archive className="h-4 w-4" />}
                           title={"Gestion du patrimoine"}
-                        />
+                        /> */}
 
                         <NavBarLink
                           to={"/vehicle-management"}
@@ -308,13 +308,13 @@ export const SideNavBar = () => {
                       //  "MG_AGT"
                     ].includes(role!) && (
                       <>
-                        <NavBarLink
+                        {/* <NavBarLink
                           to={"/categories"}
                           pathName={"categories"}
                           isCollapsed={isCollapsed}
                           icon={<Settings className="h-4 w-4" />}
                           title={"Categories"}
-                        />
+                        /> */}
 
                         <NavBarLink
                           to={"/vehicle-documents"}
@@ -342,13 +342,13 @@ export const SideNavBar = () => {
                       //  "MG_COS"
                     ].includes(role!) && (
                       <>
-                        <NavBarLink
+                        {/* <NavBarLink
                           to={"/locations"}
                           pathName={"locations"}
                           isCollapsed={isCollapsed}
                           icon={<Pin className="h-4 w-4" />}
                           title={"Gestion des emplacements"}
-                        />
+                        /> */}
                       </>
                     )}
 

@@ -1,12 +1,11 @@
-import { emitSupplyEvent } from "../../../core/events/supply.event";
-import { catchError } from "../../../utils/catch-error";
-import { getActor } from "../../../utils/get.matricule";
+import { emitSupplyEvent } from "@/core/events/supply.event";
 import { getPagination } from "../_utils";
 import {
   createSupplyItemDTO,
   updateSupplyItemDTO,
 } from "../schema/supplies.dto";
 import { SupplyItemService } from "../services/supply-item.service";
+import { catchError, getActor } from "@sigem/shared";
 
 const service = new SupplyItemService();
 
@@ -29,7 +28,7 @@ export class SupplyItemController {
   });
 
   getById = catchError(async (req, res) => {
-    const data = await service.getById(req.params.id);
+    const data = await service.getById(req.params.id as string);
     return res.json({ ok: true, data });
   });
 
@@ -65,7 +64,7 @@ export class SupplyItemController {
 
   update = catchError(async (req, res) => {
     const parsed = updateSupplyItemDTO.parse(req.body);
-    const data = await service.update(req.params.id, parsed as any);
+    const data = await service.update(req.params.id as string, parsed as any);
 
     const { id, matriculation, role, username } = getActor(req);
 
@@ -94,7 +93,7 @@ export class SupplyItemController {
   });
 
   disable = catchError(async (req, res) => {
-    const data = await service.disable(req.params.id);
+    const data = await service.disable(req.params.id as string);
 
     const { id, matriculation, role, username } = getActor(req);
 
@@ -125,7 +124,7 @@ export class SupplyItemController {
   });
 
   enable = catchError(async (req, res) => {
-    const data = await service.enable(req.params.id);
+    const data = await service.enable(req.params.id as string);
 
     const { id, matriculation, role, username } = getActor(req);
 

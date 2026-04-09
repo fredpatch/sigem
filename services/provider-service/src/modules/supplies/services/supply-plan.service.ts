@@ -7,10 +7,10 @@ import {
   SupplyPlanStatus,
 } from "../models/supplier-plan.model";
 import { httpError } from "./supply-item.service";
-import { StockLocationModel } from "../../ledger/models/stock-location.model";
-import { StockService } from "../../ledger/services/stock.service";
-import { toObjectId } from "../../ledger/controller/stock.controller";
 import { StockMovementModel } from "../../ledger/models/stock-movement.model";
+import { StockLocationModel } from "@/modules/ledger/models/stock-location.model";
+import { StockService } from "@/modules/ledger/services/stock.service";
+import { toObjectId } from "@/modules/ledger/controller/stock.controller";
 
 function pad(n: number, size = 4) {
   return String(n).padStart(size, "0");

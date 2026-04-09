@@ -11,6 +11,7 @@ const LogEntrySchema = new Schema(
     topic: { type: String, required: true }, // "log.action"
     userId: { type: String },
     username: { type: String }, // <-- AJOUT
+    matriculation: { type: String },
     role: { type: String },
     dept: { type: String, default: "MG" },
     resourceType: { type: String },
@@ -43,6 +44,7 @@ const LogEntrySchema = new Schema(
 
 LogEntrySchema.index({ "http.path": 1, createdAt: -1 });
 LogEntrySchema.index({ username: 1, createdAt: -1 });
+LogEntrySchema.index({ matriculation: 1, createdAt: -1 });
 LogEntrySchema.index({ type: 1, createdAt: -1 });
 LogEntrySchema.index({ resourceType: 1, resourceId: 1, createdAt: -1 });
 

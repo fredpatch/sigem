@@ -22,6 +22,10 @@ import { employeeDirectoryService } from "src/modules/employees/services/employe
 import { normalizeMatricule } from "src/utils/formalize-matricule";
 
 export class AuthService {
+  private isDirectoryBypassUser(user: { role?: string } | null | undefined) {
+    return user?.role === ROLES.SUPER_ADMIN;
+  }
+
   async activateUserByMG(matriculation: string) {
     const m = normalizeMatricule(matriculation);
 
@@ -349,9 +353,11 @@ export class AuthService {
   }
 
   async login({ matriculation, password, userAgent }: LoginParams) {
+    const user = await UserModel.findOne({ matriculation }).select("+password");
     const employee =
       await employeeDirectoryService.findByMatricule(matriculation);
-    if (!employee) {
+
+    if (!employee && !this.isDirectoryBypassUser(user)) {
       return response(
         null,
         "NOT_IN_DIRECTORY",
@@ -361,7 +367,6 @@ export class AuthService {
       );
     }
 
-    const user = await UserModel.findOne({ matriculation }).select("+password");
     if (!user) {
       return response(
         null,
@@ -459,9 +464,11 @@ export class AuthService {
   }
 
   async requestOTP(matriculation: string, purpose: OtpPurpose = "LOGIN_2FA") {
+    const user = await UserModel.findOne({ matriculation });
     const employee =
       await employeeDirectoryService.findByMatricule(matriculation);
-    if (!employee) {
+
+    if (!employee && !this.isDirectoryBypassUser(user)) {
       return response(
         null,
         "NOT_IN_DIRECTORY",
@@ -471,7 +478,6 @@ export class AuthService {
       );
     }
 
-    const user = await UserModel.findOne({ matriculation });
     if (!user) {
       return response(null, "NOT_FOUND", "User not found", false, NOT_FOUND);
     }

@@ -10,6 +10,10 @@ import { authenticate } from "../middlewares/authenticate";
 const NOTIF_SERVICE_URL =
   process.env.NOTIF_SERVICE_URL || "http://localhost:4001";
 
+if (!NOTIF_SERVICE_URL) {
+  throw new Error("NOTIF_SERVICE_URL is not defined");
+}
+
 export const router = Router();
 
 // /v1/notifications/*  →  NOTIF_SERVICE_URL + (chemin réécrit sans le prefix)

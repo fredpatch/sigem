@@ -30,7 +30,7 @@ employeeRouter.get("/enriched-search", authenticate, async (req, res) => {
   }).select("matriculation status role is2FAValidated is2FAEnabled lastLogin");
 
   const map = new Map(
-    users.map((u) => [normalizeMatricule(u.matriculation), u])
+    users.map((u) => [normalizeMatricule(u.matriculation), u]),
   );
 
   // 3) Merge
@@ -81,5 +81,5 @@ employeeRouter.get(
     });
 
     res.json(result);
-  })
+  }),
 );

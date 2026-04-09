@@ -6,6 +6,11 @@ import { service } from "src/config/services";
 import { forwardUserHeaders } from "src/middlewares/forward-user";
 
 const VEHICLE_PROXY = process.env.VEHICLE_SERVICE_URL;
+
+if (!VEHICLE_PROXY) {
+  throw new Error("VEHICLE_SERVICE_URL is not defined");
+}
+
 const API_VERSION = "v1";
 const router = Router();
 const target = VEHICLE_PROXY;

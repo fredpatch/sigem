@@ -1,7 +1,7 @@
 import { validate } from "../core/http/validate";
 import { ProviderModel } from "../models/provider.model";
 import { ProviderService } from "../services/provider.service";
-import { CommitMode, CommitRow, normalizeRowData } from "../types/types";
+import { CommitRow } from "../types/types";
 import { catchError } from "../utils/catch-error";
 import { parseTabularFile } from "../utils/import/parse-tabular-file";
 import { buildProvidersBulkOps } from "../utils/import/providers.commit.bulk";
@@ -103,7 +103,7 @@ class ProviderController {
   catalog = catchError(async (req, res) => {
     const q = validate(providerCatalogQuerySchema, req.query);
     const data = await this.providerService.catalog({
-      providerId: req.params.providerId,
+      providerId: req.params.providerId as string,
       ...q,
     });
     res.status(data.status).json(data);

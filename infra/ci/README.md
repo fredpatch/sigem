@@ -2,7 +2,7 @@
 
 CI/CD workflows and templates.
 
-MONGO_URL=mongodb://admin:CHANGE_ME_STRONG@100.84.234.98:27017/sigem?replicaSet=rs0&authSource=admin&directConnection=true
+MONGO_URL=mongodb://admin:CHANGE_ME_STRONG@100.110.227.69:27017/sigem?replicaSet=rs0&authSource=admin&directConnection=true
 
 # Port number
 
@@ -30,14 +30,14 @@ NODE_ENV=development
 # EVENTS_DRIVER=noop
 
 EVENTS_DRIVER=kafka
-KAFKA_BROKERS=100.84.234.98:9092
+KAFKA_BROKERS=100.110.227.69:9092
 KAFKA_CLIENT_ID=sigem-api
 KAFKA_TOPICS_NOTIFY=notify.event
 KAFKA_TOPICS_LOG=log.action
 KAFKA_SSL=false
 KAFKA_SASL_ENABLED=false
 
-MARIADB_HOST=100.84.234.98
+MARIADB_HOST=100.110.227.69
 MARIADB_PORT=3307
 MARIADB_USER=admin
 MARIADB_PASSWORD=admin

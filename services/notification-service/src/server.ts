@@ -1,8 +1,11 @@
 import "dotenv/config";
-import { KAFKA_TOPICS } from "@sigem/shared";
-import { connectToMongo } from "@sigem/shared";
-import { ensureKafkaTopics, startConsumer } from "@sigem/shared";
-import initApp, { API_VERSION } from "./app";
+import {
+  KAFKA_TOPICS,
+  ensureKafkaTopics,
+  startConsumer,
+  connectToMongo,
+} from "@sigem/shared";
+import initApp from "./app";
 import { createSocketServer } from "./ws/socket";
 import { handleIncomingEvent } from "./handlers/notify.handler";
 

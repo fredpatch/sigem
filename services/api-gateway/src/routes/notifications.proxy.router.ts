@@ -6,6 +6,11 @@ import { service } from "src/config/services";
 import { forwardUserHeaders } from "src/middlewares/forward-user";
 
 const NOTIFICATION_PROXY = process.env.NOTIF_SERVICE_URL;
+
+if (!NOTIFICATION_PROXY) {
+  throw new Error("NOTIF_SERVICE_URL is not defined");
+}
+
 const API_VERSION = "v1";
 const router = Router();
 const target = NOTIFICATION_PROXY;

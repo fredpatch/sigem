@@ -1,17 +1,9 @@
-import { defineConfig } from "tsup";
+import { createBackendTsupConfig } from "../../configs/tsup.backend.base";
 
-export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm"],
-  platform: "node",
-  target: "node20",
-  outDir: "dist",
-  sourcemap: false,
-  clean: true,
-  splitting: false,
-  bundle: true,
-  dts: false,
-  treeshake: true,
-  minify: false,
+export default createBackendTsupConfig({
+  entry: ["src/server.ts"],
   noExternal: ["@sigem/shared"],
+  // Native modules must stay external — tsup bundles their JS but the .node
+  // binary can only be resolved correctly from node_modules at runtime.
+  external: ["bcrypt", "snappy"],
 });

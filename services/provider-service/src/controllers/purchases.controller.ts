@@ -20,18 +20,23 @@ class PurchasesController {
   update = catchError(async (req, res) => {
     const body = validate(updatePurchaseSchema, req.body);
     const { id } = req.params;
-    const data = await this.purchasesService.updatePurchase(id, body as any);
+    const data = await this.purchasesService.updatePurchase(
+      id as string,
+      body as any,
+    );
     res.status(data.status).json(data);
   });
 
   confirm = catchError(async (req, res) => {
     const { id } = req.params;
-    const data = await this.purchasesService.confirmPurchase(id);
+    const data = await this.purchasesService.confirmPurchase(id as string);
     res.status(data.status).json(data);
   });
 
   getOne = catchError(async (req, res) => {
-    const data = await this.purchasesService.getPurchaseDetail(req.params.id);
+    const data = await this.purchasesService.getPurchaseDetail(
+      req.params.id as string,
+    );
     if (!data) return res.status(404).json({ error: "Not found" });
     res.status(data.status).json(data);
   });
@@ -43,7 +48,9 @@ class PurchasesController {
   });
 
   cancel = catchError(async (req, res) => {
-    const data = await this.purchasesService.cancelPurchase(req.params.id);
+    const data = await this.purchasesService.cancelPurchase(
+      req.params.id as string,
+    );
     res.status(data.status).json(data);
   });
 }

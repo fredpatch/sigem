@@ -1,3 +1,5 @@
+import { emitEvent } from "@sigem/shared";
+
 export type LedgerEventType =
   | "ledger.entry.created"
   | "ledger.entry.updated"

@@ -1,5 +1,6 @@
 // utils/import/providers.match.ts
-import { ProviderModel } from "../../models/provider.model";
+
+import { ProviderModel } from "@/models/provider.model";
 
 const normKey = (s: string) =>
   s

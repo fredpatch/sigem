@@ -1,5 +1,5 @@
 // src/modules/supplies/models/supply-item.model.ts
-import mongoose, { Schema, InferSchemaType, model } from "mongoose";
+import { Schema, model } from "mongoose";
 import { normalizeLabel } from "../supply.helpers";
 import { SupplyItem } from "../../../types/supply-item";
 

@@ -1,14 +1,13 @@
 import winston, { format } from "winston";
 
-const { combine, timestamp, printf, colorize, align, json, prettyPrint, cli } =
-  format;
+const { combine, timestamp, printf } = format;
 
 const logFormat = combine(
   timestamp({ format: "YYYY-MM-DD HH::mm A" }),
   printf(
     ({ timestamp, level, message }) =>
-      `[${timestamp}]::[${level.toUpperCase()}]: ${message}`
-  )
+      `[${timestamp}]::[${level.toUpperCase()}]: ${message}`,
+  ),
 );
 
 export const logger = winston.createLogger({

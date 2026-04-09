@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { authenticate } from "../../../middlewares/authenticate";
-import { authorizedRoles } from "../../../middlewares/authorized-roles";
 import { StockController } from "../controller/stock.controller";
 import { StockLocationController } from "../controller/stock-location.controller";
 import { SupplierPriceController } from "../controller/supplier-price.controller";
-import { audit } from "../../../middlewares/audit";
+import { audit } from "@/middlewares/audit";
+import { authorizedRoles } from "@/middlewares/authorized-roles";
+import { authenticate } from "@/middlewares/authenticate";
 
 const canWrite = authorizedRoles(
   "MG_COS",

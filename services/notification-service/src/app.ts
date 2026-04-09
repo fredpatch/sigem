@@ -1,5 +1,5 @@
 import express from "express";
-import middlewaresInit from "@sigem/shared/middleware";
+import { middlewaresInit } from "@sigem/shared";
 import { router as rootRouter } from "./routes/index.route";
 
 export const API_VERSION = "v1";

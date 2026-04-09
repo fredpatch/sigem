@@ -10,6 +10,7 @@ export interface AuditEventPayload {
   type?: string;
   userId?: string;
   username?: string;
+  matriculation?: string;
   role?: string;
   dept?: string;
   resourceType?: string;

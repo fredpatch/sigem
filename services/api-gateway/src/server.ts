@@ -1,9 +1,10 @@
 // src/server.ts
 import "reflect-metadata";
 import getApp, { API_VERSION } from "./app";
-import { MariaDataSource } from "./config/maria.datasource";
+import { ensureMariaViews, MariaDataSource } from "./config/maria.datasource";
 import { initEvents } from "./core/events";
 import { connectToMongo } from "@sigem/shared";
+import { initSuperAdminBootstrap } from "./bootstrap/init-super-admin";
 
 const PORT = Number(process.env.PORT || 4000);
 const startServer = async () => {
@@ -25,13 +26,12 @@ const startServer = async () => {
     }
 
     await connectToMongo({ uri }, fallback);
+    await initSuperAdminBootstrap();
 
     // Maria connect
-    // MariaDataSource.initialize()
-    //   .then(() => console.log("MariaDB connected"))
-    //   .catch((err) => {
-    //     console.error("Error during MariaDB Data Source initialization:", err);
-    //   });
+    await MariaDataSource.initialize();
+    await ensureMariaViews();
+    console.log("MariaDB connected");
 
     server.listen(PORT, "0.0.0.0", async () => {
       console.log(`🚀 API Gateway running on port ${PORT}`);

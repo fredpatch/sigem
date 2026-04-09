@@ -42,7 +42,7 @@ authRouter.post("/set-password", authController.firstLoginSetPasswordHandler);
 authRouter.get(
   "/me",
   authenticate,
-  audit("verify_user", "auth"),
+  // audit("verify_user", "auth"),
   authController.getMeHandler,
 );
 

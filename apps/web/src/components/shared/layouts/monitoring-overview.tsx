@@ -36,10 +36,10 @@ export const MGMonitoringOverview = () => {
       <Separator />
 
       {/* TABS KPI */}
-      <Tabs defaultValue="assets" className="w-full">
+      <Tabs defaultValue="supplies" className="w-full">
         <div className="flex items-center justify-center">
           <TabsList className="flex flex-wrap">
-            <TabsTrigger value="assets">Parc matériel</TabsTrigger>
+            {/* <TabsTrigger value="assets">Parc matériel</TabsTrigger> */}
             <TabsTrigger value="vehicles">Parc automobile</TabsTrigger>
             <TabsTrigger value="supplies">Fournitures</TabsTrigger>
           </TabsList>

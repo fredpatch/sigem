@@ -16,7 +16,7 @@ const initMiddlewares = (app: Application) => {
   app.disable("x-powered-by"); // Security: hide express signature
 
   // CORS
-  app.use((req, res, next) => {
+  app.use((_req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -27,7 +27,7 @@ const initMiddlewares = (app: Application) => {
   app.use(
     helmet({
       referrerPolicy: { policy: "no-referrer" },
-    })
+    }),
   );
 
   app.use(
@@ -40,7 +40,7 @@ const initMiddlewares = (app: Application) => {
         return cb(new Error("Not allowed by CORS [GATEWAY]"), false);
       },
       credentials: true,
-    })
+    }),
   );
 
   app.use(express.json({ limit: "5mb" }));

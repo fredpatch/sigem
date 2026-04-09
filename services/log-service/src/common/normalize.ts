@@ -1,15 +1,4 @@
 // log-service/src/kafka/normalize.ts
-type AnyPayload = Record<string, any>;
-
-function parseHeaders(h?: Record<string, Buffer | string | undefined>) {
-  return Object.fromEntries(
-    Object.entries(h ?? {}).map(([k, v]) => [
-      k,
-      typeof v === "string" ? v : v?.toString(),
-    ])
-  );
-}
-
 function unwrapEvent(raw: any) {
   // Cas 1: EventBus envelope { type, payload, ts }
   if (
@@ -29,7 +18,7 @@ function unwrapEvent(raw: any) {
 }
 
 function deriveSeverity(
-  evt: any
+  evt: any,
 ): "info" | "success" | "warning" | "error" | "critical" {
   if (evt.severity) return evt.severity;
   const s = evt.http?.status;
@@ -53,7 +42,7 @@ function splitResourceIfNeeded(evt: any) {
 export function normalizeDoc(
   topic: string,
   rawPayload: any,
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
 ) {
   const { outerType, ts, evt } = unwrapEvent(rawPayload);
 
@@ -78,11 +67,14 @@ export function normalizeDoc(
     type: eventType,
     topic,
     userId: evt.userId || headers["user-id"],
+    username: evt.username,
+    matriculation: evt.matriculation || evt.data?.matriculation,
     role: evt.role || headers["user-role"],
     dept: evt.dept || "MG",
     resourceType,
     resourceId,
     payload: rawPayload, // on garde l’original pour forensic
+    http: evt.http,
     severity,
     createdAt,
   };

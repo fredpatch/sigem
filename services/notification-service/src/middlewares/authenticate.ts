@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import * as cookie from "cookie";
-import { jwtService } from "@sigem/shared/auth/jwt";
-import { JwtUserPayload } from "@sigem/shared";
+import { jwtService, JwtUserPayload } from "@sigem/shared";
 
 const cfg = {
   accessSecret: process.env.JWT_SECRET || "dev-secret",
