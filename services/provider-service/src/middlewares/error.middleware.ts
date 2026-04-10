@@ -8,10 +8,10 @@ export function errorMiddleware(
 ) {
     const status = Number(err?.statusCode ?? err?.status ?? 500);
     const message =
-        err?.message ?? "Une erreur inattendue est survenue (reference-service).";
+        err?.message ?? "Une erreur inattendue est survenue (provider-service).";
 
     // Log minimal (tu peux remplacer par ton logger)
-    console.error("[reference-service:error]", err);
+    console.error("[provider-service:error]", err);
 
     return res.status(status).json({
         ok: false,

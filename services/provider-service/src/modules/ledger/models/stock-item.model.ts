@@ -1,11 +1,15 @@
 // stock-item.model.ts
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const StockItemSchema = new Schema(
   {
-    supplyItemId: { type: Types.ObjectId, ref: "SupplyItem", required: true },
+    supplyItemId: {
+      type: Schema.Types.ObjectId,
+      ref: "SupplyItem",
+      required: true,
+    },
     locationId: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "StockLocation",
       required: true,
     },
@@ -13,7 +17,7 @@ const StockItemSchema = new Schema(
     onHand: { type: Number, default: 0 },
     minLevel: { type: Number, default: 0 },
 
-    orgId: { type: Types.ObjectId, index: true, required: false },
+    orgId: { type: Schema.Types.ObjectId, index: true, required: false },
   },
   { timestamps: true },
 );

@@ -10,7 +10,8 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@sigem/shared": "*"
+    "@sigem/shared": "*",
+    "cookie-parser": "^1.4.7"
   },
   "devDependencies": {
   }

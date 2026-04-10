@@ -12,6 +12,26 @@ type MongoConnectOptions = {
 
 const DEFAULT_SIGNALS: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
 
+function redactMongoUri(uri: string): string {
+  try {
+    const url = new URL(uri);
+    if (url.password) {
+      url.password = "***";
+    }
+    return url.toString();
+  } catch {
+    return uri;
+  }
+}
+
+function formatMongoError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
+}
+
 function deriveLocalFallbackUri(primaryUri: string): string {
   try {
     const url = new URL(primaryUri);
@@ -52,7 +72,15 @@ export const connectToMongo = async (
     ...opts.options,
   };
 
+  const primaryUri = redactMongoUri(uri);
+  const resolvedFallbackUri =
+    fallbackUri ?? (isDev ? deriveLocalFallbackUri(uri) : undefined);
+
   try {
+    console.log(
+      `[database] Attempting primary MongoDB connection: ${primaryUri}`,
+    );
+
     await mongoose.connect(uri, connectOptions);
 
     if (!mongoose.connection.db) {
@@ -62,13 +90,21 @@ export const connectToMongo = async (
     isConnected = true;
     console.log("[database] Connected to primary MongoDB instance");
   } catch (primaryError) {
-    const fallback = fallbackUri ?? deriveLocalFallbackUri(uri);
+    console.error(
+      `[database] Primary MongoDB connection failed (${primaryUri}): ${formatMongoError(primaryError)}`,
+    );
+
+    if (!resolvedFallbackUri) {
+      throw primaryError;
+    }
+
+    const fallback = redactMongoUri(resolvedFallbackUri);
 
     console.warn(
       `[database] Attempting to connect to fallback MongoDB instance: ${fallback}`,
     );
 
-    await mongoose.connect(fallback, connectOptions);
+    await mongoose.connect(resolvedFallbackUri, connectOptions);
 
     isConnected = true;
     console.log("[database] Connected to fallback MongoDB instance");

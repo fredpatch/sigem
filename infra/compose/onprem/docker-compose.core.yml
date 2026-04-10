@@ -1,0 +1,30 @@
+name: sigem-onprem
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: sigem-onprem-mongo
+    restart: unless-stopped
+    env_file:
+      - ./.env.onprem
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    volumes:
+      - mongo_onprem_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - sigem-onprem
+
+volumes:
+  mongo_onprem_data:
+
+networks:
+  sigem-onprem:
+    driver: bridge

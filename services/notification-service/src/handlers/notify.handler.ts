@@ -1,197 +1,250 @@
-// notify.handler.ts
-import { NotificationEventPayload } from "@sigem/shared";
 import {
   fmtDate,
   fmtDocType,
   fmtDue,
   fmtMileage,
   fmtVehicle,
+  mapSeverityToNotificationType,
+  NotificationEventPayload,
 } from "@sigem/shared";
-import { mapSeverityToNotificationType } from "@sigem/shared";
 import { Notification } from "../models/notification.model";
-// import { sendOtpEmail } from "./send-otp-email";
 import { IMPORTANT, KNOWN_TOPICS } from "../utils/constants";
 
 type SocketIO = any;
+
+function pickDisplayValue(
+  ...values: Array<string | number | null | undefined>
+): string | undefined {
+  for (const value of values) {
+    if (value === undefined || value === null) continue;
+    const text = String(value).trim();
+    if (text) return text;
+  }
+  return undefined;
+}
+
+function normalizeNotificationMessage(topic: string, message: string): string {
+  if (
+    topic.startsWith("supply.item.") ||
+    topic.startsWith("provider.") ||
+    topic.startsWith("supply.price.")
+  ) {
+    return message.replace(/\s+\(#([^)]+)\)/g, "");
+  }
+
+  return message;
+}
+
+function resolveTopic(topic: string, evt: NotificationEventPayload): string {
+  return topic === "notify.event" && evt.type ? evt.type : topic;
+}
+
+function buildProviderMessage(evt: any, topic: string) {
+  const label = pickDisplayValue(
+    evt.label,
+    evt.designation,
+    evt.name,
+    evt.data?.designation,
+    evt.data?.name,
+  );
+  const providerId =
+    evt.providerId ?? evt.resourceId ?? evt.id ?? evt.data?.providerId;
+  const providerType = pickDisplayValue(evt.providerType, evt.data?.providerType);
+  const subject =
+    providerType === "FOURNISSEUR" ? "Le fournisseur" : "Le prestataire";
+
+  const fallbackByTopic: Record<string, { title: string; verb: string }> = {
+    "provider.created": { title: "Prestataire cree", verb: "cree" },
+    "provider.updated": { title: "Prestataire mis a jour", verb: "mis a jour" },
+    "provider.deactivated": {
+      title: "Prestataire desactive",
+      verb: "desactive",
+    },
+    "provider.activated": { title: "Prestataire reactive", verb: "reactive" },
+  };
+
+  const current = fallbackByTopic[topic];
+  return {
+    title: evt.title ?? current.title,
+    message:
+      evt.message ??
+      `${subject}${label ? ` "${label}"` : providerId ? ` (ref. ${providerId})` : ""} a ete ${current.verb}.`,
+  };
+}
+
+function buildSupplyItemMessage(evt: any, topic: string) {
+  const label = pickDisplayValue(
+    evt.itemLabel,
+    evt.label,
+    evt.name,
+    evt.data?.reference,
+    evt.data?.label,
+  );
+  const itemId = evt.itemId ?? evt.resourceId ?? evt.id ?? evt.data?.itemId;
+  const fallbackByTopic: Record<string, { title: string; verb: string }> = {
+    "supply.item.created": { title: "Article cree", verb: "cree" },
+    "supply.item.updated": { title: "Article mis a jour", verb: "mis a jour" },
+    "supply.item.deactivated": {
+      title: "Article desactive",
+      verb: "desactive",
+    },
+    SUPPLY_ITEM_DEACTIVATED: {
+      title: "Article desactive",
+      verb: "desactive",
+    },
+    "supply.item.activated": { title: "Article active", verb: "active" },
+    SUPPLY_ITEM_ACTIVATED: { title: "Article active", verb: "active" },
+  };
+
+  const current = fallbackByTopic[topic];
+  return {
+    title: evt.title ?? current.title,
+    message:
+      evt.message ??
+      `Un article a ete ${current.verb}${label ? ` : "${label}"` : itemId ? ` (ref. ${itemId})` : ""}.`,
+  };
+}
+
+function buildSupplyPriceMessage(evt: any, topic: string) {
+  const label = pickDisplayValue(
+    evt.itemLabel,
+    evt.label,
+    evt.name,
+    evt.data?.reference,
+    evt.data?.label,
+  );
+  const priceId = evt.priceId ?? evt.resourceId ?? evt.id ?? evt.data?.priceId;
+  const oldPrice = evt.oldPrice ?? evt.data?.oldPrice;
+  const newPrice = evt.newPrice ?? evt.data?.newPrice ?? evt.data?.unitPrice;
+
+  if (topic === "supply.price.updated") {
+    return {
+      title: evt.title ?? "Prix mis a jour",
+      message:
+        evt.message ??
+        `Le prix a ete mis a jour${label ? ` pour "${label}"` : priceId ? ` (ref. ${priceId})` : ""}` +
+          (oldPrice != null && newPrice != null
+            ? ` : ${oldPrice} -> ${newPrice}.`
+            : "."),
+    };
+  }
+
+  return {
+    title: evt.title ?? "Prix supprime",
+    message:
+      evt.message ??
+      `Un prix a ete supprime${label ? ` pour "${label}"` : priceId ? ` (ref. ${priceId})` : ""}.`,
+  };
+}
+
+function buildSupplyPlanMessage(evt: any, topic: string) {
+  const label = pickDisplayValue(
+    evt.label,
+    evt.planLabel,
+    evt.planName,
+    evt.data?.label,
+    evt.data?.reference,
+  );
+  const id = evt.planId ?? evt.resourceId ?? evt.id;
+  const from = evt.fromStatus ?? evt.data?.fromStatus;
+  const to = evt.toStatus ?? evt.data?.toStatus;
+
+  switch (topic) {
+    case "supply.plan.status.changed":
+      return {
+        title: evt.title ?? "Statut du plan mis a jour",
+        message:
+          evt.message ??
+          `Le statut du plan${label ? ` "${label}"` : id ? ` (ref. ${id})` : ""}` +
+            (from && to ? ` : ${from} -> ${to}.` : "."),
+      };
+    case "supply.plan.created":
+      return {
+        title: evt.title ?? "Plan previsionnel cree",
+        message:
+          evt.message ??
+          `Un plan previsionnel a ete cree${label ? ` : "${label}"` : id ? ` (ref. ${id})` : ""}.`,
+      };
+    case "supply.plan.completed":
+      return {
+        title: evt.title ?? "Plan previsionnel termine",
+        message:
+          evt.message ??
+          `Le plan${label ? ` "${label}"` : id ? ` (ref. ${id})` : ""} a ete marque comme termine.`,
+      };
+    default:
+      return {
+        title: evt.title ?? "Plan previsionnel supprime",
+        message:
+          evt.message ??
+          `Un plan previsionnel a ete supprime${label ? ` : "${label}"` : id ? ` (ref. ${id})` : ""}.`,
+      };
+  }
+}
 
 function inferTitleAndMessage(
   topic: string,
   evt: NotificationEventPayload,
 ): { title: string; message: string } {
-  // Tu peux raffiner ce switch plus tard (Dashboard-friendly)
   switch (topic) {
-    case "supply.plan.status.changed": {
-      const e: any = evt;
-      const label = e.label ?? e.planLabel ?? e.planName;
-      const id = e.planId ?? e.resourceId ?? e.id;
-      const from = e.fromStatus ?? e.data?.fromStatus;
-      const to = e.toStatus ?? e.data?.toStatus;
+    case "provider.created":
+    case "provider.updated":
+    case "provider.deactivated":
+    case "provider.activated":
+      return buildProviderMessage(evt as any, topic);
 
-      return {
-        title: e.title ?? "Statut du plan mis à jour",
-        message:
-          e.message ??
-          `Le statut du plan${label ? ` "${label}"` : ""}${id ? ` (#${id})` : ""}` +
-            (from && to ? ` : ${from} → ${to}.` : "."),
-      };
-    }
-    case "supply.plan.created": {
-      const e: any = evt;
-      const label = e.label ?? e.planLabel ?? e.planName;
-      const id = e.planId ?? e.resourceId ?? e.id;
-
-      return {
-        title: e.title ?? "Plan prévisionnel créé",
-        message:
-          e.message ??
-          `Un plan prévisionnel a été créé${label ? ` : "${label}"` : ""}${id ? ` (#${id})` : ""}.`,
-      };
-    }
-
-    case "supply.plan.completed": {
-      const e: any = evt;
-      const label = e.label ?? e.planLabel ?? e.planName;
-      const id = e.planId ?? e.resourceId ?? e.id;
-
-      return {
-        title: e.title ?? "Plan prévisionnel terminé",
-        message:
-          e.message ??
-          `Le plan${label ? ` "${label}"` : ""}${id ? ` (#${id})` : ""} a été marqué comme terminé.`,
-      };
-    }
-
-    case "supply.plan.deleted": {
-      const e: any = evt;
-      const label = e.label ?? e.planLabel ?? e.planName;
-      const id = e.planId ?? e.resourceId ?? e.id;
-
-      return {
-        title: e.title ?? "Plan prévisionnel supprimé",
-        message:
-          e.message ??
-          `Un plan prévisionnel a été supprimé${label ? ` : "${label}"` : ""}${id ? ` (#${id})` : ""}.`,
-      };
-    }
-
-    case "supply.item.created": {
-      const e: any = evt;
-      const label = e.itemLabel ?? e.label ?? e.name;
-      const id = e.itemId ?? e.resourceId ?? e.id;
-
-      return {
-        title: e.title ?? "Article créé",
-        message:
-          e.message ??
-          `Un article a été créé${label ? ` : "${label}"` : ""}${id ? ` (#${id})` : ""}.`,
-      };
-    }
-
-    case "supply.item.updated": {
-      const e: any = evt;
-      const label = e.itemLabel ?? e.label ?? e.name;
-      const id = e.itemId ?? e.resourceId ?? e.id;
-
-      return {
-        title: e.title ?? "Article mis à jour",
-        message:
-          e.message ??
-          `Un article a été mis à jour${label ? ` : "${label}"` : ""}${id ? ` (#${id})` : ""}.`,
-      };
-    }
-
+    case "supply.item.created":
+    case "supply.item.updated":
     case "supply.item.deactivated":
-    case "SUPPLY_ITEM_DEACTIVATED": {
-      const e: any = evt;
-      const label = e.itemLabel ?? e.label ?? e.name;
-      const id = e.itemId ?? e.resourceId ?? e.id;
-
-      return {
-        title: e.title ?? "Article désactivé",
-        message:
-          e.message ??
-          `Un article a été désactivé${label ? ` : "${label}"` : ""}${id ? ` (#${id})` : ""}.`,
-      };
-    }
-
+    case "SUPPLY_ITEM_DEACTIVATED":
     case "supply.item.activated":
-    case "SUPPLY_ITEM_ACTIVATED": {
-      const e: any = evt;
-      const label = e.itemLabel ?? e.label ?? e.name;
-      const id = e.itemId ?? e.resourceId ?? e.id;
+    case "SUPPLY_ITEM_ACTIVATED":
+      return buildSupplyItemMessage(evt as any, topic);
 
-      return {
-        title: e.title ?? "Article activé",
-        message:
-          e.message ??
-          `Un article a été activé${label ? ` : "${label}"` : ""}${id ? ` (#${id})` : ""}.`,
-      };
-    }
+    case "supply.price.updated":
+    case "supply.price.deleted":
+      return buildSupplyPriceMessage(evt as any, topic);
 
-    case "supply.price.updated": {
-      const e: any = evt;
-      const label = e.itemLabel ?? e.label ?? e.name;
-      const id = e.priceId ?? e.resourceId ?? e.id;
-      const oldPrice = e.oldPrice ?? e.data?.oldPrice;
-      const newPrice = e.newPrice ?? e.data?.newPrice;
+    case "supply.plan.status.changed":
+    case "supply.plan.created":
+    case "supply.plan.completed":
+    case "supply.plan.deleted":
+      return buildSupplyPlanMessage(evt as any, topic);
 
-      return {
-        title: e.title ?? "Prix mis à jour",
-        message:
-          e.message ??
-          `Le prix a été mis à jour${label ? ` pour "${label}"` : ""}` +
-            (oldPrice != null && newPrice != null
-              ? ` : ${oldPrice} → ${newPrice}`
-              : "") +
-            `${id ? ` (#${id})` : ""}.`,
-      };
-    }
-
-    case "supply.price.deleted": {
-      const e: any = evt;
-      const label = e.itemLabel ?? e.label ?? e.name;
-      const id = e.priceId ?? e.resourceId ?? e.id;
-
-      return {
-        title: e.title ?? "Prix supprimé",
-        message:
-          e.message ??
-          `Un prix a été supprimé${label ? ` pour "${label}"` : ""}${id ? ` (#${id})` : ""}.`,
-      };
-    }
     case "asset.created":
     case "ASSET_CREATED":
       return {
-        title: evt.title ?? "Nouvel équipement créé",
+        title: evt.title ?? "Nouvel equipement cree",
         message:
           evt.message ??
-          `L'équipement "${evt.label ?? evt.assetId}" a été ajouté au patrimoine.`,
+          `L'equipement "${evt.label ?? evt.assetId}" a ete ajoute au patrimoine.`,
       };
+
     case "asset.updated":
     case "ASSET_UPDATED":
       return {
-        title: evt.title ?? "Équipement mis à jour",
+        title: evt.title ?? "Equipement mis a jour",
         message:
           evt.message ??
-          `L'équipement "${evt.label ?? evt.assetId}" a été mis à jour.`,
+          `L'equipement "${evt.label ?? evt.assetId}" a ete mis a jour.`,
       };
 
     case "asset.deleted":
     case "ASSET_DELETED":
       return {
-        title: evt.title ?? "Équipement supprimé",
+        title: evt.title ?? "Equipement supprime",
         message:
           evt.message ??
-          `L'équipement "${evt.label ?? evt.assetId}" a été supprimé.`,
+          `L'equipement "${evt.label ?? evt.assetId}" a ete supprime.`,
       };
 
     case "asset.restored":
     case "ASSET_RESTORED":
       return {
-        title: evt.title ?? "Équipement restauré",
+        title: evt.title ?? "Equipement restaure",
         message:
           evt.message ??
-          `L'équipement "${evt.label ?? evt.assetId}" a été restauré.`,
+          `L'equipement "${evt.label ?? evt.assetId}" a ete restaure.`,
       };
 
     case "asset.location.changed":
@@ -200,7 +253,7 @@ function inferTitleAndMessage(
         title: evt.title ?? "Changement de localisation",
         message:
           evt.message ??
-          `L'équipement "${evt.label ?? evt.assetId}" a été déplacé` +
+          `L'equipement "${evt.label ?? evt.assetId}" a ete deplace` +
             (evt.fromLocationLabel && evt.toLocationLabel
               ? ` de "${evt.fromLocationLabel}" vers "${evt.toLocationLabel}".`
               : "."),
@@ -209,43 +262,45 @@ function inferTitleAndMessage(
     case "asset.status.changed":
     case "ASSET_STATUS_CHANGED":
       return {
-        title: evt.title ?? "Changement d'état",
+        title: evt.title ?? "Changement d'etat",
         message:
           evt.message ??
-          `L'état de "${evt.label ?? evt.assetId}" est passé ` +
+          `L'etat de "${evt.label ?? evt.assetId}" est passe ` +
             (evt.fromStatus && evt.toStatus
-              ? `de ${evt.fromStatus} à ${evt.toStatus}.`
+              ? `de ${evt.fromStatus} a ${evt.toStatus}.`
               : "."),
       };
 
     case "asset.quantity.changed":
     case "ASSET_QUANTITY_CHANGED":
       return {
-        title: evt.title ?? "Quantité mise à jour",
+        title: evt.title ?? "Quantite mise a jour",
         message:
           evt.message ??
-          `La quantité de "${evt.label ?? evt.assetId}" a changé` +
+          `La quantite de "${evt.label ?? evt.assetId}" a change` +
             (typeof evt.fromQuantity === "number" &&
             typeof evt.toQuantity === "number"
-              ? ` (${evt.fromQuantity} → ${evt.toQuantity}).`
+              ? ` (${evt.fromQuantity} -> ${evt.toQuantity}).`
               : "."),
       };
 
     case "asset.transfer":
     case "ASSET_TRANSFER":
       return {
-        title: evt.title ?? "Transfert d'équipement",
+        title: evt.title ?? "Transfert d'equipement",
         message:
-          evt.message ?? `Transfert de "${evt.label ?? evt.assetId}" effectué.`,
+          evt.message ?? `Transfert de "${evt.label ?? evt.assetId}" effectue.`,
       };
+
     case "stock.low":
     case "STOCK_LOW":
       return {
         title: evt.title ?? "Stock faible",
         message:
           evt.message ??
-          `Le stock de "${evt.label ?? evt.assetId}" est passé en seuil bas.`,
+          `Le stock de "${evt.label ?? evt.assetId}" est passe en seuil bas.`,
       };
+
     case "stock.critical":
     case "STOCK_CRITICAL":
       return {
@@ -255,15 +310,12 @@ function inferTitleAndMessage(
           `Le stock de "${evt.label ?? evt.assetId}" est en niveau critique.`,
       };
 
-    // =======================
-    // VEHICLE: CRUD / ACTIONS
-    // =======================
     case "vehicle.created": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
       return {
-        title: e.title ?? "Véhicule ajouté",
-        message: e.message ?? `Véhicule ${vehicle} a été ajouté au parc.`,
+        title: e.title ?? "Vehicule ajoute",
+        message: e.message ?? `Vehicule ${vehicle} a ete ajoute au parc.`,
       };
     }
 
@@ -275,8 +327,8 @@ function inferTitleAndMessage(
           ? ` Modifs: ${e.changes.join(", ")}.`
           : "";
       return {
-        title: e.title ?? "Véhicule mis à jour",
-        message: e.message ?? `Véhicule ${vehicle}.${changes}`.trim(),
+        title: e.title ?? "Vehicule mis a jour",
+        message: e.message ?? `Vehicule ${vehicle}.${changes}`.trim(),
       };
     }
 
@@ -284,8 +336,8 @@ function inferTitleAndMessage(
       const e: any = evt;
       const vehicle = fmtVehicle(e);
       return {
-        title: e.title ?? "Véhicule retiré",
-        message: e.message ?? `Véhicule ${vehicle} a été retiré du parc.`,
+        title: e.title ?? "Vehicule retire",
+        message: e.message ?? `Vehicule ${vehicle} a ete retire du parc.`,
       };
     }
 
@@ -295,26 +347,21 @@ function inferTitleAndMessage(
       const from = fmtMileage(e.fromMileage);
       const to = fmtMileage(e.toMileage ?? e.currentMileage);
       return {
-        title: e.title ?? "Kilométrage mis à jour",
+        title: e.title ?? "Kilometrage mis a jour",
         message:
-          e.message ??
-          `Véhicule ${vehicle} : ${from ? `${from} → ` : ""}${to}.`,
+          e.message ?? `Vehicule ${vehicle} : ${from ? `${from} -> ` : ""}${to}.`,
       };
     }
 
-    // =======================
-    // VEHICLE DOCUMENTS: CRUD
-    // =======================
     case "vehicle.document.created": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
       const doc = fmtDocType(e.documentType ?? e.type);
       const exp = fmtDate(e.expiresAt);
       return {
-        title: e.title ?? "Document ajouté",
+        title: e.title ?? "Document ajoute",
         message:
-          e.message ??
-          `${doc} ajouté pour le véhicule ${vehicle}. Expire le ${exp}.`,
+          e.message ?? `${doc} ajoute pour le vehicule ${vehicle}. Expire le ${exp}.`,
       };
     }
 
@@ -328,10 +375,10 @@ function inferTitleAndMessage(
           : "";
       const exp = e.expiresAt ? ` Expire le ${fmtDate(e.expiresAt)}.` : "";
       return {
-        title: e.title ?? "Document mis à jour",
+        title: e.title ?? "Document mis a jour",
         message:
           e.message ??
-          `${doc} du véhicule ${vehicle} mis à jour.${changes}${exp}`.trim(),
+          `${doc} du vehicule ${vehicle} mis a jour.${changes}${exp}`.trim(),
       };
     }
 
@@ -340,14 +387,11 @@ function inferTitleAndMessage(
       const vehicle = fmtVehicle(e);
       const doc = fmtDocType(e.documentType ?? e.type);
       return {
-        title: e.title ?? "Document supprimé",
-        message: e.message ?? `${doc} supprimé pour le véhicule ${vehicle}.`,
+        title: e.title ?? "Document supprime",
+        message: e.message ?? `${doc} supprime pour le vehicule ${vehicle}.`,
       };
     }
 
-    // =======================
-    // VEHICLE DOCUMENTS: MONITORING
-    // =======================
     case "vehicle.document.due_soon": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
@@ -356,9 +400,9 @@ function inferTitleAndMessage(
       const daysLeft =
         typeof e.daysLeft === "number" ? ` (J-${e.daysLeft})` : "";
       return {
-        title: e.title ?? `À renouveler : ${doc}`,
+        title: e.title ?? `A renouveler : ${doc}`,
         message:
-          e.message ?? `Véhicule ${vehicle}. Expire le ${exp}${daysLeft}.`,
+          e.message ?? `Vehicule ${vehicle}. Expire le ${exp}${daysLeft}.`,
       };
     }
 
@@ -370,9 +414,9 @@ function inferTitleAndMessage(
       const late =
         typeof e.daysOverdue === "number" ? ` (+${e.daysOverdue}j)` : "";
       return {
-        title: e.title ?? `Expiré : ${doc}`,
+        title: e.title ?? `Expire : ${doc}`,
         message:
-          e.message ?? `Véhicule ${vehicle}. Expiré depuis le ${exp}${late}.`,
+          e.message ?? `Vehicule ${vehicle}. Expire depuis le ${exp}${late}.`,
       };
     }
 
@@ -385,89 +429,81 @@ function inferTitleAndMessage(
         ? fmtDate(e.newExpiresAt)
         : fmtDate(e.expiresAt);
       return {
-        title: e.title ?? `Renouvelé : ${doc}`,
+        title: e.title ?? `Renouvele : ${doc}`,
         message:
           e.message ??
-          `Véhicule ${vehicle}. Validité ${prev ? `${prev} → ` : ""}${next}.`,
+          `Vehicule ${vehicle}. Validite ${prev ? `${prev} -> ` : ""}${next}.`,
       };
     }
 
-    // =======================
-    // VEHICLE TASKS: CRUD / CYCLE
-    // =======================
     case "vehicle.task.created": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
-      const task = e.taskLabel ?? e.label ?? "Tâche";
+      const task = e.taskLabel ?? e.label ?? "Tache";
       const due = fmtDue(e);
       return {
-        title: e.title ?? `Tâche créée : ${task}`,
-        message: e.message ?? `Véhicule ${vehicle}. ${due}`.trim(),
+        title: e.title ?? `Tache creee : ${task}`,
+        message: e.message ?? `Vehicule ${vehicle}. ${due}`.trim(),
       };
     }
 
     case "vehicle.task.updated": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
-      const task = e.taskLabel ?? e.label ?? "Tâche";
+      const task = e.taskLabel ?? e.label ?? "Tache";
       const changes =
         Array.isArray(e.changes) && e.changes.length
           ? ` Modifs: ${e.changes.join(", ")}.`
           : "";
       const due = fmtDue(e);
       return {
-        title: e.title ?? `Tâche mise à jour : ${task}`,
-        message: e.message ?? `Véhicule ${vehicle}. ${due}${changes}`.trim(),
+        title: e.title ?? `Tache mise a jour : ${task}`,
+        message: e.message ?? `Vehicule ${vehicle}. ${due}${changes}`.trim(),
       };
     }
 
     case "vehicle.task.deleted": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
-      const task = e.taskLabel ?? e.label ?? "Tâche";
+      const task = e.taskLabel ?? e.label ?? "Tache";
       return {
-        title: e.title ?? `Tâche supprimée : ${task}`,
-        message: e.message ?? `Véhicule ${vehicle}.`,
+        title: e.title ?? `Tache supprimee : ${task}`,
+        message: e.message ?? `Vehicule ${vehicle}.`,
       };
     }
 
     case "vehicle.task.completed": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
-      const task = e.taskLabel ?? e.label ?? "Tâche";
-      const when = e.completedAt
-        ? fmtDate(e.completedAt)
-        : fmtDate(e.timestamp);
+      const task = e.taskLabel ?? e.label ?? "Tache";
+      const when = e.completedAt ? fmtDate(e.completedAt) : fmtDate(e.timestamp);
       const km =
-        e.completedMileage != null
-          ? ` (${fmtMileage(e.completedMileage)})`
-          : "";
+        e.completedMileage != null ? ` (${fmtMileage(e.completedMileage)})` : "";
       return {
-        title: e.title ?? `Terminé : ${task}`,
-        message: e.message ?? `Véhicule ${vehicle}. Réalisé le ${when}${km}.`,
+        title: e.title ?? `Termine : ${task}`,
+        message: e.message ?? `Vehicule ${vehicle}. Realise le ${when}${km}.`,
       };
     }
 
     case "vehicle.task.next_planned": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
-      const task = e.taskLabel ?? e.label ?? "Tâche";
+      const task = e.taskLabel ?? e.label ?? "Tache";
       const due = fmtDue(e);
       return {
-        title: e.title ?? `Prochaine échéance planifiée : ${task}`,
-        message: e.message ?? `Véhicule ${vehicle}. ${due}`.trim(),
+        title: e.title ?? `Prochaine echeance planifiee : ${task}`,
+        message: e.message ?? `Vehicule ${vehicle}. ${due}`.trim(),
       };
     }
-    // Ajouts pour la surveillance des véhicules
+
     case "vehicle.task.due_soon": {
       const e: any = evt;
       const vehicle = fmtVehicle(e);
       const due = fmtDue(e);
-
       const taskLabel = e.taskLabel ?? e.label ?? "Maintenance";
       return {
-        title: `À planifier : ${taskLabel}`,
-        message: `Véhicule ${vehicle}. ${due}`.trim(),
+        title: `A planifier : ${taskLabel}`,
+        message: `Vehicule ${vehicle}. ${due}`.trim(),
       };
     }
 
@@ -475,26 +511,27 @@ function inferTitleAndMessage(
       const e: any = evt;
       const vehicle = fmtVehicle(e);
       const due = fmtDue(e);
-
       const taskLabel = e.taskLabel ?? e.label ?? "Maintenance";
       return {
         title: `En retard : ${taskLabel}`,
-        message: `Véhicule ${vehicle}. ${due}`.trim(),
+        message: `Vehicule ${vehicle}. ${due}`.trim(),
       };
     }
+
     case "vehicle.document.expiring":
       return {
-        title: evt.title ?? "Document véhicule bientôt expiré",
+        title: evt.title ?? "Document vehicule bientot expire",
         message:
           evt.message ??
-          `Le document "${(evt as any).documentType ?? "Document"}" du véhicule ${
+          `Le document "${(evt as any).documentType ?? "Document"}" du vehicule ${
             (evt as any).vehiclePlate ?? (evt as any).vehicleId ?? "-"
-          } arrive à expiration.`,
+          } arrive a expiration.`,
       };
+
     default:
       return {
-        title: evt.title ?? `Événement sur ${topic}`,
-        message: evt.message ?? `Événement reçu sur ${topic}`,
+        title: evt.title ?? `Evenement sur ${topic}`,
+        message: evt.message ?? `Evenement recu sur ${topic}`,
       };
   }
 }
@@ -505,53 +542,26 @@ export async function handleIncomingEvent(
   topic: string,
 ) {
   const evt = rawEvt as NotificationEventPayload;
+  const resolvedTopic = resolveTopic(topic, evt);
 
-  /* Uncomment this section when transport is secure for notifications */
-  // 1) Send OTP email event
-  // if (topic === "auth.otp.requested") {
-  //   // expected payload
-  //   // {email, code, expiresInMinutes, userName?}
-
-  //   const { email, code, expiresInMinutes = 5, userName } = evt as any;
-
-  //   if (!email || !code) {
-  //     console.warn("OTP email event missing email or code:", evt);
-  //     return;
-  //   }
-
-  //   try {
-  //     await sendOtpEmail({
-  //       to: email,
-  //       code,
-  //       expiresInMinutes,
-  //       userName,
-  //     })
-  //   } catch (error) {
-  //     // wont break the consumer: log and keep going
-  //     console.error("[mail][otp] failed:", error);
-  //   }
-
-  //   // Selon ta stratégie:
-  //   // - soit tu RETURN ici (OTP = email only)
-  //   // - soit tu continues pour aussi enregistrer une notif DB
-  //   return; // OTP email handled, no need to create a notification
-  // }
-
-  const { title, message } = inferTitleAndMessage(topic, evt);
+  const { title, message } = inferTitleAndMessage(resolvedTopic, evt);
+  const normalizedMessage = normalizeNotificationMessage(
+    resolvedTopic,
+    message,
+  );
   const severity = mapSeverityToNotificationType(evt.severity);
   const isKnown =
-    KNOWN_TOPICS.has(topic) || (evt.type && KNOWN_TOPICS.has(evt.type));
+    KNOWN_TOPICS.has(resolvedTopic) || (evt.type && KNOWN_TOPICS.has(evt.type));
 
   if (!isKnown && !IMPORTANT.has(severity)) {
-    return; // Ignorer les notifications non importantes si le topic est inconnu
+    return;
   }
 
-  // 1️⃣ Sauvegarder en base
   const doc = await Notification.create({
     type: evt.type ?? topic,
     severity,
     title,
-    message,
+    message: normalizedMessage,
     payload: evt,
     userId: evt.userId,
     role: evt.role,
@@ -582,7 +592,6 @@ export async function handleIncomingEvent(
           : undefined;
 
   const p = doc.payload ?? {};
-  // 2️⃣ Construire le payload Socket aligné avec le front
   const notificationPayload = {
     id: doc._id.toString(),
     title: doc.title ?? doc.type,
@@ -590,31 +599,23 @@ export async function handleIncomingEvent(
     type: doc.type,
     severity: doc.severity,
     createdAt: doc.createdAt,
-
     payload: doc.payload,
     meta: {
-      // vehicle
       vehiclePlate: p.vehiclePlate,
       vehicleBrand: p.vehicleBrand,
       vehicleModel: p.vehicleModel,
-
-      // task
       taskLabel: p.taskLabel,
       dueAt: p.dueAt,
       dueMileage: p.dueMileage,
       currentMileage: p.currentMileage,
-
-      // document
       documentType: p.documentType ?? p.type,
       expiresAt: p.expiresAt,
     },
-
     relatedResource,
     isRead: doc.read,
     isDeleted: false,
   };
 
-  // 3️⃣ Ciblage : userId > rôle > global
   if (evt.userId) {
     io.to(`user:${evt.userId}`).emit("notification:user", notificationPayload);
   } else if (evt.role) {

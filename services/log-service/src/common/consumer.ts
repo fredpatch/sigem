@@ -16,7 +16,8 @@ export async function startConsumer() {
     .filter(Boolean);
 
   if (!brokers.length) {
-    throw new Error("[kafka] Missing brokers; set KAFKA_BROKERS");
+    console.log("[kafka] Consumer startup skipped (no brokers configured)");
+    return;
   }
 
   // console.log("[kafka] consumer starting", {

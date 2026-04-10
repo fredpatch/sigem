@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 
 const ALLOWED_ORIGINS = [
   "http://localhost:5173",
+  "http://localhost:8080",
   /// production origins here
 ];
 
@@ -14,14 +15,6 @@ const initMiddlewares = (app: Application) => {
 
   app.set("trust proxy", 1);
   app.disable("x-powered-by"); // Security: hide express signature
-
-  // CORS
-  app.use((_req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    next();
-  });
 
   // 🔒 Helmet (API: CSP souvent inutile, mais ok pour referrer & autres)
   app.use(
@@ -37,7 +30,7 @@ const initMiddlewares = (app: Application) => {
         if (!origin) return cb(null, true);
 
         if (ALLOWED_ORIGINS.includes(origin)) return cb(null, origin);
-        return cb(new Error("Not allowed by CORS [GATEWAY]"), false);
+        return cb(new Error("Not allowed by CORS [PROVIDER]"), false);
       },
       credentials: true,
     }),

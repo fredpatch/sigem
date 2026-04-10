@@ -3,6 +3,7 @@ import { ProviderModel } from "../models/provider.model";
 import { ProviderService } from "../services/provider.service";
 import { CommitRow } from "../types/types";
 import { catchError } from "../utils/catch-error";
+import { emitNotificationEvent, getActor, KAFKA_TOPICS } from "@sigem/shared";
 import { parseTabularFile } from "../utils/import/parse-tabular-file";
 import { buildProvidersBulkOps } from "../utils/import/providers.commit.bulk";
 import { matchProviders } from "../utils/import/providers.match";
@@ -41,9 +42,63 @@ function getInsertedIdMap(bulk: any): Record<number, string> {
 class ProviderController {
   private providerService = new ProviderService();
 
+  private async emitProviderNotification(
+    req: any,
+    eventType: string,
+    title: string,
+    verb: string,
+    providerLike: any,
+  ) {
+    const provider = providerLike?.data ?? providerLike;
+    if (!provider) return;
+
+    const providerId = String(provider._id ?? provider.id ?? "");
+    if (!providerId) return;
+
+    const { id, matriculation, role, username } = getActor(req);
+    const displayName =
+      provider.designation?.trim?.() ||
+      provider.name?.trim?.() ||
+      "Prestataire";
+    const providerType = provider.type?.toString?.() || "PRESTATAIRE";
+    const subject =
+      providerType === "FOURNISSEUR" ? "Le fournisseur" : "Le prestataire";
+
+    await emitNotificationEvent(eventType, {
+      userId: id,
+      role,
+      severity: "success",
+      title,
+      message: `${subject} "${displayName}" a été ${verb}.`,
+      resourceType: "Provider",
+      resourceId: providerId,
+      label: displayName,
+      data: {
+        providerId,
+        name: provider.name,
+        designation: provider.designation,
+        providerType,
+        isActive: provider.isActive,
+      },
+      actor: {
+        userId: id,
+        role,
+        name: username,
+        matriculation,
+      },
+    });
+  }
+
   create = catchError(async (req, res) => {
     const payload = validate(CreateProviderSchema, req.body);
     const provider = await this.providerService.create(payload);
+    await this.emitProviderNotification(
+      req,
+      KAFKA_TOPICS.PROVIDER_CREATED,
+      "Prestataire créé",
+      "créé",
+      provider,
+    );
 
     res.status(201).json(provider);
   });
@@ -63,6 +118,13 @@ class ProviderController {
     if (!provider) {
       return res.status(404).json({ message: "Provider not found" });
     }
+    await this.emitProviderNotification(
+      req,
+      KAFKA_TOPICS.PROVIDER_UPDATED,
+      "Prestataire mis à jour",
+      "mis à jour",
+      provider,
+    );
 
     res.json(provider);
   });
@@ -74,6 +136,13 @@ class ProviderController {
     if (!provider) {
       return res.status(404).json({ message: "Provider not found" });
     }
+    await this.emitProviderNotification(
+      req,
+      KAFKA_TOPICS.PROVIDER_DEACTIVATED,
+      "Prestataire désactivé",
+      "désactivé",
+      provider,
+    );
 
     res.json(provider);
   });
@@ -85,6 +154,13 @@ class ProviderController {
     if (!provider) {
       return res.status(404).json({ message: "Provider not found" });
     }
+    await this.emitProviderNotification(
+      req,
+      KAFKA_TOPICS.PROVIDER_ACTIVATED,
+      "Prestataire réactivé",
+      "réactivé",
+      provider,
+    );
     res.json(provider);
   });
 

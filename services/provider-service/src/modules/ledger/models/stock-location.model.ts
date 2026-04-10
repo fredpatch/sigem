@@ -1,5 +1,5 @@
 // stock-location.model.ts
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const StockLocationSchema = new Schema(
   {
@@ -7,7 +7,7 @@ const StockLocationSchema = new Schema(
     active: { type: Boolean, default: true },
 
     // optionnel si MG est multi-direction / multi-entité
-    orgId: { type: Types.ObjectId, index: true, required: false },
+    orgId: { type: Schema.Types.ObjectId, index: true, required: false },
   },
   { timestamps: true },
 );

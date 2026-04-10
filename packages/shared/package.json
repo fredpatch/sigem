@@ -10,7 +10,9 @@
     ".": "./src/index.ts"
   },
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "cookie-parser": "^1.4.7"
+  },
   "scripts": {
     "build": "tsc -b tsconfig.json",
     "clean": "tsc -b --clean && rimraf dist",

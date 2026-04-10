@@ -30,6 +30,7 @@ const inventoryProxy = createProxyMiddleware({
   },
   on: {
     proxyReq: (proxyReq, req: any, _res) => {
+      proxyReq.removeHeader("origin");
       // Si on a un body déjà parsé (express.json)
       if (req.body && Object.keys(req.body).length) {
         const bodyData = JSON.stringify(req.body);

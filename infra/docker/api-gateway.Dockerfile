@@ -15,7 +15,6 @@ COPY packages/shared/src ./packages/shared/src
 COPY services/api-gateway/src ./services/api-gateway/src
 COPY services/api-gateway/tsup.config.ts ./services/api-gateway/
 COPY services/api-gateway/tsconfig.json ./services/api-gateway/
-COPY services/api-gateway/tsconfig.build.json ./services/api-gateway/
 
 # tsup bundles @sigem/shared inline → dist/server.cjs
 RUN npm run build -w @sigem/api-gateway

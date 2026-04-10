@@ -31,4 +31,4 @@ COPY --from=build /app/services/reference-service/dist ./services/reference-serv
 
 WORKDIR /app/services/reference-service
 EXPOSE 4006
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/server.cjs"]

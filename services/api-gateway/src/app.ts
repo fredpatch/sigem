@@ -15,6 +15,7 @@ export const API_VERSION = "v1";
 
 const ALLOWED_ORIGINS = [
   "http://localhost:5173",
+  "http://localhost:8080",
   // production origins here
 ];
 

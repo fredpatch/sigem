@@ -2,6 +2,14 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { EmployeeDirectory } from "./views/employee-directory.view";
 
+function hasMariaConfig() {
+  return Boolean(
+    process.env.MARIADB_HOST &&
+      process.env.MARIADB_USER &&
+      process.env.MARIADB_DATABASE,
+  );
+}
+
 export const MariaDataSource = new DataSource({
   type: "mariadb",
   host: process.env.MARIADB_HOST,
@@ -35,5 +43,27 @@ const employeeDirectoryViewSql = `
 `;
 
 export async function ensureMariaViews() {
+  if (!hasMariaConfig()) {
+    console.warn(
+      "[mariadb] Skipping view provisioning because MariaDB is not configured",
+    );
+    return;
+  }
+
   await MariaDataSource.query(employeeDirectoryViewSql);
+}
+
+export async function initializeMariaIfConfigured() {
+  if (!hasMariaConfig()) {
+    console.warn("[mariadb] MariaDB is not configured, skipping initialization");
+    return false;
+  }
+
+  if (!MariaDataSource.isInitialized) {
+    await MariaDataSource.initialize();
+  }
+
+  await ensureMariaViews();
+  console.log("MariaDB connected");
+  return true;
 }

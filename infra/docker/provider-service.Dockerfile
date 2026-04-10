@@ -15,20 +15,17 @@ COPY services/provider-service/tsup.config.ts ./services/provider-service/
 COPY services/provider-service/tsconfig.json ./services/provider-service/
 
 RUN npm run build -w @sigem/provider-service
+RUN npm prune --omit=dev
 
 # --- Runtime ---
 FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-COPY package*.json ./
-COPY packages/shared/package*.json ./packages/shared/
-COPY services/provider-service/package*.json ./services/provider-service/
-
-RUN npm ci --omit=dev
-
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/services/provider-service/dist ./services/provider-service/dist
+COPY --from=build /app/package.json ./package.json
 
 WORKDIR /app/services/provider-service
 EXPOSE 4010
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/server.cjs"]

@@ -5,16 +5,22 @@ import { KafkaEventBus } from "./providers/kafka-event.bus";
 import { env } from "src/config/env";
 
 export async function initEvents(opts?: { eager?: boolean }) {
-  const driver = env.EVENTS_DRIVER;
+  const brokers = env.KAFKA_BROKERS.split(",").map((b) => b.trim()).filter(Boolean);
+  const driver = env.EVENTS_DRIVER === "kafka" && brokers.length === 0
+    ? "noop"
+    : env.EVENTS_DRIVER;
   let bus: IEventBus;
 
   if (driver === "kafka") {
     console.log(
       "[events] driver=kafka brokers=%s",
-      process.env.KAFKA_BROKERS || "localhost:9092"
+      brokers.join(",")
     );
     bus = new KafkaEventBus();
   } else {
+    if (env.EVENTS_DRIVER === "kafka" && brokers.length === 0) {
+      console.warn("[events] KAFKA_BROKERS is empty, falling back to noop driver");
+    }
     console.log("[events] driver=noop");
     bus = new NoOpEventBus();
   }

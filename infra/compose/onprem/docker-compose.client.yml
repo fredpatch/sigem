@@ -1,0 +1,18 @@
+services:
+  client:
+    image: ${CLIENT_IMAGE:-sigem/client:onprem}
+    build:
+      context: ../../..
+      dockerfile: infra/docker/client.Dockerfile
+      args:
+        VITE_GATEWAY_URL: /api
+        VITE_SOCKET_CONNECTION: ${PUBLIC_URL:-http://localhost}
+    container_name: sigem-onprem-client
+    restart: unless-stopped
+    ports:
+      - "${CLIENT_PORT:-80}:80"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - sigem-onprem

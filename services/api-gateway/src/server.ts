@@ -1,7 +1,7 @@
 // src/server.ts
 import "reflect-metadata";
 import getApp, { API_VERSION } from "./app";
-import { ensureMariaViews, MariaDataSource } from "./config/maria.datasource";
+import { initializeMariaIfConfigured } from "./config/maria.datasource";
 import { initEvents } from "./core/events";
 import { connectToMongo } from "@sigem/shared";
 import { initSuperAdminBootstrap } from "./bootstrap/init-super-admin";
@@ -16,22 +16,21 @@ const startServer = async () => {
     const server = await getApp();
 
     // Mongo
-    const fallback = process.env.MONGO_URL_FALLBACK!;
-    if (!fallback) {
-      throw new Error("MONGO_URL_FALLBACK missing");
-    }
     const uri = process.env.MONGO_URL;
     if (!uri) {
       throw new Error("MONGO_URL missing");
     }
 
-    await connectToMongo({ uri }, fallback);
+    const mongoSsl = process.env.MONGO_SSL === "true";
+
+    await connectToMongo({
+      uri,
+      options: { ssl: mongoSsl },
+    });
     await initSuperAdminBootstrap();
 
     // Maria connect
-    await MariaDataSource.initialize();
-    await ensureMariaViews();
-    console.log("MariaDB connected");
+    await initializeMariaIfConfigured();
 
     server.listen(PORT, "0.0.0.0", async () => {
       console.log(`🚀 API Gateway running on port ${PORT}`);

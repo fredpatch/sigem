@@ -31,4 +31,4 @@ COPY --from=build /app/services/vehicle-service/dist ./services/vehicle-service/
 
 WORKDIR /app/services/vehicle-service
 EXPOSE 4003
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/server.cjs"]

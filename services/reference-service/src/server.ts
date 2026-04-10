@@ -5,18 +5,19 @@ const PORT = Number(process.env.PORT) || 4006;
 
 async function bootstrap() {
   // Mongo
-  const fallback = process.env.MONGO_URL_FALLBACK!;
-  if (!fallback) {
-    throw new Error("MONGO_URL_FALLBACK missing");
-  }
   const uri = process.env.MONGO_URL;
   if (!uri) {
     throw new Error("MONGO_URL missing");
   }
 
-  await connectToMongo({ uri }, fallback);
+  const mongoSsl = process.env.MONGO_SSL === "true";
 
-  app.listen(PORT, () => {
+  await connectToMongo({
+    uri,
+    options: { ssl: mongoSsl },
+  });
+
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Reference Service is running on port ${PORT}`);
   });
 }

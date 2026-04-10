@@ -16,6 +16,15 @@ const application = async () => {
   // middlewares init
   initMiddlewares(app);
 
+  app.get(`/${API_VERSION}/health`, (_req, res) => {
+    res.json({
+      name: "provider-service",
+      status: "ok",
+      ts: new Date().toISOString(),
+      version: API_VERSION,
+    });
+  });
+
   // routes
   app.use(`/${API_VERSION}`, purchaseRequestRouter);
   app.use(`/${API_VERSION}`, purchaseRouter);

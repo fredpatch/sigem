@@ -9,6 +9,10 @@ import { runVehicleDocumentScheduler } from "./jobs/vehicle-document.scheduler";
 
 // src/server.ts
 const startServer = async () => {
+  const kafkaBrokers = env.KAFKA_BROKERS.split(",")
+    .map((b) => b.trim())
+    .filter(Boolean);
+
   // init EventBus (based on EVENTS_DRIVER), "eager connect" for health
   await initEvents({ eager: true });
 
@@ -16,18 +20,23 @@ const startServer = async () => {
   const server = await getApp();
 
   // Mongo
-  const fallback = process.env.MONGO_URL_FALLBACK!;
-  if (!fallback) {
-    throw new Error("MONGO_URL_FALLBACK missing");
-  }
   const uri = process.env.MONGO_URL;
   if (!uri) {
     throw new Error("MONGO_URL missing");
   }
 
-  await connectToMongo({ uri }, fallback);
+  const mongoSsl = process.env.MONGO_SSL === "true";
 
-  await ensureKafkaTopics(env.KAFKA_BROKERS.split(",").map((b) => b.trim()));
+  await connectToMongo({
+    uri,
+    options: { ssl: mongoSsl },
+  });
+
+  if (env.EVENTS_DRIVER === "kafka" && kafkaBrokers.length > 0) {
+    await ensureKafkaTopics(kafkaBrokers);
+  } else {
+    console.log("[kafka] Topic provisioning skipped (no brokers configured)");
+  }
 
   // Tasks monitoring
   initSchedulers();

@@ -3,6 +3,8 @@
  */
 
 export const KNOWN_TOPICS = new Set([
+  "notify.event",
+
   "asset.created",
   "ASSET_CREATED",
   "asset.updated",
@@ -69,6 +71,11 @@ export const KNOWN_TOPICS = new Set([
 
   "supply.price.updated",
   "supply.price.deleted",
+
+  "provider.created",
+  "provider.updated",
+  "provider.deactivated",
+  "provider.activated",
 ]);
 
 export const IMPORTANT = new Set(["warning", "error"]);

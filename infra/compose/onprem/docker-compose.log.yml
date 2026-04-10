@@ -1,0 +1,27 @@
+services:
+  log-service:
+    image: ${LOG_IMAGE:-sigem/log-service:onprem}
+    build:
+      context: ../../..
+      dockerfile: infra/docker/log-service.Dockerfile
+    container_name: sigem-onprem-log-service
+    restart: unless-stopped
+    env_file:
+      - ./.env.onprem
+    environment:
+      PORT: 4004
+      NODE_ENV: production
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
+    ports:
+      - "127.0.0.1:${LOG_SERVICE_PORT:-4004}:4004"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4004/v1/health >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sigem-onprem

@@ -1,5 +1,5 @@
 // stock-movement.model.ts
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
 
 export type StockMovementType = "IN" | "OUT" | "ADJUST";
 
@@ -11,9 +11,13 @@ const StockMovementSchema = new Schema(
       required: true,
     },
 
-    supplyItemId: { type: Types.ObjectId, ref: "SupplyItem", required: true },
+    supplyItemId: {
+      type: Schema.Types.ObjectId,
+      ref: "SupplyItem",
+      required: true,
+    },
     locationId: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "StockLocation",
       required: true,
     },
@@ -24,19 +28,19 @@ const StockMovementSchema = new Schema(
     // info métier
     qty: { type: Number }, // utile pour IN / OUT (toujours positif)
     unitCost: { type: Number },
-    providerId: { type: Types.ObjectId, ref: "Provider" },
+    providerId: { type: Schema.Types.ObjectId, ref: "Provider" },
 
     // référence métier (appro, réception, manuel)
     refType: { type: String }, // SUPPLY_PLAN | RECEPTION | MANUAL
-    refId: { type: Types.ObjectId },
+    refId: { type: Schema.Types.ObjectId },
 
     reason: { type: String },
 
     stockBefore: { type: Number, required: true },
     stockAfter: { type: Number, required: true },
 
-    createdBy: { type: Types.ObjectId, ref: "User" },
-    orgId: { type: Types.ObjectId, index: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    orgId: { type: Schema.Types.ObjectId, index: true },
   },
   { timestamps: true },
 );

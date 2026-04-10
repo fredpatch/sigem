@@ -7,16 +7,17 @@ const PORT = Number(process.env.PORT ?? 4001);
 
 async function main() {
   // Mongo
-  const fallback = process.env.MONGO_URL_FALLBACK!;
-  if (!fallback) {
-    throw new Error("MONGO_URL_FALLBACK missing");
-  }
   const uri = process.env.MONGO_URL;
   if (!uri) {
     throw new Error("MONGO_URL missing");
   }
 
-  await connectToMongo({ uri }, fallback);
+  const mongoSsl = process.env.MONGO_SSL === "true";
+
+  await connectToMongo({
+    uri,
+    options: { ssl: mongoSsl },
+  });
 
   // Kafka Consumer
   startConsumer().catch((err) => {
