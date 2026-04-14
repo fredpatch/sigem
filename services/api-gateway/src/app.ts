@@ -12,13 +12,10 @@ import { stocksProxyRouter } from "./routes/stocks.proxy.router";
 
 export const API_VERSION = "v1";
 
-const public_url = process.env.PUBLIC_URL || "";
-
 const ALLOWED_ORIGINS = [
+  "http://100.110.227.69:8080",
   "http://localhost:5173",
   "http://localhost:8080",
-  "http://100.110.227.69:8080",
-  `${public_url}`,
   // production origins here
 ];
 
