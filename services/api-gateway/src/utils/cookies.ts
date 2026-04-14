@@ -1,7 +1,15 @@
 import { CookieOptions, Response } from "express";
 
 export const REFRESH_PATH = "/auth/refresh";
-const secure = process.env.NODE_ENV !== "development";
+
+const isTruthy = (value?: string) =>
+  ["1", "true", "yes", "on"].includes((value ?? "").trim().toLowerCase());
+
+const explicitCookieSecure = process.env.COOKIE_SECURE?.trim();
+const secure =
+  explicitCookieSecure !== undefined
+    ? isTruthy(explicitCookieSecure)
+    : (process.env.PUBLIC_URL ?? "").trim().startsWith("https://");
 
 const defaults: CookieOptions = {
   sameSite: "strict",
