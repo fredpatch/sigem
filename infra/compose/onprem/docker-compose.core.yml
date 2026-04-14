@@ -2,9 +2,11 @@ name: sigem-onprem
 
 services:
   mongo:
-    image: mongo:7
+    image: mongo:4.4
     container_name: sigem-onprem-mongo
     restart: unless-stopped
+    ports:
+      - "100.110.227.69:27017:27017"
     env_file:
       - ./.env.onprem
     environment:
@@ -14,7 +16,7 @@ services:
     volumes:
       - mongo_onprem_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test: ["CMD", "mongo", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 15s
       timeout: 5s
       retries: 5

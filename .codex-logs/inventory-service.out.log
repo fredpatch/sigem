@@ -1,0 +1,16 @@
+
+> dev:inventory
+> npm run dev -w @sigem/inventory-service
+
+
+> @sigem/inventory-service@0.1.0 dev
+> tsx watch src/server.ts
+
+[dotenv@17.3.1] injecting env (16) from .env.development -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[events] driver=kafka brokers=100.110.227.69:9092
+🟢 [KafkaEventBus] Initialized (clientId=sigem-inventory, brokers=100.110.227.69:9092)
+✅ [Kafka] Producer connected and ready to send events.
+[database] Connected to primary MongoDB instance
+🚀 inventory-service running on 4002
+🟢 Health check: http://localhost:4002/v1/health
+Terminer le programme de commandes (O/N)�? 
