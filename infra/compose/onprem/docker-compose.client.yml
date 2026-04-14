@@ -10,7 +10,7 @@ services:
     container_name: sigem-onprem-client
     restart: unless-stopped
     ports:
-      - "${CLIENT_PORT:-80}:80"
+      - "${CLIENT_PORT:-8080}:80"
     depends_on:
       api-gateway:
         condition: service_healthy

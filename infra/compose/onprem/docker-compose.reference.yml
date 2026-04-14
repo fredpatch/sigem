@@ -13,9 +13,13 @@ services:
       NODE_ENV: production
       MONGO_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
     ports:
-      - "127.0.0.1:${REFERENCE_SERVICE_PORT:-4006}:4006"
+      - "0.0.0.0:${REFERENCE_SERVICE_PORT:-4006}:4006"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4006/v1/health >/dev/null 2>&1 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:4006/v1/health >/dev/null 2>&1 || exit 1",
+        ]
       interval: 20s
       timeout: 5s
       retries: 5

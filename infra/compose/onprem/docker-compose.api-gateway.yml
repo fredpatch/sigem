@@ -18,9 +18,13 @@ services:
       REFERENCE_SERVICE_URL: ${REFERENCE_SERVICE_URL:-http://reference-service:4006}
       PROVIDER_SERVICE_URL: ${PROVIDER_SERVICE_URL:-http://provider-service:4010}
     ports:
-      - "127.0.0.1:${API_GATEWAY_PORT:-4000}:4000"
+      - "0.0.0.0:${API_GATEWAY_PORT:-4000}:4000"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4000/v1/health >/dev/null 2>&1 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:4000/v1/health >/dev/null 2>&1 || exit 1",
+        ]
       interval: 20s
       timeout: 5s
       retries: 5
