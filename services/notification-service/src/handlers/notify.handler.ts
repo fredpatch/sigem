@@ -39,6 +39,24 @@ function resolveTopic(topic: string, evt: NotificationEventPayload): string {
   return topic === "notify.event" && evt.type ? evt.type : topic;
 }
 
+function shouldPersistNotification(
+  topic: string,
+  resolvedTopic: string,
+  evt: NotificationEventPayload,
+  severity: string,
+): boolean {
+  // `notify.event` is a transport wrapper. Persist only when it resolves to a
+  // concrete business notification type.
+  if (topic === "notify.event" && (!evt.type || resolvedTopic === "notify.event")) {
+    return false;
+  }
+
+  const isKnown =
+    KNOWN_TOPICS.has(resolvedTopic) || (!!evt.type && KNOWN_TOPICS.has(evt.type));
+
+  return isKnown || IMPORTANT.has(severity);
+}
+
 function buildProviderMessage(evt: any, topic: string) {
   const label = pickDisplayValue(
     evt.label,
@@ -550,10 +568,7 @@ export async function handleIncomingEvent(
     message,
   );
   const severity = mapSeverityToNotificationType(evt.severity);
-  const isKnown =
-    KNOWN_TOPICS.has(resolvedTopic) || (evt.type && KNOWN_TOPICS.has(evt.type));
-
-  if (!isKnown && !IMPORTANT.has(severity)) {
+  if (!shouldPersistNotification(topic, resolvedTopic, evt, severity)) {
     return;
   }
 

@@ -3,8 +3,6 @@
  */
 
 export const KNOWN_TOPICS = new Set([
-  "notify.event",
-
   "asset.created",
   "ASSET_CREATED",
   "asset.updated",

@@ -57,16 +57,12 @@ export const useRealtimeNotifications = () => {
     socket.on(SOCKET_EVENTS.NOTIFICATION_GLOBAL, handleNotification);
     socket.on(SOCKET_EVENTS.NOTIFICATION_USER, handleNotification);
 
-    socket.on(SOCKET_EVENTS.NOTIFY_EVENT, handleNotification);
-
     // DIAG (ne pas router vers handleNotification)
     socket.on(SOCKET_EVENTS.DIAG_PONG, (payload) => {
       console.log("🏓 [SIGEM Socket] DIAG_PONG:", payload);
     });
 
     return () => {
-      socket.off(SOCKET_EVENTS.NOTIFY_EVENT, handleNotification);
-
       socket.off(SOCKET_EVENTS.NOTIFICATION_GLOBAL, handleNotification);
       socket.off(SOCKET_EVENTS.NOTIFICATION_USER, handleNotification);
 

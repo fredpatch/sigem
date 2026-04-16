@@ -90,7 +90,7 @@ export class AuthController {
       email: response.user.email,
       timestamp: new Date().toISOString(),
       severity: "success",
-      recipients: [], // vide = broadcast rôle (géré côté notif svc)
+      recipients: [], // vide = broadcast role (gere cote notif svc)
     });
 
     // return response
@@ -147,20 +147,6 @@ export class AuthController {
     // Call service
     const response = await authService.getMe(userId!);
 
-    // Notifications
-    await getEventBus().emit(KAFKA_TOPICS.NOTIFY_EVENT, {
-      // actorId: actor.id,
-      // actorName: actor.username,
-      // actorSessionId: actor.sessionId,
-      // role: actor.role,
-
-      username: response.data?.username,
-
-      timestamp: new Date().toISOString(),
-      severity: "success",
-      recipients: [], // vide = broadcast rôle (géré côté notif svc)
-    });
-
     // return response
     return res.status(200).json(response);
   });
@@ -185,7 +171,7 @@ export class AuthController {
     //   expiresInMinutes: 5,
     //   timestamp: new Date().toISOString(),
     //   severity: "success",
-    //   recipients: [], // vide = broadcast rôle (géré côté notif svc)
+    //   recipients: [], // vide = broadcast role (gere cote notif svc)
     // });
 
     // return response
