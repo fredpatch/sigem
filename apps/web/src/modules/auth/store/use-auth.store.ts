@@ -34,10 +34,10 @@ export const useAuthStore = create<AuthState>()(
 
           // console.log("🚀 ~ file: auth.ts:50 ~ login ~ res:", res);
           // set({ user: response.data, preAuthUser: res.data }); // Don't set user yet
-          set({ user: null, preAuthUser: res.data ?? null, otp: null }); // Don't set user yet
+          set({ user: null, preAuthUser: res ?? null, otp: null }); // Don't set user yet
 
           // Don't return the user until OTP is verified
-          return res.data ?? null;
+          return res ?? null;
         } catch (error: any) {
           // toast.error(error?.message || "Login failed");
           // console.log("🚀 ~ file: authStore.ts:50 ~ login ~ error:", error);
@@ -74,7 +74,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           const res = await AuthAPI.fetchMe();
 
-          set({ user: res.data ?? null });
+          set({ user: res ?? null });
         } catch {
           set({ user: null });
         }

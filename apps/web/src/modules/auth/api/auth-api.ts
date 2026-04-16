@@ -2,11 +2,11 @@ import { api } from "@/lib/axios";
 import {
   LoginDTO,
   LoginResponse,
-  MeResponse,
   OtpResponse,
   RegisterDTO,
   RequestOtpDTO,
   SetPasswordDTO,
+  User,
   // RequestOtpResponse,
   VerifyOtpDTO,
 } from "../types/auth-type";
@@ -26,9 +26,9 @@ export class AuthAPI {
     await api.post("/auth/logout");
   }
 
-  static async fetchMe(): Promise<MeResponse> {
-    const res = await api.get<MeResponse>("/auth/me");
-    return res.data;
+  static async fetchMe(): Promise<User | null> {
+    const res = await api.get<{ data?: User }>("/auth/me");
+    return res.data ?? null;
   }
 
   static async verifyOTP(request: VerifyOtpDTO): Promise<OtpResponse> {
