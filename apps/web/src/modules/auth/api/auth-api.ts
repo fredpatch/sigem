@@ -2,6 +2,7 @@ import { api } from "@/lib/axios";
 import {
   LoginDTO,
   LoginResponse,
+  MeResponse,
   OtpResponse,
   RegisterDTO,
   RequestOtpDTO,
@@ -25,8 +26,8 @@ export class AuthAPI {
     await api.post("/auth/logout");
   }
 
-  static async fetchMe() {
-    const res = await api.get("/auth/me");
+  static async fetchMe(): Promise<MeResponse> {
+    const res = await api.get<MeResponse>("/auth/me");
     return res.data;
   }
 

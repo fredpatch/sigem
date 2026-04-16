@@ -16,6 +16,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!user?._id) {
+      if (user) {
+        console.warn(
+          "[SIGEM Socket] Skipping connection because authenticated user has no _id",
+          user
+        );
+      }
       socketRef.current?.disconnect();
       socketRef.current = null;
       setIsConnected(false);
@@ -82,7 +88,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socketRef.current = null;
       setIsConnected(false);
     };
-  }, [user?._id]);
+  }, [user?._id, user?.role]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
