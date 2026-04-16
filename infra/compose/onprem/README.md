@@ -105,6 +105,11 @@ All commands below are run from the repository root:
 cd /path/to/sigem
 ```
 
+Use these command patterns consistently:
+
+- `npm run onprem:*:up` starts or restarts a service without forcing an image rebuild.
+- `npm run onprem:*:up:build` rebuilds the image and restarts the service.
+
 ### Step 1: start shared infra
 
 ```bash
@@ -252,14 +257,14 @@ git pull origin main
 npm install
 ```
 
-Then rebuild only the service you changed by running its `onprem:*:up` script again.
+Then rebuild only the service you changed by running its `onprem:*:up:build` script.
 
 Examples:
 
 ```bash
-npm run onprem:provider:up
-npm run onprem:notification:up
-npm run onprem:gateway:up
+npm run onprem:provider:up:build
+npm run onprem:notification:up:build
+npm run onprem:gateway:up:build
 ```
 
 ## 12. Operational notes

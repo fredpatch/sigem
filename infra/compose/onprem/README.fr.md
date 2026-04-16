@@ -105,6 +105,11 @@ Toutes les commandes ci-dessous s'exécutent depuis la racine du dépôt :
 cd /path/to/sigem
 ```
 
+Utilisez ces conventions de commande :
+
+- `npm run onprem:*:up` démarre ou redémarre un service sans forcer la reconstruction de l'image.
+- `npm run onprem:*:up:build` reconstruit l'image puis redémarre le service.
+
 ### Étape 1 : démarrer l'infrastructure partagée
 
 ```bash
@@ -252,14 +257,14 @@ git pull origin main
 npm install
 ```
 
-Puis reconstruisez uniquement le service modifié en relançant son script `onprem:*:up`.
+Puis reconstruisez uniquement le service modifié en lançant son script `onprem:*:up:build`.
 
 Exemples :
 
 ```bash
-npm run onprem:provider:up
-npm run onprem:notification:up
-npm run onprem:gateway:up
+npm run onprem:provider:up:build
+npm run onprem:notification:up:build
+npm run onprem:gateway:up:build
 ```
 
 ## 12. Notes d'exploitation
