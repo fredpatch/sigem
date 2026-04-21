@@ -3,6 +3,7 @@ import { StockMovementModel } from "../models/stock-movement.model";
 import { StockKpiService } from "../services/stock-kpi.service";
 import { StockService } from "../services/stock.service";
 import { Types } from "mongoose";
+import { ensureDefaultStockLocation } from "../services/stock-location.service";
 
 export function toObjectId(v: any, field: string) {
   if (!v || typeof v !== "string" || !Types.ObjectId.isValid(v)) {
@@ -26,6 +27,19 @@ export function toInt(v: any, def: number) {
 
 const service = new StockService();
 const kpiService = new StockKpiService();
+
+async function resolveLocationId(rawLocationId: any, actorId?: string) {
+  if (typeof rawLocationId === "string" && rawLocationId.trim()) {
+    return toObjectId(rawLocationId, "locationId");
+  }
+
+  const orgId =
+    actorId && Types.ObjectId.isValid(actorId)
+      ? new Types.ObjectId(actorId)
+      : undefined;
+  const location = await ensureDefaultStockLocation({ orgId });
+  return new Types.ObjectId(String(location._id));
+}
 
 export class StockController {
   // GET /v1/stock?locationId=...&search=...&belowMin=true&limit=50
@@ -107,6 +121,7 @@ export class StockController {
 
     // orgId / createdBy from auth context (MG-friendly)
     const { id: orgId } = getActor(req);
+    const locationId = await resolveLocationId(body.locationId, orgId);
 
     const input = {
       orgId,
@@ -114,7 +129,7 @@ export class StockController {
 
       type: String(body.type),
       supplyItemId: toObjectId(body.supplyItemId, "supplyItemId"),
-      locationId: toObjectId(body.locationId, "locationId"),
+      locationId,
 
       qty: body.qty !== undefined ? Number(body.qty) : undefined,
       countedQty:

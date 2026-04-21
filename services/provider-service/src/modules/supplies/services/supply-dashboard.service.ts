@@ -1,15 +1,54 @@
-// supply-dashboard.service.ts
-
+import { ProviderModel } from "../../../models/provider.model";
 import { SupplyPlanEntity } from "../models/supplier-plan.model";
 import { SupplierPriceEntity } from "../models/supplier-price.model";
 import { SupplyItemEntity } from "../models/supply-item.model";
 import {
+  fillStatusAmountZeros,
   fillStatusZeros,
   parseRange,
   SupplyDashboardDto,
   SupplyPlanStatus,
   toIso,
 } from "../supply.helpers";
+
+const ACTIVE_STATUSES: SupplyPlanStatus[] = [
+  "SCHEDULED",
+  "WAITING_QUOTE",
+  "WAITING_INVOICE",
+  "ORDERED",
+  "DELIVERED",
+];
+
+function monthKey(date: Date) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function fillMonthlyTrend(
+  from: Date,
+  to: Date,
+  rows: Array<{ _id: string; count: number; amount: number }>,
+) {
+  const base = new Map<string, { month: string; count: number; amount: number }>();
+  const cursor = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), 1));
+
+  while (cursor <= end) {
+    const key = monthKey(cursor);
+    base.set(key, { month: key, count: 0, amount: 0 });
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+
+  for (const row of rows) {
+    if (!row?._id) continue;
+    base.set(row._id, {
+      month: row._id,
+      count: Number(row.count ?? 0),
+      amount: Number(row.amount ?? 0),
+    });
+  }
+
+  return Array.from(base.values());
+}
 
 export class SupplyDashboardService {
   async getDashboard(input?: {
@@ -25,13 +64,13 @@ export class SupplyDashboardService {
 
     const [
       plansFacet,
-      topSuppliers,
-      topItems,
+      topSuppliersRaw,
+      topItemsRaw,
       itemsStats,
       itemsWithoutPrice,
+      itemsAtRisk,
       pricesFacet,
     ] = await Promise.all([
-      // 1) Plans: core, byStatus, lastCreated, missing
       SupplyPlanEntity.aggregate([
         { $match: planMatch },
         {
@@ -41,11 +80,39 @@ export class SupplyDashboardService {
                 $group: {
                   _id: null,
                   count: { $sum: 1 },
+                  activeCount: {
+                    $sum: {
+                      $cond: [{ $in: ["$status", ACTIVE_STATUSES] }, 1, 0],
+                    },
+                  },
                   totalAmount: { $sum: { $ifNull: ["$estimatedTotal", 0] } },
                 },
               },
             ],
             byStatus: [{ $group: { _id: "$status", n: { $sum: 1 } } }],
+            byStatusAmount: [
+              {
+                $group: {
+                  _id: "$status",
+                  amount: { $sum: { $ifNull: ["$estimatedTotal", 0] } },
+                },
+              },
+            ],
+            monthlyTrend: [
+              {
+                $group: {
+                  _id: {
+                    $dateToString: {
+                      format: "%Y-%m",
+                      date: "$createdAt",
+                    },
+                  },
+                  count: { $sum: 1 },
+                  amount: { $sum: { $ifNull: ["$estimatedTotal", 0] } },
+                },
+              },
+              { $sort: { _id: 1 } },
+            ],
             lastCreated: [
               { $sort: { createdAt: -1 } },
               { $limit: 5 },
@@ -64,7 +131,37 @@ export class SupplyDashboardService {
                 $match: {
                   $or: [
                     { estimatedTotal: { $in: [0, null] } },
-                    { "lines.selectedUnitPrice": null },
+                    {
+                      lines: {
+                        $elemMatch: {
+                          $or: [
+                            { selectedUnitPrice: null },
+                            { selectedUnitPrice: { $lte: 0 } },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              { $count: "n" },
+            ],
+            atRisk: [
+              {
+                $match: {
+                  status: { $in: ACTIVE_STATUSES },
+                  $or: [
+                    { estimatedTotal: { $in: [0, null] } },
+                    {
+                      lines: {
+                        $elemMatch: {
+                          $or: [
+                            { selectedUnitPrice: null },
+                            { selectedUnitPrice: { $lte: 0 } },
+                          ],
+                        },
+                      },
+                    },
                   ],
                 },
               },
@@ -74,7 +171,6 @@ export class SupplyDashboardService {
         },
       ]),
 
-      // 2) Top suppliers by amount (from plan lines)
       SupplyPlanEntity.aggregate([
         { $match: planMatch },
         { $unwind: "$lines" },
@@ -97,7 +193,6 @@ export class SupplyDashboardService {
         { $limit: 5 },
       ]),
 
-      // 3) Top items by amount/usage (from plan lines)
       SupplyPlanEntity.aggregate([
         { $match: planMatch },
         { $unwind: "$lines" },
@@ -121,7 +216,6 @@ export class SupplyDashboardService {
         { $limit: 5 },
       ]),
 
-      // 4) Items stats (total/active)
       SupplyItemEntity.aggregate([
         {
           $group: {
@@ -132,7 +226,6 @@ export class SupplyDashboardService {
         },
       ]),
 
-      // 5) Items active without any supplier price
       SupplyItemEntity.aggregate([
         { $match: { active: true } },
         {
@@ -147,7 +240,32 @@ export class SupplyDashboardService {
         { $count: "n" },
       ]),
 
-      // 6) Prices stats
+      SupplyItemEntity.aggregate([
+        { $match: { active: true } },
+        {
+          $lookup: {
+            from: "supplierprices",
+            localField: "_id",
+            foreignField: "itemId",
+            as: "prices",
+          },
+        },
+        {
+          $addFields: {
+            lastPriceUpdatedAt: { $max: "$prices.updatedAt" },
+          },
+        },
+        {
+          $match: {
+            $or: [
+              { prices: { $size: 0 } },
+              { lastPriceUpdatedAt: { $lt: d30 } },
+            ],
+          },
+        },
+        { $count: "n" },
+      ]),
+
       SupplierPriceEntity.aggregate([
         {
           $facet: {
@@ -160,24 +278,49 @@ export class SupplyDashboardService {
               { $match: { updatedAt: { $gte: d30 } } },
               { $count: "n" },
             ],
+            stale: [
+              { $match: { updatedAt: { $lt: d30 } } },
+              { $count: "n" },
+            ],
           },
         },
       ]),
     ]);
 
     const plansData = plansFacet?.[0] ?? {};
-    const core = plansData.core?.[0] ?? { count: 0, totalAmount: 0 };
+    const core = plansData.core?.[0] ?? {
+      count: 0,
+      activeCount: 0,
+      totalAmount: 0,
+    };
     const byStatusRows = (plansData.byStatus ?? []) as Array<{
       _id: SupplyPlanStatus;
       n: number;
     }>;
+    const byStatusAmountRows = (plansData.byStatusAmount ?? []) as Array<{
+      _id: SupplyPlanStatus;
+      amount: number;
+    }>;
+    const lastCreated = (plansData.lastCreated ?? []) as Array<{
+      id: string;
+      reference: string;
+      status: SupplyPlanStatus;
+      createdAt: Date;
+      amount: number;
+    }>;
+    const monthlyTrendRows = (plansData.monthlyTrend ?? []) as Array<{
+      _id: string;
+      count: number;
+      amount: number;
+    }>;
 
-    const missing = plansData.missing?.[0]?.n ?? 0;
-    const lastCreated = (plansData.lastCreated ?? []) as any[];
+    const missing = Number(plansData.missing?.[0]?.n ?? 0);
+    const atRiskCount = Number(plansData.atRisk?.[0]?.n ?? 0);
 
-    const totalCount = itemsStats?.[0]?.totalCount ?? 0;
-    const activeCount = itemsStats?.[0]?.activeCount ?? 0;
-    const withoutAnySupplierPriceCount = itemsWithoutPrice?.[0]?.n ?? 0;
+    const totalCount = Number(itemsStats?.[0]?.totalCount ?? 0);
+    const activeCount = Number(itemsStats?.[0]?.activeCount ?? 0);
+    const withoutAnySupplierPriceCount = Number(itemsWithoutPrice?.[0]?.n ?? 0);
+    const itemsAtRiskCount = Number(itemsAtRisk?.[0]?.n ?? 0);
     const coveragePct =
       activeCount > 0
         ? Math.round(
@@ -186,26 +329,75 @@ export class SupplyDashboardService {
         : 0;
 
     const pricesData = pricesFacet?.[0] ?? {};
-    const pricesCount = pricesData.count?.[0]?.n ?? 0;
-    const updated7d = pricesData.updated7d?.[0]?.n ?? 0;
-    const updated30d = pricesData.updated30d?.[0]?.n ?? 0;
+    const pricesCount = Number(pricesData.count?.[0]?.n ?? 0);
+    const updated7d = Number(pricesData.updated7d?.[0]?.n ?? 0);
+    const updated30d = Number(pricesData.updated30d?.[0]?.n ?? 0);
+    const staleCount = Number(pricesData.stale?.[0]?.n ?? 0);
+
+    const supplierIds = (topSuppliersRaw ?? []).map((x: any) => String(x.supplierId));
+    const itemIds = (topItemsRaw ?? []).map((x: any) => String(x.itemId));
+
+    const [providers, items] = await Promise.all([
+      supplierIds.length
+        ? ProviderModel.find({ _id: { $in: supplierIds } })
+            .select({ name: 1, designation: 1 })
+            .lean()
+        : [],
+      itemIds.length
+        ? SupplyItemEntity.find({ _id: { $in: itemIds } })
+            .select({ label: 1 })
+            .lean()
+        : [],
+    ]);
+
+    const providerMap = new Map(
+      providers.map((provider: any) => [
+        String(provider._id),
+        provider.name ?? provider.designation ?? String(provider._id),
+      ]),
+    );
+    const itemMap = new Map(
+      items.map((item: any) => [String(item._id), item.label ?? String(item._id)]),
+    );
+
+    const topSuppliers = (topSuppliersRaw ?? []).map((x: any) => ({
+      supplierId: String(x.supplierId),
+      supplierName: providerMap.get(String(x.supplierId)) ?? String(x.supplierId),
+      plansCount: Number(x.plansCount ?? 0),
+      amount: Number(x.amount ?? 0),
+    }));
+
+    const topItems = (topItemsRaw ?? []).map((x: any) => ({
+      itemId: String(x.itemId),
+      label: itemMap.get(String(x.itemId)) ?? String(x.itemId),
+      linesCount: Number(x.linesCount ?? 0),
+      quantitySum: Number(x.quantitySum ?? 0),
+      amount: Number(x.amount ?? 0),
+    }));
+
+    const totalAmount = Number(core.totalAmount ?? 0);
+    const topSupplierSharePct =
+      totalAmount > 0 && topSuppliers.length > 0
+        ? Math.round((topSuppliers[0].amount / totalAmount) * 100)
+        : 0;
 
     return {
       range: { from: toIso(from), to: toIso(to) },
       plans: {
         count: Number(core.count ?? 0),
-        totalAmount: Number(core.totalAmount ?? 0),
+        activeCount: Number(core.activeCount ?? 0),
+        totalAmount,
         byStatus: fillStatusZeros(byStatusRows),
-        withMissingPricesCount: Number(missing ?? 0),
-        topSuppliers: (topSuppliers ?? []).map((x: any) => ({
-          supplierId: String(x.supplierId),
-          plansCount: Number(x.plansCount ?? 0),
-          amount: Number(x.amount ?? 0),
-        })),
-        lastCreated: (lastCreated ?? []).map((x: any) => ({
+        byStatusAmount: fillStatusAmountZeros(byStatusAmountRows),
+        withMissingPricesCount: missing,
+        atRiskCount,
+        topSupplierSharePct,
+        monthlyTrend: fillMonthlyTrend(from, to, monthlyTrendRows),
+        topSuppliers,
+        lastCreated: lastCreated.map((x) => ({
           id: String(x.id),
           reference: String(x.reference),
-          status: x.status as SupplyPlanStatus,
+          status: x.status,
           createdAt: new Date(x.createdAt).toISOString(),
           amount: Number(x.amount ?? 0),
         })),
@@ -215,17 +407,14 @@ export class SupplyDashboardService {
         activeCount,
         withoutAnySupplierPriceCount,
         coveragePct,
-        topItems: (topItems ?? []).map((x: any) => ({
-          itemId: String(x.itemId),
-          linesCount: Number(x.linesCount ?? 0),
-          quantitySum: Number(x.quantitySum ?? 0),
-          amount: Number(x.amount ?? 0),
-        })),
+        atRiskCount: itemsAtRiskCount,
+        topItems,
       },
       prices: {
         count: pricesCount,
         updated7d,
         updated30d,
+        staleCount,
       },
     };
   }
@@ -234,15 +423,6 @@ export class SupplyDashboardService {
     const days = Math.max(7, Math.min(365, Number(input.days ?? 30)));
     const from = new Date(Date.now() - days * 24 * 3600 * 1000);
 
-    const ACTIVE_STATUSES: SupplyPlanStatus[] = [
-      "SCHEDULED",
-      "WAITING_QUOTE",
-      "WAITING_INVOICE",
-      "ORDERED",
-      "DELIVERED",
-    ];
-
-    // 1) Plans actifs
     const activePlans = await SupplyPlanEntity.find({
       status: { $in: ACTIVE_STATUSES },
       createdAt: { $gte: from },
@@ -273,7 +453,6 @@ export class SupplyDashboardService {
       }
     }
 
-    // 2) Couverture des prix (items actifs vs prix existants)
     const activeItems = await SupplyItemEntity.find({ active: true }).select({
       _id: 1,
       label: 1,
@@ -295,7 +474,6 @@ export class SupplyDashboardService {
         )
       : 0;
 
-    // 3) Prix obsolètes + dernière MAJ
     const staleLimit = new Date(Date.now() - 30 * 24 * 3600 * 1000);
 
     const [stalePricesCount, lastUpdate] = await Promise.all([
@@ -305,7 +483,6 @@ export class SupplyDashboardService {
         .select({ updatedAt: 1 }),
     ]);
 
-    // 4) Top items/suppliers (enrichir labels)
     const itemLabelMap = new Map(
       activeItems.map((i) => [String(i._id), i.label]),
     );
@@ -319,7 +496,6 @@ export class SupplyDashboardService {
         count,
       }));
 
-    // Option: enrichir fournisseurs via ProviderEntity si accessible ici.
     const topSuppliers = Array.from(supplierCount.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)

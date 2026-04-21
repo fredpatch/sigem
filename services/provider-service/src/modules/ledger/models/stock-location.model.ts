@@ -14,5 +14,6 @@ const StockLocationSchema = new Schema(
 
 // recherche simple
 StockLocationSchema.index({ name: "text" });
+StockLocationSchema.index({ orgId: 1, name: 1 }, { unique: true });
 
 export const StockLocationModel = model("StockLocation", StockLocationSchema);

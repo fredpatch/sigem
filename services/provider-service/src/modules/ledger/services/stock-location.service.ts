@@ -8,25 +8,44 @@ export async function ensureDefaultStockLocation(input?: {
 }) {
   const name = input?.name || "Magasin principal";
 
-  const filter: any = {
-    name,
-    ...(input?.orgId ? { orgId: input.orgId } : {}),
-  };
+  const scopeFilter: any = input?.orgId ? { orgId: input.orgId } : {};
 
-  let location = await StockLocationModel.findOne(filter);
+  const existing = await StockLocationModel.findOne(scopeFilter)
+    .sort({ createdAt: 1 })
+    .lean();
 
-  if (!location) {
-    location = await StockLocationModel.create({
+  if (existing) {
+    return existing;
+  }
+
+  try {
+    const created = await StockLocationModel.create({
       name,
       active: true,
       orgId: input?.orgId,
     });
-  }
 
-  return location;
+    return created;
+  } catch (error: any) {
+    if (error?.code === 11000) {
+      const concurrent = await StockLocationModel.findOne({
+        name,
+        ...scopeFilter,
+      })
+        .sort({ createdAt: 1 })
+        .lean();
+
+      if (concurrent) return concurrent;
+    }
+
+    throw error;
+  }
 }
 
-export async function getStockLocations() {
-  const locations = await StockLocationModel.find();
+export async function getStockLocations(input?: { orgId?: Types.ObjectId }) {
+  await ensureDefaultStockLocation(input);
+
+  const filter: any = input?.orgId ? { orgId: input.orgId } : {};
+  const locations = await StockLocationModel.find(filter).sort({ createdAt: 1 });
   return locations;
 }

@@ -19,9 +19,12 @@ export class StockLocationController {
   });
 
   getStockLocations = catchError(async (req, res) => {
-    const location = await getStockLocations();
+    const { id } = getActor(req);
+    const orgId =
+      id && Types.ObjectId.isValid(id) ? new Types.ObjectId(id) : undefined;
+    const location = await getStockLocations({ orgId });
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       data: location,
     });

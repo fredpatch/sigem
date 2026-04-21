@@ -1,10 +1,10 @@
-# Claude Task: SIGEM Exploration
+# Task: SIGEM Exploration
 
 ## 🎯 CURRENT OBJECTIVE
 
-[Update this section with your current goal]
+## [Update this section with your current goal]
 
-Example: "Map the complete ticket lifecycle across all services"
+You are auditing and improving the "Fournitures" dashboard in a production-like monorepo.
 
 ---
 
@@ -32,52 +32,27 @@ Never re-explore cached paths
 
 4. Update Cache After Each Discovery
 Update MANIFEST.json with new paths
-
 Update relevant exploration.md files
-
 Update QUICK-REFERENCE.md for patterns
 
 Add timestamp to all updates
 
 5. Token Saving Rules
 ❌ Don't repeat cached content in responses
-
 ✅ Use file references instead
-
 ❌ Don't re-read files from current session
-
 ✅ Keep responses brief, point to cache
 
-📁 Cache Structure Reference
-text
-/exploration-cache/
-├── MANIFEST.json          # Master status of all paths
-├── QUICK-REFERENCE.md     # Cross-cutting patterns
-├── services/
-│   ├── api-gateway/exploration.md
-│   ├── inventory-service/exploration.md
-│   ├── log-service/exploration.md
-│   ├── notification-service/exploration.md
-│   ├── provider-service/exploration.md
-│   ├── reference-service/exploration.md
-│   └── vehicle-service/exploration.md
-├── apps/
-│   ├── configs/exploration.md
-│   ├── docs/exploration.md
-│   ├── infra/exploration.md
-│   ├── packages/exploration.md
-│   └── scripts/exploration.md
-└── patterns/
-    ├── communication.md
-    ├── data-flow.md
-    ├── error-handling.md
-    └── authentication.md
+
 🔄 Session Start Procedure
 At the beginning of each session:
 
-Read this TASK.md file
-
-Read /exploration-cache/MANIFEST.json
+1. **READ** `/exploration-cache/MANIFEST.json`
+2. **SEARCH** relevant `/exploration-cache/**/*.md` for answer
+3. **CITE** source if found: `📚 FROM: [file]`
+4. **EXPLORE** only missing gaps
+5. **UPDATE** cache with new findings
+6. **NEVER** re-explore cached paths
 
 State current cache status:
 
@@ -89,22 +64,16 @@ markdown
 Proceed with current objective
 
 📝 Current Task Details
-[PASTE YOUR SPECIFIC QUERY HERE]
+Refine also the hover effect on the graphs for the supplies dashboard visual.
+the tooltip haven't been refined
 
-Example:
-"Find all services involved in ticket creation. Document the complete flow from API request to database persistence."
 
 ✅ Task Completion Checklist
 Before marking task complete:
-
 All relevant services documented in cache
-
 MANIFEST.json updated with new explorations
-
 QUICK-REFERENCE.md has pattern summaries
-
 No gaps remain for this objective
-
 Cache files are self-contained (can answer future queries)
 
 🚀 Quick Commands
@@ -116,15 +85,12 @@ Command	Meaning
 [UPDATE]	Force cache update with recent findings
 [CLEAR]	Reset cache for specific path
 [VERIFY]	Check if answer exists in cache before exploring
+
 ⚠️ Critical Rules
 NEVER explore a path marked "completed" in MANIFEST.json
-
 ALWAYS cite cache source when answering
-
 ALWAYS update cache after discovering something new
-
 KEEP responses concise - point to cache files
-
 ASK before large explorations (>10 files)
 
 📍 Current State (Auto-updates)

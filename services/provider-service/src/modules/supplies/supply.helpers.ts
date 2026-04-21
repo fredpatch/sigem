@@ -3,9 +3,9 @@ export function normalizeLabel(input: string) {
   return (input || "")
     .trim()
     .toLowerCase()
-    .normalize("NFD") // split accents
-    .replace(/[\u0300-\u036f]/g, "") // remove accents
-    .replace(/\s+/g, " "); // collapse spaces
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
 }
 
 export type SupplyPlanStatus =
@@ -56,12 +56,21 @@ export type SupplyDashboardDto = {
 
   plans: {
     count: number;
+    activeCount: number;
     totalAmount: number;
     byStatus: Record<SupplyPlanStatus, number>;
-    withMissingPricesCount: number; // lignes sans prix ou plans avec total=0
+    byStatusAmount: Record<SupplyPlanStatus, number>;
+    withMissingPricesCount: number;
+    atRiskCount: number;
+    topSupplierSharePct: number;
+    monthlyTrend: Array<{
+      month: string;
+      count: number;
+      amount: number;
+    }>;
     topSuppliers: Array<{
       supplierId: string;
-      supplierName?: string; // optionnel si lookup providers dispo
+      supplierName?: string;
       plansCount: number;
       amount: number;
     }>;
@@ -78,7 +87,8 @@ export type SupplyDashboardDto = {
     activeCount: number;
     totalCount: number;
     withoutAnySupplierPriceCount: number;
-    coveragePct: number; // % d’articles actifs ayant ≥1 prix
+    coveragePct: number;
+    atRiskCount: number;
     topItems: Array<{
       itemId: string;
       label?: string;
@@ -92,6 +102,7 @@ export type SupplyDashboardDto = {
     count: number;
     updated7d: number;
     updated30d: number;
+    staleCount: number;
     cheapestByItemSample?: Array<{
       itemId: string;
       itemLabel?: string;
@@ -138,6 +149,21 @@ export function fillStatusZeros(
   for (const r of rows) {
     if (!r?._id) continue;
     base[r._id] = Number(r.n ?? 0);
+  }
+  return base;
+}
+
+export function fillStatusAmountZeros(
+  rows: Array<{ _id: SupplyPlanStatus; amount: number }>,
+): Record<SupplyPlanStatus, number> {
+  const base = Object.fromEntries(ALL_STATUSES.map((s) => [s, 0])) as Record<
+    SupplyPlanStatus,
+    number
+  >;
+
+  for (const r of rows) {
+    if (!r?._id) continue;
+    base[r._id] = Number(r.amount ?? 0);
   }
   return base;
 }

@@ -1,6 +1,6 @@
 {
   "project": "SIGEM",
-  "last_full_scan": "2026-04-21T00:00:00Z",
+  "last_full_scan": "2026-04-21T19:35:00Z",
   "explored_services": {
     "api-gateway": {
       "status": "partial",
@@ -13,7 +13,8 @@
         "src/routes/providers.proxy.router.ts",
         "src/routes/products.proxy.router.ts",
         "src/routes/supplier.proxy.router.ts",
-        "src/routes/stocks.proxy.router.ts"
+        "src/routes/stocks.proxy.router.ts",
+        "src/middlewares/forward-user.ts"
       ],
       "summary_file": "services/api-gateway/exploration.md",
       "key_patterns": [
@@ -22,13 +23,14 @@
         "centralized auth before proxy",
         "forwarded user headers"
       ],
-      "explored_at": "2026-04-21T00:00:00Z"
+      "explored_at": "2026-04-21T18:30:00Z"
     },
     "inventory-service": {
       "status": "partial",
       "files_explored": [
         "src/routes/inventory.route.ts",
-        "src/models/asset.model.ts"
+        "src/models/asset.model.ts",
+        "src/core/events/index.ts"
       ],
       "summary_file": "services/inventory-service/exploration.md",
       "key_patterns": [
@@ -36,7 +38,7 @@
         "role-gated writes",
         "asset code generation"
       ],
-      "explored_at": "2026-04-21T00:00:00Z"
+      "explored_at": "2026-04-21T18:30:00Z"
     },
     "log-service": {
       "status": "not_started"
@@ -53,27 +55,59 @@
         "src/controllers/purchase-request.controller.ts",
         "src/services/purchase-requests.service.ts",
         "src/validators/purchase-request.schema.ts",
-        "src/modules/supplies/routes/supplies.route.ts"
+        "src/modules/supplies/routes/supplies.route.ts",
+        "src/middlewares/authenticate.ts",
+        "src/middlewares/authorized-roles.ts",
+        "src/modules/ledger/routes/stock.routes.ts",
+        "src/modules/ledger/controller/stock.controller.ts",
+        "src/modules/ledger/controller/stock-location.controller.ts",
+        "src/modules/ledger/controller/supplier-price.controller.ts",
+        "src/modules/ledger/services/stock.service.ts",
+        "src/modules/ledger/services/stock-kpi.service.ts",
+        "src/modules/ledger/services/stock-location.service.ts",
+        "src/modules/ledger/models/stock-item.model.ts",
+        "src/modules/ledger/models/stock-movement.model.ts",
+        "src/modules/ledger/models/stock-location.model.ts",
+        "src/modules/ledger/helpers/ledger.emit.ts",
+        "src/modules/supplies/services/supply-plan.service.ts",
+        "src/modules/supplies/services/supply-dashboard.service.ts",
+        "src/modules/supplies/controllers/supply-plan.controller.ts",
+        "src/modules/supplies/controllers/supply-item.controller.ts",
+        "src/modules/supplies/controllers/supplier-price.controller.ts",
+        "src/modules/supplies/models/supply-item.model.ts",
+        "src/routes/provider.routes.ts",
+        "src/services/provider.service.ts",
+        "src/validators/provider.schema.ts",
+        "src/core/events/index.ts",
+        "src/core/events/supply.event.ts",
+        "src/modules/ledger/controller/stock-location.controller.ts",
+        "src/modules/ledger/controller/stock.controller.ts",
+        "src/modules/ledger/models/stock-location.model.ts",
+        "src/modules/ledger/services/stock-location.service.ts",
+        "src/modules/supplies/services/supply-plan.service.ts"
       ],
       "summary_file": "services/provider-service/exploration.md",
       "key_patterns": [
         "purchase-request lifecycle",
         "state transition workflow",
         "request-to-purchase conversion",
-        "supply planning sidecar workflow"
+        "supply planning sidecar workflow",
+        "stock ledger ownership",
+        "procurement-to-stock auto injection",
+        "stock kpi read model"
       ],
-      "explored_at": "2026-04-21T00:00:00Z"
+      "explored_at": "2026-04-21T19:25:00Z"
     },
     "reference-service": {
-      "status": "not_started"
+      "status": "partial"
     },
     "vehicle-service": {
-      "status": "not_started"
+      "status": "partial"
     }
   },
   "explored_apps": {
     "configs": {
-      "status": "not_started"
+      "status": "partial"
     },
     "docs": {
       "status": "not_started"
@@ -94,10 +128,10 @@
     "tsconfig.json"
   ],
   "pending_tasks": [
-    "Confirm whether 'ticketing' should map to purchase requests, vehicle tasks, or another business term.",
-    "Explore vehicle-service for task lifecycle similarities.",
-    "Explore inventory-service routes/controllers to see where purchase requests or stock actions land downstream.",
-    "Document shared auth/audit/event patterns across services."
+    "Inspect provider-service runtime health and error middleware during an actual stock request failure.",
+    "Confirm whether stock events are consumed anywhere or remain effectively unused.",
+    "Review whether stock read routes should have a separate read-role policy instead of reusing canWrite.",
+    "Decide whether supply dashboard trends should key off created date or operational dates such as scheduled, ordered, or delivered."
   ],
   "query_history": [
     {
@@ -108,6 +142,45 @@
         "query-cache/ticket-lifecycle.md"
       ],
       "answered_at": "2026-04-21T00:00:00Z"
+    },
+    {
+      "question": "Audit the stock module end-to-end and identify interoperability failures between services, especially deployment/runtime mismatches that only appear on-prem.",
+      "answered_in": [
+        "services/api-gateway/exploration.md",
+        "services/provider-service/exploration.md",
+        "services/inventory-service/stock-patterns.md",
+        "apps/infra/exploration.md",
+        "apps/docs/exploration.md",
+        "apps/packages/exploration.md",
+        "query-cache/stock-module-audit.md"
+      ],
+      "answered_at": "2026-04-21T18:30:00Z"
+    },
+    {
+      "question": "Implement a minimal provider-service fix so the default stock location is automatically created if missing.",
+      "answered_in": [
+        "services/provider-service/exploration.md",
+        "query-cache/stock-default-location-fix.md",
+        "QUICK-REFERENCE.md"
+      ],
+      "answered_at": "2026-04-21T19:05:00Z"
+    },
+    {
+      "question": "Audit and minimally improve the Fournitures dashboard with feasible KPIs and charts from existing data.",
+      "answered_in": [
+        "services/provider-service/exploration.md",
+        "query-cache/supplies-dashboard-audit.md",
+        "QUICK-REFERENCE.md"
+      ],
+      "answered_at": "2026-04-21T19:25:00Z"
+    },
+    {
+      "question": "Apply a minimal visual refinement pass to the Fournitures dashboard UI without changing the KPI set.",
+      "answered_in": [
+        "query-cache/supplies-dashboard-visual-refinement.md",
+        "QUICK-REFERENCE.md"
+      ],
+      "answered_at": "2026-04-21T19:35:00Z"
     }
   ]
 }

@@ -8,22 +8,17 @@ import {
 } from "../models/supplier-plan.model";
 import { httpError } from "./supply-item.service";
 import { StockMovementModel } from "../../ledger/models/stock-movement.model";
-import { StockLocationModel } from "@/modules/ledger/models/stock-location.model";
 import { StockService } from "@/modules/ledger/services/stock.service";
 import { toObjectId } from "@/modules/ledger/controller/stock.controller";
+import { ensureDefaultStockLocation } from "@/modules/ledger/services/stock-location.service";
 
 function pad(n: number, size = 4) {
   return String(n).padStart(size, "0");
 }
 
 async function getDefaultStockLocationId() {
-  const loc = await StockLocationModel.findOne().sort({ createdAt: 1 }).lean();
-  if (!loc)
-    throw httpError(
-      "Aucun magasin défini. Initialisez une location stock.",
-      400,
-    );
-  return loc._id as Types.ObjectId;
+  const loc = await ensureDefaultStockLocation();
+  return new Types.ObjectId(String(loc._id));
 }
 
 async function generateReference() {

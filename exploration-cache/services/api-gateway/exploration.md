@@ -54,6 +54,7 @@ Public entry point for SIGEM APIs. It mounts local gateway routes such as auth a
 - User context is propagated with `forwardUserHeaders`.
 - Proxy handlers rewrite paths using `req.originalUrl`, so the downstream service sees the original versioned URL.
 - CORS headers from target services are stripped and replaced by gateway-managed ones.
+- Stock and supplies are both proxied to `provider-service`, not `inventory-service`.
 
 ## Data Flow
 
@@ -61,12 +62,17 @@ Client request -> gateway shared middlewares -> gateway auth middleware -> forwa
 
 For the current "ticketing" exploration, the gateway does not implement a ticket domain itself. It exposes candidate workflows through `/v1/purchase-requests` and `/v1/vehicle-tasks`.
 
+For the stock module, the relevant runtime path is:
+
+Browser -> `/api/stocks...` in nginx -> rewritten to `/v1/stocks...` -> gateway `stocks.proxy.router.ts` -> `PROVIDER_SERVICE_URL` -> `provider-service`.
+
 ## Notes for Future Queries
 
 - There is no explicit `ticket` route name in the gateway.
 - `products.proxy.router.ts` is where `purchase-requests` and `purchases` are published.
 - Route naming is centralized in `src/config/services.ts`, which is a good lookup point before exploring a service.
+- `stocks.proxy.router.ts` and `supplier.proxy.router.ts` both depend on `PROVIDER_SERVICE_URL`, but their thrown startup error strings incorrectly mention `INVENTORY_SERVICE_URL`.
 
 ## Explored
 
-`2026-04-21T00:00:00Z`
+`2026-04-21T18:30:00Z`
