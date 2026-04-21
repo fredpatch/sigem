@@ -37,6 +37,174 @@ import { VehicleTaskTemplateEntity } from "src/models/vehicle-task-template.mode
 import { VehicleTaskStatus } from "src/types/task-planned.type";
 
 export class VehicleService {
+  async getDashboardKpis() {
+    const activeStatus = VehicleStatus.ACTIVE;
+    const now = new Date();
+    const ref7 = new Date(now);
+    ref7.setDate(ref7.getDate() - 7);
+    const ref14 = new Date(now);
+    ref14.setDate(ref14.getDate() - 14);
+    const ref30 = new Date(now);
+    ref30.setDate(ref30.getDate() - 30);
+    const ref60 = new Date(now);
+    ref60.setDate(ref60.getDate() - 60);
+
+    const pctChange = (current: number, previous: number) => {
+      if (previous <= 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    const [
+      totalVehicles,
+      activeVehicles,
+      assignedActiveVehicles,
+      activeMileageAgg,
+      usageAgg,
+      energyAgg,
+      openTasks,
+      dueSoonTasks,
+      overdueTasks,
+      overdueVehicleIds,
+      overdueWindow7,
+      overdueWindow7Prev,
+      overdueWindow30,
+      overdueWindow30Prev,
+    ] = await Promise.all([
+      Vehicle.countDocuments({}),
+      Vehicle.countDocuments({ status: activeStatus }),
+      Vehicle.countDocuments({
+        status: activeStatus,
+        $or: [
+          { assignedToEmployeeMatricule: { $exists: true, $ne: null } },
+          { assignedToName: { $exists: true, $ne: null } },
+        ],
+      }),
+      Vehicle.aggregate([
+        { $match: { status: activeStatus } },
+        { $group: { _id: null, totalMileage: { $sum: "$currentMileage" } } },
+      ]),
+      Vehicle.aggregate([
+        {
+          $group: {
+            _id: { $ifNull: ["$usageType", "UNKNOWN"] },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      Vehicle.aggregate([
+        {
+          $group: {
+            _id: { $ifNull: ["$energy", "UNKNOWN"] },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      VehicleTaskEntity.countDocuments({
+        status: { $in: [VehicleTaskStatus.PLANNED, VehicleTaskStatus.DUE_SOON, VehicleTaskStatus.OVERDUE] },
+      }),
+      VehicleTaskEntity.countDocuments({ status: VehicleTaskStatus.DUE_SOON }),
+      VehicleTaskEntity.countDocuments({ status: VehicleTaskStatus.OVERDUE }),
+      VehicleTaskEntity.distinct("vehicleId", { status: VehicleTaskStatus.OVERDUE }),
+      VehicleTaskEntity.countDocuments({
+        status: VehicleTaskStatus.OVERDUE,
+        updatedAt: { $gte: ref7, $lte: now },
+      }),
+      VehicleTaskEntity.countDocuments({
+        status: VehicleTaskStatus.OVERDUE,
+        updatedAt: { $gte: ref14, $lt: ref7 },
+      }),
+      VehicleTaskEntity.countDocuments({
+        status: VehicleTaskStatus.OVERDUE,
+        updatedAt: { $gte: ref30, $lte: now },
+      }),
+      VehicleTaskEntity.countDocuments({
+        status: VehicleTaskStatus.OVERDUE,
+        updatedAt: { $gte: ref60, $lt: ref30 },
+      }),
+    ]);
+
+    const totalMileageActive = Number(activeMileageAgg?.[0]?.totalMileage ?? 0);
+    const avgMileageActive =
+      activeVehicles > 0 ? Math.round(totalMileageActive / activeVehicles) : 0;
+
+    const inactiveVehicles = Math.max(totalVehicles - activeVehicles, 0);
+    const assignmentRate =
+      activeVehicles > 0
+        ? Math.round((assignedActiveVehicles / activeVehicles) * 100)
+        : 0;
+
+    const overdueActiveVehicleCount =
+      overdueVehicleIds.length > 0
+        ? await Vehicle.countDocuments({
+            _id: {
+              $in: overdueVehicleIds
+                .map((id) => {
+                  const raw = typeof id === "string" ? id : id?.toString?.();
+                  return raw && Types.ObjectId.isValid(raw)
+                    ? new Types.ObjectId(raw)
+                    : null;
+                })
+                .filter((id): id is Types.ObjectId => !!id),
+            },
+            status: activeStatus,
+          })
+        : 0;
+
+    const vehiclesWithoutOverdue = Math.max(
+      activeVehicles - overdueActiveVehicleCount,
+      0,
+    );
+    const fleetCompliance =
+      activeVehicles > 0
+        ? Math.round((vehiclesWithoutOverdue / activeVehicles) * 100)
+        : 0;
+
+    const byUsageType = usageAgg.reduce(
+      (acc, row) => {
+        acc[String(row._id ?? "UNKNOWN")] = Number(row.count ?? 0);
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const byEnergy = energyAgg.reduce(
+      (acc, row) => {
+        acc[String(row._id ?? "UNKNOWN")] = Number(row.count ?? 0);
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const overdueTrend = {
+      window7dCurrent: overdueWindow7,
+      window7dPrevious: overdueWindow7Prev,
+      window7dDelta: overdueWindow7 - overdueWindow7Prev,
+      window7dPct: pctChange(overdueWindow7, overdueWindow7Prev),
+      window30dCurrent: overdueWindow30,
+      window30dPrevious: overdueWindow30Prev,
+      window30dDelta: overdueWindow30 - overdueWindow30Prev,
+      window30dPct: pctChange(overdueWindow30, overdueWindow30Prev),
+    };
+
+    return {
+      totalVehicles,
+      activeVehicles,
+      inactiveVehicles,
+      assignedActiveVehicles,
+      assignmentRate,
+      totalMileageActive,
+      avgMileageActive,
+      openTasks,
+      dueSoonTasks,
+      overdueTasks,
+      vehiclesWithOverdue: overdueActiveVehicleCount,
+      fleetCompliance,
+      overdueTrend,
+      byUsageType,
+      byEnergy,
+    };
+  }
+
   async ensureOilChangeOpenTask(params: {
     dept: string;
     vehicleId: string;
@@ -367,6 +535,188 @@ export class VehicleService {
 }
 
 export class VehicleDocumentService {
+  async getDashboardKpis(soonDays = 30) {
+    const requiredDocTypes = [
+      "INSURANCE",
+      "TECH_INSPECTION",
+      "REGISTRATION",
+      "TAX_STICKER",
+    ];
+
+    const now = new Date();
+    const soonLimit = new Date(now);
+    soonLimit.setDate(soonLimit.getDate() + soonDays);
+    const ref7 = new Date(now);
+    ref7.setDate(ref7.getDate() - 7);
+    const ref30 = new Date(now);
+    ref30.setDate(ref30.getDate() - 30);
+
+    const pctChange = (current: number, previous: number) => {
+      if (previous <= 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    const activeVehicles = await Vehicle.find({ status: VehicleStatus.ACTIVE })
+      .select("_id")
+      .lean();
+    const activeVehicleIds = activeVehicles.map((v: any) => v._id?.toString());
+    const activeVehicleIdSet = new Set(activeVehicleIds);
+
+    const docs = await VehicleDocumentEntity.find({
+      vehicleId: {
+        $in: activeVehicleIds
+          .filter((id): id is string => !!id && Types.ObjectId.isValid(id))
+          .map((id) => new Types.ObjectId(id)),
+      },
+    })
+      .sort({ expiresAt: 1 })
+      .populate({
+        path: "vehicleId",
+        select: "plateNumber brand model",
+      })
+      .lean();
+
+    const safeDate = (value?: string | Date | null) => {
+      if (!value) return null;
+      const parsed = value instanceof Date ? value : new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    const getVehicleId = (doc: any) => {
+      if (typeof doc.vehicleId === "string") return doc.vehicleId;
+      return doc.vehicleId?._id?.toString?.() ?? doc.vehicleId?.id ?? null;
+    };
+
+    const relevantDocs = docs.filter((doc: any) => {
+      const vehicleId = getVehicleId(doc);
+      return !!vehicleId && activeVehicleIdSet.has(vehicleId);
+    });
+
+    const expired = relevantDocs.filter((doc: any) => {
+      const exp = safeDate(doc.expiresAt);
+      return !!exp && exp < now;
+    });
+
+    const expiringSoon = relevantDocs.filter((doc: any) => {
+      const exp = safeDate(doc.expiresAt);
+      return !!exp && exp >= now && exp <= soonLimit;
+    });
+
+    const docsByVehicle: Record<string, any[]> = {};
+    for (const vehicleId of activeVehicleIds) {
+      if (vehicleId) docsByVehicle[vehicleId] = [];
+    }
+    for (const doc of relevantDocs) {
+      const vehicleId = getVehicleId(doc);
+      if (!vehicleId) continue;
+      (docsByVehicle[vehicleId] ||= []).push(doc);
+    }
+
+    const vehicleStats = Object.values(docsByVehicle).map((vehicleDocs) => {
+      const types = new Set(vehicleDocs.map((doc) => String(doc.type)));
+      const missingRequired = requiredDocTypes.some((type) => !types.has(type));
+      const hasExpiredRequired = requiredDocTypes.some((type) => {
+        const doc = vehicleDocs.find((item) => String(item.type) === type);
+        const exp = safeDate(doc?.expiresAt);
+        return !!exp && exp < now;
+      });
+
+      return {
+        missingRequired,
+        compliant: !missingRequired && !hasExpiredRequired,
+      };
+    });
+
+    const vehiclesWithDocs = new Set(
+      relevantDocs.map((doc: any) => getVehicleId(doc)).filter(Boolean),
+    ).size;
+    const vehiclesWithExpired = new Set(
+      expired.map((doc: any) => getVehicleId(doc)).filter(Boolean),
+    ).size;
+    const vehiclesMissingRequired = vehicleStats.filter(
+      (item) => item.missingRequired,
+    ).length;
+    const compliantVehicles = vehicleStats.filter((item) => item.compliant).length;
+    const activeVehiclesCount = activeVehicleIds.length;
+
+    const compliance =
+      activeVehiclesCount > 0
+        ? Math.round((compliantVehicles / activeVehiclesCount) * 100)
+        : 0;
+
+    const computeComplianceAt = (asOf: Date) => {
+      const asOfStats = Object.values(docsByVehicle).map((vehicleDocs) => {
+        const types = new Set(vehicleDocs.map((doc) => String(doc.type)));
+        const missingRequired = requiredDocTypes.some((type) => !types.has(type));
+        const hasExpiredRequired = requiredDocTypes.some((type) => {
+          const doc = vehicleDocs.find((item) => String(item.type) === type);
+          const exp = safeDate(doc?.expiresAt);
+          return !!exp && exp < asOf;
+        });
+        return !missingRequired && !hasExpiredRequired;
+      });
+
+      const compliantAt = asOfStats.filter(Boolean).length;
+      return activeVehiclesCount > 0
+        ? Math.round((compliantAt / activeVehiclesCount) * 100)
+        : 0;
+    };
+
+    const compliance7dAgo = computeComplianceAt(ref7);
+    const compliance30dAgo = computeComplianceAt(ref30);
+    const complianceTrend = {
+      compliance7dAgo,
+      compliance30dAgo,
+      points7d: compliance - compliance7dAgo,
+      points30d: compliance - compliance30dAgo,
+      pct7d: pctChange(compliance, compliance7dAgo),
+      pct30d: pctChange(compliance, compliance30dAgo),
+    };
+
+    const noReminder = relevantDocs.filter(
+      (doc: any) => (doc.reminderDaysBefore?.length ?? 0) === 0,
+    ).length;
+
+    const byType = relevantDocs.reduce(
+      (acc, doc: any) => {
+        const key = String(doc.type ?? "OTHER");
+        acc[key] = (acc[key] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const typeChartData = Object.entries(byType)
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const topUrgentDocs = [...expired, ...expiringSoon]
+      .sort((a: any, b: any) => {
+        const da = safeDate(a.expiresAt)?.getTime() ?? 0;
+        const db = safeDate(b.expiresAt)?.getTime() ?? 0;
+        return da - db;
+      })
+      .slice(0, 6);
+
+    return {
+      activeVehicles: activeVehiclesCount,
+      totalDocuments: relevantDocs.length,
+      activeDocsCount: Math.max(relevantDocs.length - expired.length, 0),
+      expiredCount: expired.length,
+      expiringSoonCount: expiringSoon.length,
+      vehiclesWithDocs,
+      vehiclesWithExpired,
+      vehiclesMissingRequired,
+      compliantVehicles,
+      compliance,
+      complianceTrend,
+      noReminder,
+      byType,
+      typeChartData,
+      topUrgentDocs,
+    };
+  }
+
   async createVehicleDocument(payload: CreateVehicleDocumentInput) {
     const vehicleId = new Types.ObjectId(payload.vehicleId);
 

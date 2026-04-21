@@ -35,6 +35,7 @@ vehicleDocumentRouter.get(
 );
 
 vehicleDocumentRouter.get("/", authenticate, canRead, document.list);
+vehicleDocumentRouter.get("/kpis", authenticate, canRead, document.kpis);
 
 // Accès direct par id de document : /v1/vehicle-documents/:id
 // => à monter soit ici avec un autre router dans l'api-gateway

@@ -10,14 +10,10 @@ import {
   PieChart,
 } from "lucide-react";
 import { motion } from "framer-motion";
-
 import { BarChart, CartesianGrid, XAxis, YAxis, Bar, Cell } from "recharts";
-
-// À adapter selon tes chemins réels
 import { useVehicles } from "./hooks/use-vehicle";
 import { useVehicleTasks } from "./hooks/use-vehicle-tasks";
 import { VehicleTask } from "./types/types";
-import { Vehicle } from "./types/vehicle.types";
 import { StatCard } from "../assets/_components/stats-card";
 import { ENERGY_COLORS, USAGE_COLORS } from "@/constants";
 import {
@@ -34,104 +30,35 @@ import {
 } from "@/utils/helpers";
 import { UrgentTaskItem } from "../assets/_components/urgent-task-items";
 import { Badge } from "@/components/ui/badge";
-// import { useNavigate } from "react-router-dom";
-
-const OPEN_STATUSES = ["PLANNED", "DUE_SOON", "OVERDUE"] as const;
 
 export const VehicleKPIDashboard = () => {
-  // const navigate = useNavigate();
+  const { kpis } = useVehicles();
+  const kpiData = kpis.data;
 
-  // === DATA FETCH ===
-  const { list: vehicleList } = useVehicles();
-  const { data: vehiclesData } = vehicleList;
-  const vehicles: Vehicle[] = vehiclesData?.items || [];
-
-  const { items: tasksData } = useVehicleTasks(); // éventuellement: useVehicleTasks({ status: "OPEN" })
-  // const { data: tasksData } = taskList;
+  const { items: tasksData } = useVehicleTasks({ status: "OPEN", limit: 200 });
   const tasks: VehicleTask[] = tasksData || [];
 
-  // === BASIC VEHICLE STATS ===
-  const totalVehicles = vehicles.length;
-  const activeVehicles = vehicles.filter((v) => v.status === "ACTIVE").length;
-  const inactiveVehicles = totalVehicles - activeVehicles;
+  const totalVehicles = kpiData?.totalVehicles ?? 0;
+  const activeVehicles = kpiData?.activeVehicles ?? 0;
+  const inactiveVehicles = kpiData?.inactiveVehicles ?? 0;
+  const assignedActiveVehicles = kpiData?.assignedActiveVehicles ?? 0;
+  const assignmentRate = kpiData?.assignmentRate ?? 0;
+  const totalMileage = kpiData?.totalMileageActive ?? 0;
+  const avgMileage = kpiData?.avgMileageActive ?? 0;
+  const openTasksCount = kpiData?.openTasks ?? 0;
+  const dueSoonTasksCount = kpiData?.dueSoonTasks ?? 0;
+  const overdueTasksCount = kpiData?.overdueTasks ?? 0;
+  const vehiclesWithOverdue = kpiData?.vehiclesWithOverdue ?? 0;
+  const fleetCompliance = kpiData?.fleetCompliance ?? 0;
+  const overdueTrend7dPct = kpiData?.overdueTrend?.window7dPct ?? 0;
+  const overdueTrend7dDelta = kpiData?.overdueTrend?.window7dDelta ?? 0;
+  const vehiclesWithoutOverdue = Math.max(activeVehicles - vehiclesWithOverdue, 0);
 
-  const assignedVehicles = vehicles.filter(
-    (v) => v.assignedToEmployeeId || v.assignedToName
-  ).length;
+  const topOverdue = uniqueByVehicle(getTopOverdueTasks(tasks, 8), 5);
+  const topDueSoon = uniqueByVehicle(getTopDueSoonTasks(tasks, 8), 5);
 
-  const assignmentRate =
-    activeVehicles > 0
-      ? Math.round((assignedVehicles / activeVehicles) * 100)
-      : 0;
-
-  // Kilométrage
-  const totalMileage = vehicles.reduce(
-    (sum, v) => sum + (v.currentMileage || 0),
-    0
-  );
-  const avgMileage =
-    activeVehicles > 0 ? Math.round(totalMileage / activeVehicles) : 0;
-
-  // === TASK STATS ===
-  const openTasks = tasks.filter((t) =>
-    OPEN_STATUSES.includes(t.status as (typeof OPEN_STATUSES)[number])
-  );
-
-  const dueSoonTasks = openTasks.filter((t) => t.status === "DUE_SOON");
-  const overdueTasks = openTasks.filter((t) => t.status === "OVERDUE");
-
-  const topOverdue = uniqueByVehicle(getTopOverdueTasks(openTasks, 8), 5);
-  const topDueSoon = uniqueByVehicle(getTopDueSoonTasks(openTasks, 8), 5);
-
-  // console.log("VEHICLE OVERDUE TASKS:", overdueTasks);
-  // console.log("VEHICLE DUE SOON TASKS:", dueSoonTasks);
-
-  // console.log(topOverdue, topDueSoon);
-
-  const vehiclesWithOverdue = new Set(
-    overdueTasks.map((t) => t.vehicleId?.toString?.() ?? t.vehicleId)
-  ).size;
-
-  // Fleet compliance = % de véhicules SANS tâche overdue
-  const vehiclesWithoutOverdue =
-    totalVehicles > 0 ? totalVehicles - vehiclesWithOverdue : 0;
-  const fleetCompliance =
-    totalVehicles > 0
-      ? Math.round((vehiclesWithoutOverdue / totalVehicles) * 100)
-      : 0;
-
-  // const openVehicle = (vehicleId: string) => {
-  //   console.log("CLICKED");
-  //   // adapte selon tes routes
-  //   navigate(`/mg/vehicles/${vehicleId}`);
-  // };
-
-  // const openTask = (taskId: string) => {
-  //   // adapte si tu as une page task
-  //   navigate(`/mg/vehicle-tasks/${taskId}`);
-  // };
-
-  // === BREAKDOWN PAR USAGE TYPE ===
-  const byUsageType = vehicles.reduce(
-    (acc, v) => {
-      const key = v.usageType || "UNKNOWN";
-      if (!acc[key]) acc[key] = 0;
-      acc[key]++;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
-
-  // === BREAKDOWN PAR ÉNERGIE ===
-  const byEnergy = vehicles.reduce(
-    (acc, v) => {
-      const key = v.energy || "UNKNOWN";
-      if (!acc[key]) acc[key] = 0;
-      acc[key]++;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const byUsageType = kpiData?.byUsageType ?? {};
+  const byEnergy = kpiData?.byEnergy ?? {};
 
   const usageChartData = Object.entries(byUsageType).map(([usage, count]) => ({
     usage,
@@ -146,24 +73,23 @@ export const VehicleKPIDashboard = () => {
   const usageChartConfig = {
     FONCTION: { label: "Fonction", color: "#2563eb" },
     SERVICE: { label: "Service", color: "#0f766e" },
-    UNKNOWN: { label: "Non renseigné", color: "#6b7280" },
+    UNKNOWN: { label: "Non renseigne", color: "#6b7280" },
   } satisfies ChartConfig;
 
   const energyChartConfig = {
     DIESEL: { label: "Diesel", color: "#047857" },
     ESSENCE: { label: "Essence", color: "#b91c1c" },
     HYBRIDE: { label: "Hybride", color: "#7c3aed" },
-    ELECTRIQUE: { label: "Électrique", color: "#0ea5e9" },
-    UNKNOWN: { label: "Non renseigné", color: "#6b7280" },
+    ELECTRIQUE: { label: "Electrique", color: "#0ea5e9" },
+    UNKNOWN: { label: "Non renseigne", color: "#6b7280" },
   } satisfies ChartConfig;
 
   return (
     <div className="space-y-6">
-      {/* === OVERVIEW CARDS === */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Car}
-          label="Total véhicules"
+          label="Total vehicules"
           value={totalVehicles}
           subtitle={`${activeVehicles} actifs · ${inactiveVehicles} inactifs`}
           delay={0}
@@ -171,9 +97,9 @@ export const VehicleKPIDashboard = () => {
 
         <StatCard
           icon={Users}
-          label="Taux d’affectation"
+          label="Taux d'affectation"
           value={`${assignmentRate}%`}
-          subtitle={`${assignedVehicles} véhicules affectés`}
+          subtitle={`${assignedActiveVehicles} vehicules actifs affectes`}
           color={
             assignmentRate >= 80
               ? "text-green-600"
@@ -186,9 +112,9 @@ export const VehicleKPIDashboard = () => {
 
         <StatCard
           icon={CheckCircle2}
-          label="Conformité du parc"
+          label="Conformite du parc"
           value={`${fleetCompliance}%`}
-          subtitle={`${vehiclesWithoutOverdue} sans retard`}
+          subtitle={`${vehiclesWithoutOverdue} actifs sans retard`}
           color={
             fleetCompliance >= 80
               ? "text-green-600"
@@ -201,16 +127,13 @@ export const VehicleKPIDashboard = () => {
 
         <StatCard
           icon={Gauge}
-          label="Kilométrage moyen"
-          value={
-            avgMileage > 0 ? `${avgMileage.toLocaleString("fr-FR")} km` : "N/A"
-          }
-          subtitle={`${totalMileage.toLocaleString("fr-FR")} km cumulés`}
+          label="Kilometrage moyen"
+          value={avgMileage > 0 ? `${avgMileage.toLocaleString("fr-FR")} km` : "N/A"}
+          subtitle={`${totalMileage.toLocaleString("fr-FR")} km cumules`}
           delay={0.3}
         />
       </div>
 
-      {/* === TOP URGENCES === */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -220,11 +143,9 @@ export const VehicleKPIDashboard = () => {
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="h-5 w-5 text-primary" />
           <h3 className="font-semibold text-lg">Top urgences</h3>
-          {/* <span className="text-xs text-muted-foreground">(priorités MG)</span> */}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* LEFT: OVERDUE */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold">En retard</h4>
@@ -232,9 +153,7 @@ export const VehicleKPIDashboard = () => {
             </div>
 
             {topOverdue.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Aucun retard détecté 🎉
-              </p>
+              <p className="text-sm text-muted-foreground">Aucun retard detecte.</p>
             ) : (
               <div className="space-y-2">
                 {topOverdue.map((t: any) => (
@@ -248,16 +167,15 @@ export const VehicleKPIDashboard = () => {
             )}
           </div>
 
-          {/* RIGHT: DUE SOON */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold">À échéance proche</h4>
+              <h4 className="font-semibold">A echeance proche</h4>
               <Badge variant="secondary">{topDueSoon.length}</Badge>
             </div>
 
             {topDueSoon.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucune échéance proche pour le moment.
+                Aucune echeance proche pour le moment.
               </p>
             ) : (
               <div className="space-y-2">
@@ -274,7 +192,6 @@ export const VehicleKPIDashboard = () => {
         </div>
       </motion.div>
 
-      {/* === TASK STATUS BREAKDOWN === */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -283,9 +200,7 @@ export const VehicleKPIDashboard = () => {
       >
         <div className="flex items-center gap-2 mb-4">
           <BarChart3 className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold text-lg">
-            Suivi des tâches de maintenance
-          </h3>
+          <h3 className="font-semibold text-lg">Suivi des taches de maintenance</h3>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -293,11 +208,11 @@ export const VehicleKPIDashboard = () => {
             <div className="flex items-center gap-2 mb-1">
               <Activity className="h-3.5 w-3.5 text-blue-600" />
               <span className="text-[10px] uppercase font-semibold text-blue-700 dark:text-blue-400">
-                Tâches ouvertes
+                Taches ouvertes
               </span>
             </div>
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 tabular-nums">
-              {openTasks.length}
+              {openTasksCount}
             </p>
           </div>
 
@@ -305,11 +220,11 @@ export const VehicleKPIDashboard = () => {
             <div className="flex items-center gap-2 mb-1">
               <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
               <span className="text-[10px] uppercase font-semibold text-amber-700 dark:text-amber-400">
-                Bientôt dues
+                Bientot dues
               </span>
             </div>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 tabular-nums">
-              {dueSoonTasks.length}
+              {dueSoonTasksCount}
             </p>
           </div>
 
@@ -321,7 +236,12 @@ export const VehicleKPIDashboard = () => {
               </span>
             </div>
             <p className="text-2xl font-bold text-red-600 dark:text-red-400 tabular-nums">
-              {overdueTasks.length}
+              {overdueTasksCount}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              7j: {overdueTrend7dDelta >= 0 ? "+" : ""}
+              {overdueTrend7dDelta} ({overdueTrend7dPct >= 0 ? "+" : ""}
+              {overdueTrend7dPct}%)
             </p>
           </div>
 
@@ -329,7 +249,7 @@ export const VehicleKPIDashboard = () => {
             <div className="flex items-center gap-2 mb-1">
               <Car className="h-3.5 w-3.5 text-purple-600" />
               <span className="text-[10px] uppercase font-semibold text-purple-700 dark:text-purple-400">
-                Véhicules à risque
+                Vehicules a risque
               </span>
             </div>
             <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 tabular-nums">
@@ -339,9 +259,7 @@ export const VehicleKPIDashboard = () => {
         </div>
       </motion.div>
 
-      {/* === USAGE TYPE & ENERGY === */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Par usage type */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -350,17 +268,19 @@ export const VehicleKPIDashboard = () => {
         >
           <div className="flex items-center gap-2 mb-4">
             <PieChart className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold text-lg">Répartition par usage</h3>
+            <h3 className="font-semibold text-lg">Repartition par usage</h3>
           </div>
 
-          {/* Bar chart usage */}
           <div className="h-48 mb-4">
             {usageChartData.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucun véhicule renseigné pour le moment.
+                Aucun vehicule renseigne pour le moment.
               </p>
             ) : (
-              <ChartContainer config={usageChartConfig}>
+              <ChartContainer
+                config={usageChartConfig}
+                className="h-full w-full aspect-auto"
+              >
                 <BarChart
                   layout="vertical"
                   data={usageChartData}
@@ -368,7 +288,7 @@ export const VehicleKPIDashboard = () => {
                 >
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <YAxis
-                    dataKey={"usage"}
+                    dataKey="usage"
                     type="category"
                     orientation="right"
                     tick={{ fontSize: 11 }}
@@ -376,7 +296,7 @@ export const VehicleKPIDashboard = () => {
                     axisLine={false}
                     width={90}
                     tickFormatter={(v: string) =>
-                      v === "UNKNOWN" ? "Non renseigné" : v
+                      v === "UNKNOWN" ? "Non renseigne" : v
                     }
                   />
                   <XAxis
@@ -390,12 +310,10 @@ export const VehicleKPIDashboard = () => {
                     cursor={false}
                     content={
                       <ChartTooltipContent
-                        formatter={(value: any) => {
-                          return [`${value} véhicule(s)`, " Total"];
-                        }}
-                        labelFormatter={(label: any) => {
-                          return `Usage : ${label === "UNKNOWN" ? "Non renseigné" : label}`;
-                        }}
+                        formatter={(value: any) => [`${value} vehicule(s)`, " Total"]}
+                        labelFormatter={(label: any) =>
+                          `Usage : ${label === "UNKNOWN" ? "Non renseigne" : label}`
+                        }
                         indicator="line"
                         hideLabel
                       />
@@ -405,9 +323,7 @@ export const VehicleKPIDashboard = () => {
                     {usageChartData.map((entry) => (
                       <Cell
                         key={entry.usage}
-                        fill={
-                          USAGE_COLORS[entry.usage] ?? "hsl(var(--primary))"
-                        }
+                        fill={USAGE_COLORS[entry.usage] ?? "hsl(var(--primary))"}
                       />
                     ))}
                   </Bar>
@@ -416,23 +332,18 @@ export const VehicleKPIDashboard = () => {
             )}
           </div>
 
-          {/* Liste usage */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
             {Object.entries(byUsageType).map(([usage, count]) => {
               const percentage =
-                totalVehicles > 0
-                  ? Math.round((count / totalVehicles) * 100)
-                  : 0;
-
-              const color =
-                USAGE_COLORS[usage] ?? "hsl(var(--muted-foreground))";
-              const label = usage === "UNKNOWN" ? "Non renseigné" : usage;
+                totalVehicles > 0 ? Math.round((count / totalVehicles) * 100) : 0;
+              const color = USAGE_COLORS[usage] ?? "hsl(var(--muted-foreground))";
+              const label = usage === "UNKNOWN" ? "Non renseigne" : usage;
 
               return (
                 <div
                   key={usage}
                   className={cn(
-                    "flex items-center justify-between p-2 rounded-lg border bg-white/80"
+                    "flex items-center justify-between p-2 rounded-lg border bg-white/80",
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -453,7 +364,6 @@ export const VehicleKPIDashboard = () => {
           </div>
         </motion.div>
 
-        {/* Par énergie */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -462,17 +372,19 @@ export const VehicleKPIDashboard = () => {
         >
           <div className="flex items-center gap-2 mb-4">
             <Fuel className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold text-lg">Répartition par énergie</h3>
+            <h3 className="font-semibold text-lg">Repartition par energie</h3>
           </div>
 
-          {/* Bar chart énergie */}
           <div className="h-48 mb-4">
             {energyChartData.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucun véhicule renseigné pour le moment.
+                Aucun vehicule renseigne pour le moment.
               </p>
             ) : (
-              <ChartContainer config={energyChartConfig}>
+              <ChartContainer
+                config={energyChartConfig}
+                className="h-full w-full aspect-auto"
+              >
                 <BarChart
                   layout="vertical"
                   data={energyChartData}
@@ -488,7 +400,6 @@ export const VehicleKPIDashboard = () => {
                     axisLine={false}
                     allowDecimals={false}
                   />
-
                   <XAxis
                     type="number"
                     tick={{ fontSize: 10 }}
@@ -501,9 +412,7 @@ export const VehicleKPIDashboard = () => {
                     content={
                       <ChartTooltipContent
                         hideLabel
-                        formatter={(value: any) => {
-                          return [`${value} véhicule(s)`, " Total"];
-                        }}
+                        formatter={(value: any) => [`${value} vehicule(s)`, " Total"]}
                         indicator="line"
                       />
                     }
@@ -512,9 +421,7 @@ export const VehicleKPIDashboard = () => {
                     {energyChartData.map((entry) => (
                       <Cell
                         key={entry.energy}
-                        fill={
-                          ENERGY_COLORS[entry.energy] ?? "hsl(var(--primary))"
-                        }
+                        fill={ENERGY_COLORS[entry.energy] ?? "hsl(var(--primary))"}
                       />
                     ))}
                   </Bar>
@@ -523,29 +430,24 @@ export const VehicleKPIDashboard = () => {
             )}
           </div>
 
-          {/* Liste énergie */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
             {Object.entries(byEnergy).map(([energy, count]) => {
               const percentage =
-                totalVehicles > 0
-                  ? Math.round((count / totalVehicles) * 100)
-                  : 0;
+                totalVehicles > 0 ? Math.round((count / totalVehicles) * 100) : 0;
+              const color = ENERGY_COLORS[energy] ?? "hsl(var(--muted-foreground))";
+              const label = energy === "UNKNOWN" ? "Non renseigne" : energy;
 
-              const color =
-                ENERGY_COLORS[energy] ?? "hsl(var(--muted-foreground))";
-              const label = energy === "UNKNOWN" ? "Non renseigné" : energy;
               return (
                 <div
                   key={energy}
                   className={cn(
-                    "flex items-center justify-between p-2 rounded-lg border bg-white/80"
+                    "flex items-center justify-between p-2 rounded-lg border bg-white/80",
                   )}
                 >
                   <div className="flex items-center gap-2">
                     <div className="mt-1">
                       <LegendDot color={color} />
                     </div>
-
                     <div>
                       <p className="font-semibold text-[12px]">{label}</p>
                       <p className="text-[11px] text-muted-foreground">

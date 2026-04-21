@@ -41,6 +41,11 @@ export function useVehicles(id?: string, listParams?: ListVehiclesQuery) {
     queryFn: () => VehicleAPI.getMyVehicles(),
   });
 
+  const kpis = useQuery({
+    queryKey: [VEHICLES_KEY, "kpis"],
+    queryFn: () => VehicleAPI.getKpis(),
+  });
+
   // GET BY ID
   const listById = useQuery({
     queryKey: [VEHICLES_KEY, id],
@@ -109,6 +114,7 @@ export function useVehicles(id?: string, listParams?: ListVehiclesQuery) {
     updateMileage,
     softDelete,
     myVehicle,
+    kpis,
   };
 }
 

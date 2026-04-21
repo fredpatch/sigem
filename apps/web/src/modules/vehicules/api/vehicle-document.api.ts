@@ -23,6 +23,31 @@ export interface UpdateVehicleDocumentDto {
   provider?: string | null;
 }
 
+export type VehicleDocumentDashboardKpis = {
+  activeVehicles: number;
+  totalDocuments: number;
+  activeDocsCount: number;
+  expiredCount: number;
+  expiringSoonCount: number;
+  vehiclesWithDocs: number;
+  vehiclesWithExpired: number;
+  vehiclesMissingRequired: number;
+  compliantVehicles: number;
+  compliance: number;
+  complianceTrend: {
+    compliance7dAgo: number;
+    compliance30dAgo: number;
+    points7d: number;
+    points30d: number;
+    pct7d: number;
+    pct30d: number;
+  };
+  noReminder: number;
+  byType: Record<string, number>;
+  typeChartData: Array<{ type: string; count: number }>;
+  topUrgentDocs: Array<any>;
+};
+
 class VehicleDocumentsAPI {
   async list(vehicleId: string): Promise<VehicleDocument[]> {
     const { data } = await api.get(`/vehicle-documents/${vehicleId}/documents`);
@@ -37,6 +62,13 @@ class VehicleDocumentsAPI {
 
     // console.log("VEHICLE DOCUMENT INFORMATIONS", data);
 
+    return data;
+  }
+
+  async getKpis(soonDays = 30): Promise<VehicleDocumentDashboardKpis> {
+    const { data } = await api.get("/vehicle-documents/kpis", {
+      params: { soonDays },
+    });
     return data;
   }
 

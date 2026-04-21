@@ -40,6 +40,7 @@ vehicleRouter.post("/mg/create", authenticate, mgController.createMgVehicle);
 
 vehicleRouter.get("/mg-table", authenticate, vehicleController.getMgTable);
 vehicleRouter.get("/my", authenticate, vehicleController.listMyVehicles);
+vehicleRouter.get("/kpis", authenticate, canRead, vehicleController.kpis);
 
 vehicleRouter.post(
   "/",

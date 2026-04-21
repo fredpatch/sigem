@@ -195,6 +195,11 @@ export class VehicleController {
     return res.status(200).json(result);
   });
 
+  kpis = catchError(async (_req, res) => {
+    const kpis = await this.vehicle.getDashboardKpis();
+    return res.status(200).json(response(kpis, null, "Vehicle KPIs fetched", true, 200));
+  });
+
   listMyVehicles = catchError(async (req, res) => {
     const user = (req as any).user as { matriculation?: string };
     if (!user?.matriculation) {
@@ -383,6 +388,18 @@ export class VehicleDocumentController {
     return res
       .status(200)
       .json(response(docs, null, "Documents fetched", true, 200));
+  });
+
+  kpis = catchError(async (req, res) => {
+    const soonDaysRaw = req.query.soonDays as string | undefined;
+    const soonDays = soonDaysRaw ? Number(soonDaysRaw) : 30;
+    const kpis = await this.document.getDashboardKpis(
+      Number.isFinite(soonDays) ? soonDays : 30,
+    );
+
+    return res
+      .status(200)
+      .json(response(kpis, null, "Vehicle document KPIs fetched", true, 200));
   });
 
   getById = catchError(async (req, res) => {

@@ -1,0 +1,113 @@
+{
+  "project": "SIGEM",
+  "last_full_scan": "2026-04-21T00:00:00Z",
+  "explored_services": {
+    "api-gateway": {
+      "status": "partial",
+      "files_explored": [
+        "src/app.ts",
+        "src/routes/index.ts",
+        "src/config/routes.path.ts",
+        "src/config/services.ts",
+        "src/routes/vehicles.proxy.router.ts",
+        "src/routes/providers.proxy.router.ts",
+        "src/routes/products.proxy.router.ts",
+        "src/routes/supplier.proxy.router.ts",
+        "src/routes/stocks.proxy.router.ts"
+      ],
+      "summary_file": "services/api-gateway/exploration.md",
+      "key_patterns": [
+        "versioned route mounting",
+        "gateway-to-service proxying",
+        "centralized auth before proxy",
+        "forwarded user headers"
+      ],
+      "explored_at": "2026-04-21T00:00:00Z"
+    },
+    "inventory-service": {
+      "status": "partial",
+      "files_explored": [
+        "src/routes/inventory.route.ts",
+        "src/models/asset.model.ts"
+      ],
+      "summary_file": "services/inventory-service/exploration.md",
+      "key_patterns": [
+        "asset catalog CRUD",
+        "role-gated writes",
+        "asset code generation"
+      ],
+      "explored_at": "2026-04-21T00:00:00Z"
+    },
+    "log-service": {
+      "status": "not_started"
+    },
+    "notification-service": {
+      "status": "not_started"
+    },
+    "provider-service": {
+      "status": "partial",
+      "files_explored": [
+        "src/app.ts",
+        "src/routes/purchase-request.route.ts",
+        "src/routes/purchases.route.ts",
+        "src/controllers/purchase-request.controller.ts",
+        "src/services/purchase-requests.service.ts",
+        "src/validators/purchase-request.schema.ts",
+        "src/modules/supplies/routes/supplies.route.ts"
+      ],
+      "summary_file": "services/provider-service/exploration.md",
+      "key_patterns": [
+        "purchase-request lifecycle",
+        "state transition workflow",
+        "request-to-purchase conversion",
+        "supply planning sidecar workflow"
+      ],
+      "explored_at": "2026-04-21T00:00:00Z"
+    },
+    "reference-service": {
+      "status": "not_started"
+    },
+    "vehicle-service": {
+      "status": "not_started"
+    }
+  },
+  "explored_apps": {
+    "configs": {
+      "status": "not_started"
+    },
+    "docs": {
+      "status": "not_started"
+    },
+    "infra": {
+      "status": "not_started"
+    },
+    "packages": {
+      "status": "not_started"
+    },
+    "scripts": {
+      "status": "not_started"
+    }
+  },
+  "root_files_explored": [
+    ".env",
+    "package.json",
+    "tsconfig.json"
+  ],
+  "pending_tasks": [
+    "Confirm whether 'ticketing' should map to purchase requests, vehicle tasks, or another business term.",
+    "Explore vehicle-service for task lifecycle similarities.",
+    "Explore inventory-service routes/controllers to see where purchase requests or stock actions land downstream.",
+    "Document shared auth/audit/event patterns across services."
+  ],
+  "query_history": [
+    {
+      "question": "Explore the ticketing pattern across services. Start with api-gateway and any service that handles tickets.",
+      "answered_in": [
+        "services/api-gateway/exploration.md",
+        "services/provider-service/exploration.md",
+        "query-cache/ticket-lifecycle.md"
+      ],
+      "answered_at": "2026-04-21T00:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "service": "api-gateway",
+  "version": "v1",
+  "localRoutes": [
+    "/v1/health",
+    "/v1/_debug",
+    "/v1/auth",
+    "/v1/users",
+    "/v1/directory"
+  ],
+  "proxiedRoutes": {
+    "inventory-service": [
+      "/v1/inventory"
+    ],
+    "vehicle-service": [
+      "/v1/vehicles",
+      "/v1/vehicle-documents",
+      "/v1/vehicle-task-templates",
+      "/v1/vehicle-tasks"
+    ],
+    "provider-service": [
+      "/v1/providers",
+      "/v1/products",
+      "/v1/purchases",
+      "/v1/purchase-requests",
+      "/v1/supplies",
+      "/v1/stocks"
+    ],
+    "reference-service": [
+      "/v1/references"
+    ],
+    "notification-service": [
+      "/v1/notification"
+    ]
+  },
+  "ticketingCandidates": [
+    "/v1/purchase-requests",
+    "/v1/vehicle-tasks"
+  ]
+}

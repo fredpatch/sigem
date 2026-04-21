@@ -120,3 +120,10 @@ export function useVehicleDocumentsMonitoring() {
     queryFn: () => vehicleDocumentsAPI.listAll(), // à créer ci-dessous
   });
 }
+
+export function useVehicleDocumentsKpis(soonDays = 30) {
+  return useQuery({
+    queryKey: ["vehicle-documents-kpis", soonDays],
+    queryFn: () => vehicleDocumentsAPI.getKpis(soonDays),
+  });
+}

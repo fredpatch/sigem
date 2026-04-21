@@ -9,6 +9,33 @@ import {
 } from "../types/vehicle.types";
 import { MgUpdateVehicleOilChangeDTO } from "../types/mg.types";
 
+export type VehicleDashboardKpis = {
+  totalVehicles: number;
+  activeVehicles: number;
+  inactiveVehicles: number;
+  assignedActiveVehicles: number;
+  assignmentRate: number;
+  totalMileageActive: number;
+  avgMileageActive: number;
+  openTasks: number;
+  dueSoonTasks: number;
+  overdueTasks: number;
+  vehiclesWithOverdue: number;
+  fleetCompliance: number;
+  overdueTrend: {
+    window7dCurrent: number;
+    window7dPrevious: number;
+    window7dDelta: number;
+    window7dPct: number;
+    window30dCurrent: number;
+    window30dPrevious: number;
+    window30dDelta: number;
+    window30dPct: number;
+  };
+  byUsageType: Record<string, number>;
+  byEnergy: Record<string, number>;
+};
+
 export const VehicleAPI = {
   async list(params?: ListVehiclesQuery): Promise<PaginatedVehicles> {
     const res = await vehicles.get("/vehicles", { params });
@@ -17,6 +44,11 @@ export const VehicleAPI = {
 
   async getMyVehicles() {
     const res = await vehicles.get("/vehicles/my");
+    return res.data;
+  },
+
+  async getKpis(): Promise<VehicleDashboardKpis> {
+    const res = await vehicles.get("/vehicles/kpis");
     return res.data;
   },
 
